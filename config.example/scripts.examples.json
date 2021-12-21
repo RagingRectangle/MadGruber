@@ -1,0 +1,28 @@
+[{
+    "customName": "DeviceControl",
+    "description": "Alter PoE ports",
+    "fullFilePath": "/home/mad/devicecontrol.sh",
+    "variables": [{
+            "varDescription": "Choose which PoE:",
+            "varOptions": ["poe1", "poe2", "poe3", "poe4"]
+        },
+        {
+            "varDescription": "Choose action type:",
+            "varOptions": ["start", "stop", "cycle"]
+        },
+        {
+            "varDescription": "Choose which port:",
+            "varOptions": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+        }
+    ]
+}, {
+    "customName": "Annoying Device",
+    "description": "PoE cycle 7",
+    "fullFilePath": "/home/mad/devicecontrol.sh poe1 cycle 7",
+    "variables": []
+}, {
+    "customName": "Skynet",
+    "description": "Hasta la vista, baby",
+    "fullFilePath": "/home/mad/activateSkynet.sh",
+    "variables": []
+}]

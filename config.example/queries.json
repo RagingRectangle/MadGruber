@@ -1,0 +1,23 @@
+{
+    "count": [{
+            "type": "Gym Count",
+            "table": "gym"
+        },
+        {
+            "type": "Spawn History Count",
+            "table": "pokemon"
+        },
+        {
+            "type": "Pokestop Count",
+            "table": "pokestop"
+        },
+        {
+            "type": "Quest Count",
+            "table": "trs_quest"
+        },
+        {
+            "type": "Spawnpoint Count",
+            "table": "trs_spawn"
+        }
+    ]
+}

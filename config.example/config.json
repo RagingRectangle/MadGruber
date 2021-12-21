@@ -1,0 +1,25 @@
+{
+    "serverName": "",
+    "delaySeconds": 0,
+    "discord": {
+        "token": "",
+        "prefix": "!",
+        "adminIDs": ["123","456"],
+        "channelIDs": ["789","420"],
+        "pm2Command": "pm2",
+        "truncateCommand": "truncate",
+        "scriptCommand": "scripts",
+        "madQueryCommand": "mad"
+    },
+    "pm2": {
+        "mads": [""],
+        "ignore": [""]
+    },
+    "madDB": {
+        "host": "",
+        "user": "",
+        "password": "",
+        "database": "",
+        "onlyRestartBeforeTime": ""
+    }
+}

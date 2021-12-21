@@ -1,0 +1,27 @@
+{
+  "name": "madgruber",
+  "version": "1.0.0",
+  "description": "Discord bot that does the stuffs",
+  "main": "madgruber.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RagingRectangle/MadGruber.git"
+  },
+  "author": "RagingRectangle",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/RagingRectangle/MadGruber/issues"
+  },
+  "homepage": "https://github.com/RagingRectangle/MadGruber#readme",
+  "dependencies": {
+    "discord.js": "^13.3.1",
+    "file-exists": "^5.0.1",
+    "fs": "0.0.1-security",
+    "mysql": "^2.18.1",
+    "pm2": "^5.1.2",
+    "shelljs": "^0.8.4"
+  }
+}
