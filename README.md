@@ -5,6 +5,8 @@ A Discord bot used as a very basic GUI for your server along with some MAD-speci
 
 ###### Disclaimer: I'm expecting some bumps along the way as more people test it with different setups. I only have very basic bashing knowledge so I know the scripting stuff could use some upgrading. The bot might look completely incompetent and the process it uses at times probably makes no sense but it almost always gets the damn job done, sometimes in a blaze of glory. **MADGRUBER!!!**
 
+[Join Discord server](https://discord.gg/USxvyB9QTz) to keep up with updates, get help, or talk dev stuff. 
+
 
 **Current Features:**
 - PM2 controller (start/stop/restart + current status)
