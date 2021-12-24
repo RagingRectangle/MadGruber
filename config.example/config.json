@@ -9,7 +9,8 @@
         "pm2Command": "pm2",
         "truncateCommand": "truncate",
         "scriptCommand": "scripts",
-        "madQueryCommand": "mad"
+        "madQueryCommand": "mad",
+        "linksCommand": "links"
     },
     "pm2": {
         "mads": [""],
@@ -21,5 +22,14 @@
         "password": "",
         "database": "",
         "onlyRestartBeforeTime": ""
-    }
+    },
+    "links": [{
+        "label": "",
+        "url": "",
+        "emoji": ""
+    }, {
+        "label": "",
+        "url": "",
+        "emoji": ""
+    }]
 }

@@ -5,14 +5,13 @@ A Discord bot used as a very basic GUI for your server along with some MAD-speci
 
 ###### Disclaimer: I'm expecting some bumps along the way as more people test it with different setups. I only have very basic bashing knowledge so I know the scripting stuff could use some upgrading. The bot might look completely incompetent and the process it uses at times probably makes no sense but it almost always gets the damn job done, sometimes in a blaze of glory. **MADGRUBER!!!**
 
-[Join Discord server](https://discord.gg/USxvyB9QTz) to keep up with updates, get help, or talk dev stuff. 
-
 
 **Current Features:**
 - PM2 controller (start/stop/restart + current status)
 - Truncate MAD quests and auto reload MAD processes
 - MAD DB counter (more queries later)
 - Run custom scripts with optional variables
+- Quickly access URL bookmarks
 
  
   
@@ -53,6 +52,7 @@ Discord:
 - **truncateCommand:** Command to truncate quests and restart MAD instances.
 - **scriptCommand:** Command to show the list of scripts.
 - **madQueryCommand:** Command to show MAD database queries.
+- **linksCommand:** Command to show list of bookmarks.
 
 PM2:
 - **mads:** List of MAD PM2 processes that should be restarted after truncating quests.
@@ -85,7 +85,18 @@ madDB:
     - **varDescription:** Summary of this list of variables that will be shown.  ("Pick which device" or "Choose the port")
     - **varOptions:** The list of options that this variable can be ("1", "2", "3", "4", "5")
 
+ 
+  
 
+## Links Setup
+- Add up to 25 links as buttons.
+- Discord invite links don't seem to work on PC/browser so use a URL shortener.
+- Emoji field is optional. 
+    - Full emoji string `<:mad:475050731032936448>`
+    - Unicode form (Get correct form by escaping default emojis: `\😺`)
+
+
+  
 
 ## Usage
 - Start the bot in a console with `node madgruber.js`
@@ -96,6 +107,7 @@ madDB:
 - Bot will truncate and reload MADs when you send `<prefix><truncateCommand>`
 - Bot will reply with runnable scripts when sent `<prefix><scriptCommand>`. Then follow prompts
 - Get runnable MAD database queries with `<prefix><madQueryCommand>`
+- Get link buttons with `<prefix><linksCommand>`
 
  
   
@@ -110,3 +122,5 @@ madDB:
 ![Queries](https://media.giphy.com/media/qfQGzrKjv8C5IvvJX8/giphy.gif)
 
 ![Scripts](https://media.giphy.com/media/Ip1imTASukmpyt0489/giphy.gif)
+
+![Links](https://media.giphy.com/media/tjpBQPIszvhOdjSXf9/giphy.gif)

@@ -18,6 +18,7 @@ const Queries = require('./functions/queries.js');
 const Interactions = require('./functions/interactions.js');
 const UpdateButtons = require('./functions/update_buttons.js');
 const TruncateQuests = require('./functions/truncate_quests.js');
+const Links = require('./functions/links.js');
 const config = require('./config/config.json');
 
 client.on('ready', () => {
@@ -55,6 +56,11 @@ client.on('messageCreate', async (receivedMessage) => {
 	//Run Queries
 	else if (message === `${config.discord.prefix}${config.discord.madQueryCommand}`) {
 		Queries.queries(receivedMessage);
+	}
+
+	//Send Links
+	else if (message === `${config.discord.prefix}${config.discord.linksCommand}`) {
+		Links.links(receivedMessage);
 	}
 }); //End of client.on(message)
 
