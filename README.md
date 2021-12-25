@@ -3,7 +3,9 @@
 ## About
 A Discord bot used as a very basic GUI for your server along with some MAD-specific features. Examples shown below.
 
-###### Disclaimer: I'm expecting some bumps along the way as more people test it with different setups. I only have very basic bashing knowledge so I know the scripting stuff could use some upgrading. The bot might look completely incompetent and the process it uses at times probably makes no sense but it almost always gets the damn job done, sometimes in a blaze of glory. **MADGRUBER!!!**
+###### Disclaimer: This bot might look completely incompetent and the process it uses at times probably makes no sense but it almost always gets the damn job done, sometimes in a blaze of glory. **MADGRUBER!!!**
+
+Join the Discord server for any help and to keep up with updates: https://discord.gg/USxvyB9QTz
 
 
 **Current Features:**
@@ -12,8 +14,8 @@ A Discord bot used as a very basic GUI for your server along with some MAD-speci
 - MAD DB counter (more queries later)
 - Run custom scripts with optional variables
 - Quickly access URL bookmarks
+- Reaction role manager
 
- 
   
   
    
@@ -24,6 +26,7 @@ A Discord bot used as a very basic GUI for your server along with some MAD-speci
   - Server Members Intent
   - Message Content Intent
   - Read/write perms in channels
+  - Manage Roles perm (if using role feature)
 
  
   
@@ -48,6 +51,8 @@ Discord:
 - **prefix:** Used in front of Discord commands.
 - **adminIDs:** List of Discord user IDs that can execute commands or push buttons.
 - **channelIDs:** List of channel IDs that the bot will respond in. Will also respond to DMs if they are admins.
+- **sendRoleMessage:** Whether or not to send role added/removed messages (true/false).
+- **roleMessageDeleteSeconds:** How long to wait until role message is deleted (Set to 0 to never delete).
 - **pm2Command:** Command to show the PM2 controller.
 - **truncateCommand:** Command to truncate quests and restart MAD instances.
 - **scriptCommand:** Command to show the list of scripts.
@@ -94,6 +99,14 @@ madDB:
 - Emoji field is optional. 
     - Full emoji string `<:mad:475050731032936448>`
     - Unicode form (Get correct form by escaping default emojis: `\😺`)
+
+
+  
+
+## Roles Setup
+- **messageID:** The ID of the message with the emojis users can select to add/remove roles
+- **roleID:** The ID for the role that can be added/removed
+- **emojiName:** The unicode emoji or the custom emoji name (only the name, NOT full emoji string)
 
 
   

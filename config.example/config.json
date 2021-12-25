@@ -6,6 +6,8 @@
         "prefix": "!",
         "adminIDs": ["123","456"],
         "channelIDs": ["789","420"],
+        "sendRoleMessage": true,
+        "roleMessageDeleteSeconds": 30,
         "pm2Command": "pm2",
         "truncateCommand": "truncate",
         "scriptCommand": "scripts",
