@@ -18,8 +18,15 @@ const Queries = require('./functions/queries.js');
 const Interactions = require('./functions/interactions.js');
 const UpdateButtons = require('./functions/update_buttons.js');
 const TruncateQuests = require('./functions/truncate_quests.js');
-const Links = require('./functions/links.js');
+const Roles = require('./functions/roles.js');
 const config = require('./config/config.json');
+const roleConfig = require('./config/roles.json');
+var roleMessages = [];
+roleConfig.forEach(role => {
+	if (role.messageID) {
+		roleMessages.push(role.messageID);
+	}
+})
 
 client.on('ready', () => {
 	console.log("MadGruber Bot Logged In");
@@ -83,6 +90,42 @@ client.on('interactionCreate', async interaction => {
 		Interactions.listInteraction(interaction, interactionID);
 	}
 }); //End of client.on(interactionCreate)
+
+client.on('messageReactionAdd', async (reaction, user) => {
+	if (user.bot == true) {
+		return;
+	}
+	if (reaction.message.partial) await reaction.message.fetch();
+	if (reaction.partial) {
+		try {
+			await reaction.fetch();
+		} catch (error) {
+			console.error('Error fetching the message:', error);
+			return;
+		}
+	}
+	if (roleMessages.includes(reaction.message.id)) {
+		Roles.roles(reaction, user, "add");
+	}
+}); //End of messageReactionAdd
+
+client.on('messageReactionRemove', async (reaction, user) => {
+	if (user.bot == true) {
+		return;
+	}
+	if (reaction.message.partial) await reaction.message.fetch();
+	if (reaction.partial) {
+		try {
+			await reaction.fetch();
+		} catch (error) {
+			console.error('Error fetching the message:', error);
+			return;
+		}
+	}
+	if (roleMessages.includes(reaction.message.id)) {
+		Roles.roles(reaction, user, "remove");
+	}
+}); //End of messageReactionRemove
 
 client.on("error", (e) => console.error(e));
 client.on("warn", (e) => console.warn(e));
