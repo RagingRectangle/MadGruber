@@ -51,10 +51,20 @@ module.exports = {
 
     startScript: async function startScript(interaction, script, scriptName, variableCount) {
         //console.log("script:", script);
+        //Check if file exists
+        let tempPath = script.fullFilePath.split(' ');
+        let fileTest = fileExists.sync(tempPath[0]);
+        if (fileTest === false) {
+            module.exports.sendScriptList(interaction, "restart");
+            interaction.deferUpdate();
+            console.log(`Script not found: \`${tempPath[0]}\``);
+            interaction.message.channel.send(`Script not found: \`${tempPath[0]}\``);
+            return;
+        }
+
         //No variables
         if (variableCount == 0) {
-            let bashCommand = `bash ${script.fullFilePath}`;
-            module.exports.runScript(interaction, bashCommand);
+            module.exports.runScript(interaction, scriptName, '');
         }
         //Has variables
         else {
@@ -69,10 +79,10 @@ module.exports = {
             }
             selectList.push(cancelOption);
             varOptions.forEach(variable => {
-                let bashCommand = `bash ${script.fullFilePath} ${variable}`;
+                let bashVariables = variable;
                 let listOption = {
                     label: variable,
-                    value: `${config.serverName}~run:${scriptName}~var:1_${variableCount}~bash:${bashCommand}`
+                    value: `${config.serverName}~run:${scriptName}~var:1_${variableCount}~${bashVariables}`
                 }
                 selectList.push(listOption);
             });
@@ -100,11 +110,11 @@ module.exports = {
         let varCounter = intItems[1].replace('var:', '').split('_');
         let varNumber = varCounter[0] * 1 + 1;
         let varNeeded = varCounter[1] * 1;
-        var bashCommand = intItems[2].replace('bash:', '');
+        var bashVariables = intItems[2].split('^');
 
         //No more variables needed
         if (varCounter[0] == varCounter[1]) {
-            module.exports.runScript(interaction, bashCommand);
+            module.exports.runScript(interaction, scriptName, bashVariables);
         }
         //More variables needed
         else {
@@ -122,10 +132,10 @@ module.exports = {
                     }
                     selectList.push(cancelOption);
                     varOptions.forEach(variable => {
-                        let newBashCommand = `${bashCommand} ${variable}`;
+                        let newbashVariables = `${bashVariables} ${variable}`;
                         let listOption = {
                             label: variable,
-                            value: `${config.serverName}~run:${scriptName}~var:${varNumber}_${varNeeded}~bash:${newBashCommand}`
+                            value: `${config.serverName}~run:${scriptName}~var:${varNumber}_${varNeeded}~${newbashVariables}`
                         }
                         selectList.push(listOption);
                     });
@@ -149,28 +159,27 @@ module.exports = {
     }, //End of scriptVariables()
 
 
-    runScript: async function runScript(interaction, bashCommand) {
+    runScript: async function runScript(interaction, scriptName, variables) {
         interaction.deferUpdate();
         module.exports.sendScriptList(interaction, "restart");
-        let splitCommand = bashCommand.split(' ');
-        console.log(bashCommand)
-        let filePath = splitCommand[1];
-
-        let fileTest = fileExists.sync(filePath);
-        if (fileTest === false) {
-            console.log(`Script not found: \`${filePath}\``);
-            interaction.message.channel.send(`Script not found: \`${filePath}\``);
-        } else {
+        var fullBashCommand = '';
+        for (var s in scriptList) {
+            if (scriptList[s]['customName'] === scriptName) {
+                fullBashCommand = `bash ${scriptList[s]['fullFilePath']} ${variables}`;
+                console.log("fullBash:", fullBashCommand);
+            }
+        } //End of s loop
+        if (fullBashCommand !== ''){
             try {
-                let output = shell.exec(bashCommand, {
+                let output = shell.exec(fullBashCommand, {
                     silent: false,
                     async: true
                 })
-                interaction.message.channel.send(`Ran script: \`${bashCommand}\``);
-                console.log(`Ran script: \`${bashCommand}\``);
+                interaction.message.channel.send(`Ran script: \`${fullBashCommand}\``);
+                console.log(`Ran script: \`${fullBashCommand}\``);
             } catch (err) {
-                interaction.message.channel.send(`Failed to run script: \`${bashCommand}\``);
-                console.log(`Failed to run script: ${bashCommand}:`, err);
+                interaction.message.channel.send(`Failed to run script: \`${fullBashCommand}\``);
+                console.log(`Failed to run script: ${fullBashCommand}:`, err);
             }
         }
     }, //End of runScript()
