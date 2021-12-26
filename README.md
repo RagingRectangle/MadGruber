@@ -95,7 +95,6 @@ madDB:
 
 ## Links Setup
 - Add up to 25 links as buttons.
-- Discord invite links don't seem to work on PC/browser so use a URL shortener.
 - Emoji field is optional. 
     - Full emoji string `<:mad:475050731032936448>`
     - Unicode form (Get correct form by escaping default emojis: `\😺`)

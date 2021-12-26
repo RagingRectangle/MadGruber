@@ -18,6 +18,7 @@ const Queries = require('./functions/queries.js');
 const Interactions = require('./functions/interactions.js');
 const UpdateButtons = require('./functions/update_buttons.js');
 const TruncateQuests = require('./functions/truncate_quests.js');
+const Links = require('./functions/links.js');
 const Roles = require('./functions/roles.js');
 const config = require('./config/config.json');
 const roleConfig = require('./config/roles.json');
