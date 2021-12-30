@@ -8,6 +8,7 @@ const {
 } = require('discord.js');
 const fs = require('fs');
 const pm2 = require('pm2');
+const shell = require('shelljs');
 const UpdateButtons = require('./update_buttons.js');
 const Scripts = require('./scripts.js');
 const Queries = require('./queries.js');
@@ -25,7 +26,7 @@ module.exports = {
                     Scripts.startScript(interaction, scriptConfig[s], scriptName, variableCount);
                 }
             }
-        } else if (interactionID === 'runScript') {
+        } else if (interactionID.startsWith('runScript')) {
             if (interaction.values[0] === `${config.serverName}~cancelScript`) {
                 interaction.deferUpdate();
                 Scripts.sendScriptList(interaction, 'restart');
@@ -55,7 +56,7 @@ module.exports = {
                 content: `**Restart ${config.serverName} Processes:**`,
                 components: newButtons
             });
-        } 
+        }
         //Start menu pressed
         else if (interactionID === 'start') {
             interaction.deferUpdate();
@@ -71,7 +72,7 @@ module.exports = {
                 content: `**Start ${config.serverName} Processes:**`,
                 components: newButtons
             });
-        } 
+        }
         //Stop menu pressed
         else if (interactionID === 'stop') {
             interaction.deferUpdate();
@@ -87,12 +88,12 @@ module.exports = {
                 content: `**Stop ${config.serverName} Processes:**`,
                 components: newButtons
             });
-        } 
+        }
         //Status menu pressed
         else if (interactionID === 'status') {
             UpdateButtons.updateButtons(interaction, 'edit');
             interaction.deferUpdate();
-        } 
+        }
         //Do PM2 stuff
         else if (interactionID.startsWith('process~')) {
             interaction.deferUpdate();
@@ -140,6 +141,37 @@ module.exports = {
                     }
                 }
             }) //End of pm2.connect
+        }
+        //Verify Scripts
+        else if (interactionID.startsWith('verifyScript~')) {
+            interaction.deferUpdate();
+            let runScript = interactionID.replace('verifyScript~', '');
+            if (runScript === 'no') {
+                interaction.message.edit({
+                    embeds: [new MessageEmbed().setTitle('Did not run script:').setDescription(interaction.message.embeds[0]['description']).setColor('9E0000')],
+                    components: []
+                })
+                setTimeout(() => interaction.message.delete().catch(err => console.log("Error deleting verify script message:", err)), 10000);
+            } else if (runScript === 'yes') {
+                let fullBashCommand = interaction.message.embeds[0]['description'];
+                try {
+                    let output = shell.exec(fullBashCommand, {
+                        silent: false,
+                        async: true
+                    })
+                    interaction.message.edit({
+                        embeds: [new MessageEmbed().setTitle('Ran script:').setDescription(interaction.message.embeds[0]['description']).setColor('00841E')],
+                        components: []
+                    });
+                    console.log(`Ran script: \`${fullBashCommand}\``);
+                } catch (err) {
+                    interaction.message.edit({
+                        embeds: [new MessageEmbed().setTitle('Failed to run script:').setDescription(interaction.message.embeds[0]['description']).setColor('9E0000')],
+                        components: []
+                    });
+                    console.log(`Failed to run script: ${fullBashCommand}:`, err);
+                }
+            }
         }
     }, //End of buttonInteraction()
 }

@@ -31,8 +31,6 @@ module.exports = {
                 new MessageSelectMenu()
                 .setCustomId(`${config.serverName}~scriptList`)
                 .setPlaceholder('List of Scripts')
-                .setMinValues(1)
-                .setMaxValues(1)
                 .addOptions(selectList))
 
         if (type === 'new') {
@@ -61,10 +59,13 @@ module.exports = {
             interaction.message.channel.send(`Script not found: \`${tempPath[0]}\``);
             return;
         }
-
         //No variables
         if (variableCount == 0) {
-            module.exports.runScript(interaction, scriptName, '');
+            if (config.discord.scriptVerify === false) {
+                module.exports.runScript(interaction, scriptName, '');
+            } else {
+                module.exports.verifyScript(interaction, scriptName, '');
+            }
         }
         //Has variables
         else {
@@ -73,11 +74,6 @@ module.exports = {
             let varDescription = currentVar['varDescription'];
             let varOptions = currentVar['varOptions'];
             var selectList = [];
-            let cancelOption = {
-                label: "CANCEL SCRIPT",
-                value: `${config.serverName}~cancelScript`
-            }
-            selectList.push(cancelOption);
             varOptions.forEach(variable => {
                 let bashVariables = variable;
                 let listOption = {
@@ -86,18 +82,36 @@ module.exports = {
                 }
                 selectList.push(listOption);
             });
-            let fullList = new MessageActionRow()
-                .addComponents(
-                    new MessageSelectMenu()
-                    .setCustomId(`${config.serverName}~runScript`)
-                    .setPlaceholder(varDescription)
-                    .setMinValues(1)
-                    .setMaxValues(1)
-                    .addOptions(selectList))
-
+            let listsNeeded = Math.ceil(varOptions.length / 24);
+            var varCounter = 0;
+            var allComponents = [];
+            for (var n = 0; n < listsNeeded && n < 5; n++) {
+                var currentList = [];
+                let cancelOption = {
+                    label: "CANCEL SCRIPT",
+                    value: `${config.serverName}~cancelScript`
+                }
+                currentList.push(cancelOption);
+                var optionCounter = 0;
+                for (var v = varCounter; v < varOptions.length && optionCounter < 24; v++) {
+                    currentList.push(selectList[v]);
+                    optionCounter++;
+                    varCounter++;
+                } //End of v loop
+                let fullList = new MessageActionRow()
+                    .addComponents(
+                        new MessageSelectMenu()
+                        .setCustomId(`${config.serverName}~runScript${n}`)
+                        .setPlaceholder(`${varDescription}`)
+                        .addOptions(currentList))
+                if (listsNeeded > 1) {
+                    fullList.components[0].setPlaceholder(`${varDescription} (${currentList[1]['label']} - ${currentList[currentList.length - 1]['label']})`)
+                }
+                allComponents.push(fullList);
+            } //End of n loop
             interaction.message.edit({
                 content: `Select variable 1 of ${variableCount} for ${script.customName}`,
-                components: [fullList]
+                components: allComponents
             })
         } //End of has variables
     }, //End of startScript()
@@ -107,14 +121,18 @@ module.exports = {
         let intItems = interaction.values[0].replace(`${config.serverName}~run:`, '').split('~');
         //console.log("intItems:", intItems);
         let scriptName = intItems[0];
-        let varCounter = intItems[1].replace('var:', '').split('_');
-        let varNumber = varCounter[0] * 1 + 1;
-        let varNeeded = varCounter[1] * 1;
+        let currentVarCounts = intItems[1].replace('var:', '').split('_');
+        let varNumber = currentVarCounts[0] * 1 + 1;
+        let varNeeded = currentVarCounts[1] * 1;
         var bashVariables = intItems[2].split('^');
 
         //No more variables needed
-        if (varCounter[0] == varCounter[1]) {
-            module.exports.runScript(interaction, scriptName, bashVariables);
+        if (currentVarCounts[0] == currentVarCounts[1]) {
+            if (config.discord.scriptVerify === false) {
+                module.exports.runScript(interaction, scriptName, bashVariables);
+            } else {
+                module.exports.verifyScript(interaction, scriptName, bashVariables);
+            }
         }
         //More variables needed
         else {
@@ -126,11 +144,6 @@ module.exports = {
                     let varDescription = currentVar['varDescription'];
                     let varOptions = currentVar['varOptions'];
                     var selectList = [];
-                    let cancelOption = {
-                        label: "CANCEL SCRIPT",
-                        value: `${config.serverName}~cancelScript`
-                    }
-                    selectList.push(cancelOption);
                     varOptions.forEach(variable => {
                         let newbashVariables = `${bashVariables} ${variable}`;
                         let listOption = {
@@ -139,24 +152,60 @@ module.exports = {
                         }
                         selectList.push(listOption);
                     });
-                    let fullList = new MessageActionRow()
-                        .addComponents(
-                            new MessageSelectMenu()
-                            .setCustomId(`${config.serverName}~runScript`)
-                            .setPlaceholder(varDescription)
-                            .setMinValues(1)
-                            .setMaxValues(1)
-                            .addOptions(selectList))
-
+                    let listsNeeded = Math.ceil(varOptions.length / 24);
+                    var varCounter = 0;
+                    var allComponents = [];
+                    for (var n = 0; n < listsNeeded && n < 5; n++) {
+                        var currentList = [];
+                        let cancelOption = {
+                            label: "CANCEL SCRIPT",
+                            value: `${config.serverName}~cancelScript`
+                        }
+                        currentList.push(cancelOption);
+                        var optionCounter = 0;
+                        for (var v = varCounter; v < varOptions.length && optionCounter < 24; v++) {
+                            currentList.push(selectList[v]);
+                            optionCounter++;
+                            varCounter++;
+                        } //End of v loop
+                        let fullList = new MessageActionRow()
+                            .addComponents(
+                                new MessageSelectMenu()
+                                .setCustomId(`${config.serverName}~runScript_var${varCounter}`)
+                                .setPlaceholder(`${varDescription}`)
+                                .addOptions(currentList))
+                        if (listsNeeded > 1) {
+                            fullList.components[0].setPlaceholder(`${varDescription} (${currentList[1]['label']} - ${currentList[currentList.length - 1]['label']})`)
+                        }
+                        allComponents.push(fullList);
+                    } //End of n loop
                     interaction.message.edit({
                         content: `Select variable ${varNumber} of ${varNeeded} for ${scriptName}`,
-                        components: [fullList]
+                        components: allComponents
                     })
                     break;
                 }
             } //End of s loop
         } //End of more variables needed
     }, //End of scriptVariables()
+
+
+    verifyScript: async function verifyScript(interaction, scriptName, variables) {
+        interaction.deferUpdate();
+        module.exports.sendScriptList(interaction, "restart");
+        for (var s in scriptList) {
+            if (scriptList[s]['customName'] === scriptName) {
+                let optionRow = new MessageActionRow().addComponents(
+                    new MessageButton().setCustomId(`${config.serverName}~verifyScript~yes`).setLabel(`Yes`).setStyle("SUCCESS"),
+                    new MessageButton().setCustomId(`${config.serverName}~verifyScript~no`).setLabel(`No`).setStyle("DANGER")
+                )
+                interaction.message.channel.send({
+                    embeds: [new MessageEmbed().setTitle('Run the following script?').setDescription(`bash ${scriptList[s]['fullFilePath']} ${variables}`).setColor('0D00CA')],
+                    components: [optionRow]
+                })
+            }
+        } //End of s loop
+    }, //End of verifyScript()
 
 
     runScript: async function runScript(interaction, scriptName, variables) {
@@ -169,7 +218,7 @@ module.exports = {
                 console.log("fullBash:", fullBashCommand);
             }
         } //End of s loop
-        if (fullBashCommand !== ''){
+        if (fullBashCommand !== '') {
             try {
                 let output = shell.exec(fullBashCommand, {
                     silent: false,

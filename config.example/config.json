@@ -11,6 +11,7 @@
         "pm2Command": "pm2",
         "truncateCommand": "truncate",
         "scriptCommand": "scripts",
+        "scriptVerify": true,
         "madQueryCommand": "mad",
         "linksCommand": "links"
     },

@@ -56,6 +56,7 @@ Discord:
 - **pm2Command:** Command to show the PM2 controller.
 - **truncateCommand:** Command to truncate quests and restart MAD instances.
 - **scriptCommand:** Command to show the list of scripts.
+- **scriptVerify:** Whether or not to verify running script (true/false).
 - **madQueryCommand:** Command to show MAD database queries.
 - **linksCommand:** Command to show list of bookmarks.
 
