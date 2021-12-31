@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/RagingRectangle/MadGruber#readme",
   "dependencies": {
-    "discord.js": "^13.3.1",
+    "discord.js": "13.3.1",
     "file-exists": "^5.0.1",
     "fs": "0.0.1-security",
     "mysql": "^2.18.1",
