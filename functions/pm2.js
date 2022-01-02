@@ -127,33 +127,39 @@ module.exports = {
     runPM2: async function runPM2(interaction, interactionID) {
         pm2.connect(async function (err) {
             if (err) {
-                console.log(err);
+                console.log("pm2.connect error:", err);
             } else {
                 if (interactionID.startsWith('restart~')) {
                     let processName = interactionID.replace('restart~', '');
                     pm2.restart(processName, (err, response) => {
                         if (err) {
-                            console.log(err);
+                            console.log(`Failed to restart ${processName} PM2 process.`, err);
+                            interaction.message.channel.send(`Failed to restart ${processName} PM2 process.`).catch(console.error);
                         } else {
                             console.log(`${processName} restarted`);
+                            interaction.message.channel.send(`PM2 process restarted: ${processName}`).catch(console.error);
                         }
                     });
                 } else if (interactionID.startsWith('start~')) {
                     let processName = interactionID.replace('start~', '');
                     pm2.start(processName, (err, response) => {
                         if (err) {
-                            console.log(err);
+                            console.log(`Failed to start ${processName} PM2 process.`, err);
+                            interaction.message.channel.send(`Failed to start ${processName} PM2 process.`).catch(console.error);
                         } else {
                             console.log(`${processName} started`);
+                            interaction.message.channel.send(`PM2 process started: ${processName}`).catch(console.error);
                         }
                     });
                 } else if (interactionID.startsWith('stop~')) {
                     let processName = interactionID.replace('stop~', '');
                     pm2.stop(processName, (err, response) => {
                         if (err) {
-                            console.log(err);
+                            console.log(`Failed to stop ${processName} PM2 process.`, err);
+                            interaction.message.channel.send(`Failed to stop ${processName} PM2 process.`).catch(console.error);
                         } else {
                             console.log(`${processName} stopped`);
+                            interaction.message.channel.send(`PM2 process stopped: ${processName}`).catch(console.error);
                         }
                     });
                 }
