@@ -4,20 +4,37 @@
     "discord": {
         "token": "",
         "prefix": "!",
-        "adminIDs": ["123","456"],
-        "channelIDs": ["789","420"],
-        "sendRoleMessage": true,
-        "roleMessageDeleteSeconds": 30,
+        "adminIDs": ["123", "456"],
+        "channelIDs": ["789", "420"],
+        "helpCommand": "madgruber",
         "pm2Command": "pm2",
         "truncateCommand": "truncate",
         "scriptCommand": "scripts",
-        "scriptVerify": true,
         "madQueryCommand": "mad",
         "linksCommand": "links"
     },
     "pm2": {
         "mads": [""],
         "ignore": [""]
+    },
+    "roles": {
+        "sendRoleMessage": true,
+        "roleMessageDeleteSeconds": 30,
+        "commandPermRoles": {
+            "pm2": [],
+            "truncate": [],
+            "scripts": [],
+            "queries": [],
+            "links": []
+        }
+    },
+    "truncate": {
+        "truncateVerify": true,
+        "truncateOptions": ["trs_quest", "pokemon", "trs_quest+pokemon"],
+        "onlyRestartBeforeTime": 0
+    },
+    "scripts": {
+        "scriptVerify": true
     },
     "madDB": {
         "host": "",
@@ -35,4 +52,5 @@
         "url": "",
         "emoji": ""
     }]
+    }
 }

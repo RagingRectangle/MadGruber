@@ -37,18 +37,17 @@ module.exports = {
             messageOrInteraction.channel.send({
                 content: 'Select a script below to run it.',
                 components: [fullList]
-            });
+            }).catch(console.error);
         } else if (type === 'restart') {
             messageOrInteraction.message.edit({
                 content: 'Select a script below to run it.',
                 components: [fullList]
-            });
+            }).catch(console.error);
         }
     }, //End of sendScriptList()
 
 
     startScript: async function startScript(interaction, script, scriptName, variableCount) {
-        //console.log("script:", script);
         //Check if file exists
         let tempPath = script.fullFilePath.split(' ');
         let fileTest = fileExists.sync(tempPath[0]);
@@ -56,12 +55,12 @@ module.exports = {
             module.exports.sendScriptList(interaction, "restart");
             interaction.deferUpdate();
             console.log(`Script not found: \`${tempPath[0]}\``);
-            interaction.message.channel.send(`Script not found: \`${tempPath[0]}\``);
+            interaction.message.channel.send(`Script not found: \`${tempPath[0]}\``).catch(console.error);
             return;
         }
         //No variables
         if (variableCount == 0) {
-            if (config.discord.scriptVerify === false) {
+            if (config.scripts.scriptVerify === false) {
                 module.exports.runScript(interaction, scriptName, '');
             } else {
                 module.exports.verifyScript(interaction, scriptName, '');
@@ -112,14 +111,13 @@ module.exports = {
             interaction.message.edit({
                 content: `Select variable 1 of ${variableCount} for ${script.customName}`,
                 components: allComponents
-            })
+            }).catch(console.error);
         } //End of has variables
     }, //End of startScript()
 
 
     scriptVariables: async function scriptVariables(interaction) {
         let intItems = interaction.values[0].replace(`${config.serverName}~run:`, '').split('~');
-        //console.log("intItems:", intItems);
         let scriptName = intItems[0];
         let currentVarCounts = intItems[1].replace('var:', '').split('_');
         let varNumber = currentVarCounts[0] * 1 + 1;
@@ -128,7 +126,7 @@ module.exports = {
 
         //No more variables needed
         if (currentVarCounts[0] == currentVarCounts[1]) {
-            if (config.discord.scriptVerify === false) {
+            if (config.scripts.scriptVerify === false) {
                 module.exports.runScript(interaction, scriptName, bashVariables);
             } else {
                 module.exports.verifyScript(interaction, scriptName, bashVariables);
@@ -182,7 +180,7 @@ module.exports = {
                     interaction.message.edit({
                         content: `Select variable ${varNumber} of ${varNeeded} for ${scriptName}`,
                         components: allComponents
-                    })
+                    }).catch(console.error);
                     break;
                 }
             } //End of s loop
@@ -202,7 +200,7 @@ module.exports = {
                 interaction.message.channel.send({
                     embeds: [new MessageEmbed().setTitle('Run the following script?').setDescription(`bash ${scriptList[s]['fullFilePath']} ${variables}`).setColor('0D00CA')],
                     components: [optionRow]
-                })
+                }).catch(console.error);
             }
         } //End of s loop
     }, //End of verifyScript()
@@ -224,10 +222,10 @@ module.exports = {
                     silent: false,
                     async: true
                 })
-                interaction.message.channel.send(`Ran script: \`${fullBashCommand}\``);
+                interaction.message.channel.send(`Ran script: \`${fullBashCommand}\``).catch(console.error);
                 console.log(`Ran script: \`${fullBashCommand}\``);
             } catch (err) {
-                interaction.message.channel.send(`Failed to run script: \`${fullBashCommand}\``);
+                interaction.message.channel.send(`Failed to run script: \`${fullBashCommand}\``).catch(console.error);
                 console.log(`Failed to run script: ${fullBashCommand}:`, err);
             }
         }

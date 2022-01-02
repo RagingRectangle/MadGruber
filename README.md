@@ -15,6 +15,7 @@ Join the Discord server for any help and to keep up with updates: https://discor
 - Run custom scripts with optional variables
 - Quickly access URL bookmarks
 - Reaction role manager
+- Limit commands to only certain roles
 
   
   
@@ -49,14 +50,12 @@ npm install
 Discord:
 - **token:** Discord bot token.
 - **prefix:** Used in front of Discord commands.
-- **adminIDs:** List of Discord user IDs that can execute commands or push buttons.
+- **adminIDs:** List of Discord user IDs that can execute all commands.  Can also run stuff in DMs.
 - **channelIDs:** List of channel IDs that the bot will respond in. Will also respond to DMs if they are admins.
-- **sendRoleMessage:** Whether or not to send role added/removed messages (true/false).
-- **roleMessageDeleteSeconds:** How long to wait until role message is deleted (Set to 0 to never delete).
+- **helpCommand:** Command to show correct syntax and what perms the user has.
 - **pm2Command:** Command to show the PM2 controller.
 - **truncateCommand:** Command to truncate quests and restart MAD instances.
 - **scriptCommand:** Command to show the list of scripts.
-- **scriptVerify:** Whether or not to verify running script (true/false).
 - **madQueryCommand:** Command to show MAD database queries.
 - **linksCommand:** Command to show list of bookmarks.
 
@@ -64,21 +63,27 @@ PM2:
 - **mads:** List of MAD PM2 processes that should be restarted after truncating quests.
 - **ignore:** List of PM2 processes/modules to ignore if you don't want buttons for them.
 
+Roles:
+- **sendRoleMessage:** Whether or not to send role added/removed messages (true/false).
+- **roleMessageDeleteSeconds:** How long to wait until role message is deleted (Set to 0 to never delete).
+- **commandPermRoles:** List of command types and the role IDs that are allowed to use them.
+
+Truncate:
+- **truncateVerify:** Whether or not to verify table truncate (true/false).
+- **truncateOptions:** List of tables to list as options to truncate.  Can truncate multiple tables at once by combining them with '+'. Example: *["trs_quest", "pokemon", "trs_quest+pokemon"]*
+- **onlyRestartBeforeTime:** Set this to limit when the bot will reload MAD instance (0-23).  If set to 0 it will always reload MADs.  If an event ends at 20:00 and you don't need to reload MAD because you won't rescan quests then enter "20".
+
+Scripts:
+- **scriptVerify:** Whether or not to verify running script (true/false).
+
 madDB:
 - Enter your basic MAD database info. Make sure your user has access if the database is not local.  Leave blank if you don't plan on using the truncate quest feature.
-- **onlyReloadBeforeTime:** Set this to limit when the bot will reload MAD instance (0-23).  If left blank it will always reload MADs.  If an event ends at 20:00 and you don't need to reload MAD because you won't rescan quests then enter "20".
 
  
   
-  
-## Queries Setup
-- The bot is currently only able to run a simple count query to a selection of tables in the MAD database.  
-- More query options will be added later.
 
- 
-  
-
-## Script Setup
+## Scripts Setup
+- Config file: */config/scripts.json*
 - Absolute paths must be used in scripts to work. Look in the scripts.example.json to get a better feel for how they work.
 - **customName:** Display name
 - **description:** Short summary of what it does
@@ -95,20 +100,29 @@ madDB:
   
 
 ## Links Setup
+- Config file: */config/links.json*
 - Add up to 25 links as buttons.
 - Emoji field is optional. 
     - Full emoji string `<:mad:475050731032936448>`
     - Unicode form (Get correct form by escaping default emojis: `\😺`)
 
-
+ 
   
 
-## Roles Setup
+## Reaction Role Setup
+- Config file: */config/roles.json*
 - **messageID:** The ID of the message with the emojis users can select to add/remove roles
 - **roleID:** The ID for the role that can be added/removed
 - **emojiName:** The unicode emoji or the custom emoji name (only the name, NOT full emoji string)
 
+ 
+  
+  
+## Queries Setup
+- The bot is currently only able to run a simple count query to a selection of tables in the MAD database.  
+- More query options will be added later.
 
+ 
   
 
 ## Usage
@@ -118,7 +132,7 @@ madDB:
   - Press the Reload/Start/Stop buttons and then the processes you'd like to change
   - Press the Status button to see the current status of processes
 - Bot will truncate and reload MADs when you send `<prefix><truncateCommand>`
-- Bot will reply with runnable scripts when sent `<prefix><scriptCommand>`. Then follow prompts
+- Bot will reply with runnable scripts when sent `<prefix><scriptCommand>`
 - Get runnable MAD database queries with `<prefix><madQueryCommand>`
 - Get link buttons with `<prefix><linksCommand>`
 

@@ -1,16 +1,19 @@
 const {
+    Client,
+    Intents,
+    MessageEmbed,
+    Permissions,
     MessageActionRow,
     MessageSelectMenu,
     MessageButton
 } = require('discord.js');
-const config = require('../config/config.json');
-const linksList = config.links;
+const linksList = require('../config/links.json');
 
 module.exports = {
     links: async function links(receivedMessage) {
         var buttonList = [];
         linksList.forEach(link => {
-            if (link.url !== ''){
+            if (link.url !== '') {
                 let button = new MessageButton()
                     .setURL(link.url)
                     .setLabel(link.label)
@@ -19,6 +22,10 @@ module.exports = {
                 buttonList.push(button);
             }
         });
+        if (buttonList.length == 0) {
+            receivedMessage.channel.send("No links are set in config.").catch(console.error);
+            return;
+        }
         let rowsNeeded = Math.ceil(buttonList.length / 5);
         let buttonsNeeded = buttonList.length;
         var buttonCount = 0;
@@ -33,10 +40,9 @@ module.exports = {
             } //End of r loop
             messageComponents.push(buttonRow);
         } //End of n loop
-
         receivedMessage.channel.send({
             content: `Click to open:`,
             components: messageComponents
-        });
-    }, //End of links()
+        }).catch(console.error);
+    } //End of links()
 }

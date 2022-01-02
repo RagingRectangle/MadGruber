@@ -54,8 +54,8 @@ module.exports = {
                         console.log("Count Query Error:", err);
                     } else {
                         let count = results[0]['COUNT(*)'].toLocaleString();
-                        console.log(`${countQuery}: ${count}`);
-                        interaction.channel.send(`Current ${countType}: ${count}`).catch(console.error);
+                        console.log(`SELECT COUNT(*) FROM ${config.madDB.database}.${table}: ${count}`);
+                        interaction.channel.send(`Current ${config.madDB.database} ${countType}: ${count}`).catch(console.error);
                     }
                 }) //End of query
                 connection.end();

@@ -3,6 +3,9 @@ const {
     Intents,
     MessageEmbed,
     Permissions,
+    MessageActionRow,
+    MessageSelectMenu,
+    MessageButton
 } = require('discord.js');
 const config = require('../config/config.json');
 const roleConfig = require('../config/roles.json');
@@ -20,15 +23,15 @@ module.exports = {
                             guildUser.roles.add(newRole).catch(err => {
                                     console.log(`Error giving ${newRole.name} role to user ${user.username}: ${err}`);
                                     errorCheck = true;
-                                })
+                                }).catch(console.error)
                                 .then(() => {
                                     if (errorCheck !== true) {
                                         console.log(`${user.username} added ${newRole.name} role`);
-                                        if (config.discord.sendRoleMessage === true) {
-                                            reaction.message.channel.send(`${user} has added the ${newRole.name} role.`)
+                                        if (config.roles.sendRoleMessage === true) {
+                                            reaction.message.channel.send(`${user} has added the ${newRole.name} role.`).catch(console.error)
                                                 .then(msg => {
-                                                    if (config.discord.roleMessageDeleteSeconds > 0) {
-                                                        setTimeout(() => msg.delete().catch(err => console.log("Error deleting role message:", err)), (config.discord.roleMessageDeleteSeconds * 1000))
+                                                    if (config.roles.roleMessageDeleteSeconds > 0) {
+                                                        setTimeout(() => msg.delete().catch(err => console.log("Error deleting role message:", err)), (config.roles.roleMessageDeleteSeconds * 1000))
                                                     }
                                                 })
                                         }
@@ -39,24 +42,47 @@ module.exports = {
                             guildUser.roles.remove(newRole).catch(err => {
                                     console.log(`Error removing ${newRole.name} role to user ${user.username}: ${err}`);
                                     errorCheck = true;
-                                })
+                                }).catch(console.error)
                                 .then(() => {
                                     if (errorCheck !== true) {
                                         console.log(`${user.username} removed ${newRole.name} role`);
-                                        if (config.discord.sendRoleMessage === true) {
-                                            reaction.message.channel.send(`${user} has removed the ${newRole.name} role.`)
+                                        if (config.roles.sendRoleMessage === true) {
+                                            reaction.message.channel.send(`${user} has removed the ${newRole.name} role.`).catch(console.error)
                                                 .then(msg => {
-                                                    if (config.discord.roleMessageDeleteSeconds > 0) {
-                                                        setTimeout(() => msg.delete().catch(err => console.log("Error deleting role message:", err)), (config.discord.roleMessageDeleteSeconds * 1000))
+                                                    if (config.roles.roleMessageDeleteSeconds > 0) {
+                                                        setTimeout(() => msg.delete().catch(err => console.log("Error deleting role message:", err)), (config.roles.roleMessageDeleteSeconds * 1000))
                                                     }
                                                 })
                                         }
                                     }
                                 })
-                        }//End of role removed
+                        } //End of role removed
                     }
                 }) //End of forEach(emoji)
             }
         }) //End of forEach(role)
-    } //End of roles()
+    }, //End of roles()
+
+
+    getUserCommandPerms: async function getUserCommandPerms(user) {
+        var userPerms = [];
+        if (config.discord.adminIDs.includes(user.id)) {
+            userPerms.push("admin");
+        }
+        let commandTypes = Object.keys(config.roles.commandPermRoles);
+        let commandRoles = Object.values(config.roles.commandPermRoles);
+        for (var t in commandTypes) {
+            if (userPerms.includes('admin')) {
+                userPerms.push(commandTypes[t]);
+            } else {
+                let roles = commandRoles[t];
+                for (var r in roles) {
+                    if (user._roles && user._roles.includes(roles[r])) {
+                        userPerms.push(commandTypes[t]);
+                    }
+                } //End of r loop
+            }
+        } //End of t loop
+        return userPerms;
+    } //End of getUserCommandPerms()
 }
