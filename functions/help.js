@@ -12,11 +12,6 @@ const config = require('../config/config.json');
 
 module.exports = {
     helpMenu: async function helpMenu(client, receivedMessage) {
-        var authorName = receivedMessage.author.username;
-        let member = await receivedMessage.guild.members.fetch(receivedMessage.author.id);
-        if (member.nickname !== null) {
-            authorName = member.nickname;
-        }
         let commands = config.discord;
         let prefix = config.discord.prefix;
         var pm2 = truncate = scripts = queries = links = 'N/A';
@@ -35,7 +30,8 @@ module.exports = {
         if (commands.linksCommand) {
             links = `${prefix}${commands.linksCommand}`;
         }
-        let userPerms = await Roles.getUserCommandPerms(member);
+        let userPerms = await Roles.getUserCommandPerms(receivedMessage.channel.type, receivedMessage.guild, receivedMessage.author);
+        let authorName = receivedMessage.author.username;
         var allowedCommands = `**${authorName} Permissions:**\n- ${userPerms.join('\n- ')}`;
         if (userPerms.length == 0) {
             allowedCommands = `**${authorName} Permissions:**\n- None`;

@@ -39,27 +39,25 @@ client.on('ready', () => {
 client.on('messageCreate', async (receivedMessage) => {
 	let message = receivedMessage.content.toLowerCase();
 	var user = receivedMessage.author;
-	if (receivedMessage.guildId !== null) {
-		user = await receivedMessage.guild.members.fetch(receivedMessage.author.id);
+	//Ignore messages that don't start with prefix
+	if (!message.startsWith(config.discord.prefix)){
+		return;
 	}
-	let userPerms = await Roles.getUserCommandPerms(user);
-	//Not in channel list
-	if (receivedMessage.channel.type == "GUILD_TEXT") {
-		if (!config.discord.channelIDs.includes(receivedMessage.channel.id)) {
-			return;
-		}
-		if (user.user.bot === true) {
-			return;
-		}
+	//Ignore bot messages
+	if (user.bot === true) {
+		return;
 	}
 	//DM and not admin
-	if (receivedMessage.channel.type === "DM") {
-		if (!userPerms.includes('admin')) {
-			return;
-		}
-		if (user.bot === true) {
-			return;
-		}
+	if (receivedMessage.channel.type === "DM" && !config.discord.adminIDs.includes(user.id)) {
+		return;
+	}
+	//Not in channel list
+	if (receivedMessage.channel.type === "GUILD_TEXT" && !config.discord.channelIDs.includes(receivedMessage.channel.id)) {
+		return;
+	}
+	let userPerms = await Roles.getUserCommandPerms(receivedMessage.channel.type, receivedMessage.guild, user);
+	if (userPerms === []){
+		return;
 	}
 	//Send PM2 list/buttons
 	if (config.discord.pm2Command && message === `${config.discord.prefix}${config.discord.pm2Command}`) {
@@ -101,6 +99,10 @@ client.on('messageCreate', async (receivedMessage) => {
 
 client.on('interactionCreate', async interaction => {
 	let user = interaction.member;
+	var channelType = "GUILD_TEXT";
+	if (interaction.message.guildId === null){
+		channelType = "DM";
+	}
 	if (user.bot == true) {
 		return;
 	}
@@ -109,7 +111,7 @@ client.on('interactionCreate', async interaction => {
 		return;
 	}
 	var interactionID = interaction.customId.replace(`${config.serverName}~`, '');
-	let userPerms = await Roles.getUserCommandPerms(user);
+	let userPerms = await Roles.getUserCommandPerms(channelType, interaction.message.guild, user);
 	//Button interaction
 	if (interaction.isButton()) {
 		Interactions.buttonInteraction(interaction, interactionID, userPerms);
