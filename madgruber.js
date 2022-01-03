@@ -39,28 +39,27 @@ client.on('ready', () => {
 client.on('messageCreate', async (receivedMessage) => {
 	let message = receivedMessage.content.toLowerCase();
 	var user = receivedMessage.author;
-	var userPerms = [];
-	var channelType = 'Server';
-	if (receivedMessage.channel.type !== "DM") {
+	if (receivedMessage.guildId !== null) {
 		user = await receivedMessage.guild.members.fetch(receivedMessage.author.id);
-	} else {
-		channelType = "DM";
 	}
-	//Ignore bots
-	if (user.user.bot === true){
-		return;
-	}
+	let userPerms = await Roles.getUserCommandPerms(user);
 	//Not in channel list
-	if (receivedMessage.channel.type !== "DM" && !config.discord.channelIDs.includes(receivedMessage.channel.id)) {
-		return;
+	if (receivedMessage.channel.type == "GUILD_TEXT") {
+		if (!config.discord.channelIDs.includes(receivedMessage.channel.id)) {
+			return;
+		}
+		if (user.user.bot === true) {
+			return;
+		}
 	}
 	//DM and not admin
-	if (receivedMessage.channel.type === "DM" && !userPerms.includes('admin')) {
-		return;
-	}
-	//Get user command perms
-	if (receivedMessage.channel.type !== "DM") {
-		userPerms = await Roles.getUserCommandPerms(user);
+	if (receivedMessage.channel.type === "DM") {
+		if (!userPerms.includes('admin')) {
+			return;
+		}
+		if (user.bot === true) {
+			return;
+		}
 	}
 	//Send PM2 list/buttons
 	if (config.discord.pm2Command && message === `${config.discord.prefix}${config.discord.pm2Command}`) {
@@ -93,8 +92,8 @@ client.on('messageCreate', async (receivedMessage) => {
 		if (userPerms.includes('admin') || userPerms.includes('links')) {
 			Links.links(receivedMessage);
 		}
-	}//Help Menu
-	else if (config.discord.helpCommand && message === `${config.discord.prefix}${config.discord.helpCommand}`) {
+	} //Help Menu
+	else if (config.discord.helpCommand && receivedMessage.channel.type !== "DM" && message === `${config.discord.prefix}${config.discord.helpCommand}`) {
 		Help.helpMenu(client, receivedMessage);
 	}
 }); //End of client.on(message)
