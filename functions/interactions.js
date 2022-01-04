@@ -96,15 +96,17 @@ module.exports = {
                 else if (runScript === 'yes') {
                     let fullBashCommand = interaction.message.embeds[0]['description'];
                     try {
-                        let output = shell.exec(fullBashCommand, {
-                            silent: false,
-                            async: true
-                        })
-                        interaction.message.edit({
-                            embeds: [new MessageEmbed().setTitle('Ran script:').setDescription(interaction.message.embeds[0]['description']).setColor('00841E')],
-                            components: []
-                        }).catch(console.error);
-                        console.log(`Ran script: \`${fullBashCommand}\``);
+                        shell.exec(fullBashCommand, function (code, output) {
+                            var description = `${interaction.message.embeds[0]['description']}\n\n**Response:**\n${output}`;
+                            if (code !== 0){
+                                description = `${interaction.message.embeds[0]['description']}\n\n**Error Response:**\n${output}`;
+                            }
+                            interaction.message.edit({
+                                embeds: [new MessageEmbed().setTitle('Ran script:').setDescription(description).setColor('00841E')],
+                                components: []
+                            }).catch(console.error);
+                            console.log(`Ran script: \`${fullBashCommand}\``);
+                        });
                     } catch (err) {
                         interaction.message.edit({
                             embeds: [new MessageEmbed().setTitle('Failed to run script:').setDescription(interaction.message.embeds[0]['description']).setColor('9E0000')],

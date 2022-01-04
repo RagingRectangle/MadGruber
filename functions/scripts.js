@@ -232,12 +232,14 @@ module.exports = {
         } //End of s loop
         if (fullBashCommand !== '') {
             try {
-                let output = shell.exec(fullBashCommand, {
-                    silent: false,
-                    async: true
+                shell.exec(fullBashCommand, function (code, output) {
+                    var description = `Ran script: \`${fullBashCommand}\`\n\n**Response:**\n${output}`;
+                    if (code !== 0) {
+                        description = `Ran script: \`${fullBashCommand}\`\n\n**Error Response:**\n${output}`;
+                    }
+                    interaction.message.channel.send(description).catch(console.error);
+                    console.log(`Ran script: \`${fullBashCommand}\``);
                 })
-                interaction.message.channel.send(`Ran script: \`${fullBashCommand}\``).catch(console.error);
-                console.log(`Ran script: \`${fullBashCommand}\``);
             } catch (err) {
                 interaction.message.channel.send(`Failed to run script: \`${fullBashCommand}\``).catch(console.error);
                 console.log(`Failed to run script: ${fullBashCommand}:`, err);
