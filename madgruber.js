@@ -40,7 +40,7 @@ client.on('messageCreate', async (receivedMessage) => {
 	let message = receivedMessage.content.toLowerCase();
 	var user = receivedMessage.author;
 	//Ignore messages that don't start with prefix
-	if (!message.startsWith(config.discord.prefix)){
+	if (!message.startsWith(config.discord.prefix)) {
 		return;
 	}
 	//Ignore bot messages
@@ -56,7 +56,7 @@ client.on('messageCreate', async (receivedMessage) => {
 		return;
 	}
 	let userPerms = await Roles.getUserCommandPerms(receivedMessage.channel.type, receivedMessage.guild, user);
-	if (userPerms === []){
+	if (userPerms === []) {
 		return;
 	}
 	//Send PM2 list/buttons
@@ -100,7 +100,7 @@ client.on('messageCreate', async (receivedMessage) => {
 client.on('interactionCreate', async interaction => {
 	let user = interaction.member;
 	var channelType = "GUILD_TEXT";
-	if (interaction.message.guildId === null){
+	if (interaction.message.guildId === null) {
 		channelType = "DM";
 	}
 	if (user.bot == true) {

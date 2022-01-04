@@ -1,5 +1,6 @@
 [{
     "customName": "DeviceControl",
+    "adminOnly": false,
     "description": "Alter PoE ports",
     "fullFilePath": "/home/mad/devicecontrol.sh",
     "variables": [{
@@ -17,11 +18,13 @@
     ]
 }, {
     "customName": "Annoying Device",
+    "adminOnly": false,
     "description": "PoE cycle 7",
     "fullFilePath": "/home/mad/devicecontrol.sh poe1 cycle 7",
     "variables": []
 }, {
     "customName": "Skynet",
+    "adminOnly": false,
     "description": "Hasta la vista, baby",
     "fullFilePath": "/home/mad/activateSkynet.sh",
     "variables": []

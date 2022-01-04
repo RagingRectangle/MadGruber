@@ -27,7 +27,7 @@ module.exports = {
                 let variableCount = intValues[1] * 1;
                 for (var s in scriptConfig) {
                     if (scriptName === scriptConfig[s]['customName'] && scriptConfig[s]['fullFilePath']) {
-                        Scripts.startScript(interaction, scriptConfig[s], scriptName, variableCount);
+                        Scripts.startScript(interaction, userPerms, scriptConfig[s], scriptName, variableCount);
                     }
                 }
             } else if (interactionID.startsWith('runScript')) {
@@ -35,7 +35,7 @@ module.exports = {
                     interaction.deferUpdate();
                     Scripts.sendScriptList(interaction, 'restart');
                 } else {
-                    Scripts.scriptVariables(interaction);
+                    Scripts.scriptVariables(interaction, userPerms);
                 }
             }
         } //End of scripts
@@ -73,6 +73,17 @@ module.exports = {
         //Scripts
         if (userPerms.includes('scripts')) {
             if (interactionID.startsWith('verifyScript~')) {
+                var scriptName = interaction.message.embeds[0]['title'].replace('Run script: ', '');
+                //Check if admin only
+                if (interaction.message.embeds[0]['title'].endsWith('🔒')) {
+                    scriptName = scriptName.replace('? 🔒', '');
+                    if (!userPerms.includes('admin')) {
+                        console.log(`Non-admin ${interaction.user.username} tried to verify running ${scriptName}`);
+                        return;
+                    }
+                } else {
+                    scriptName = scriptName.slice(0, -1);
+                }
                 interaction.deferUpdate();
                 let runScript = interactionID.replace('verifyScript~', '');
                 if (runScript === 'no') {

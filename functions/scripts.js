@@ -18,8 +18,12 @@ module.exports = {
         var selectList = [];
         scriptList.forEach(script => {
             if (script.fullFilePath !== '') {
+                var label = script.customName;
+                if (script.adminOnly === true) {
+                    label = label.concat(' 🔒');
+                }
                 let listOption = {
-                    label: script.customName,
+                    label: label,
                     description: script.description,
                     value: `${config.serverName}~startScript~${script.customName}~${script.variables.length}`
                 }
@@ -47,7 +51,12 @@ module.exports = {
     }, //End of sendScriptList()
 
 
-    startScript: async function startScript(interaction, script, scriptName, variableCount) {
+    startScript: async function startScript(interaction, userPerms, script, scriptName, variableCount) {
+        //Check if admin only
+        if (script.adminOnly === true && !userPerms.includes('admin')) {
+            console.log(`Non-admin ${interaction.user.username} tried running ${scriptName}`);
+            return;
+        }
         //Check if file exists
         let tempPath = script.fullFilePath.split(' ');
         let fileTest = fileExists.sync(tempPath[0]);
@@ -116,28 +125,30 @@ module.exports = {
     }, //End of startScript()
 
 
-    scriptVariables: async function scriptVariables(interaction) {
+    scriptVariables: async function scriptVariables(interaction, userPerms) {
         let intItems = interaction.values[0].replace(`${config.serverName}~run:`, '').split('~');
         let scriptName = intItems[0];
         let currentVarCounts = intItems[1].replace('var:', '').split('_');
         let varNumber = currentVarCounts[0] * 1 + 1;
         let varNeeded = currentVarCounts[1] * 1;
         var bashVariables = intItems[2].split('^');
-
-        //No more variables needed
-        if (currentVarCounts[0] == currentVarCounts[1]) {
-            if (config.scripts.scriptVerify === false) {
-                module.exports.runScript(interaction, scriptName, bashVariables);
-            } else {
-                module.exports.verifyScript(interaction, scriptName, bashVariables);
-            }
-        }
-        //More variables needed
-        else {
-            for (var s in scriptList) {
-                if (scriptList[s]['customName'] === scriptName) {
+        for (var s in scriptList) {
+            if (scriptList[s]['customName'] === scriptName) {
+                let script = scriptList[s];
+                //Check if admin only
+                if (script.adminOnly === true && !userPerms.includes('admin')) {
+                    console.log(`Non-admin ${interaction.user.username} tried selecting variable for ${scriptName}`);
+                    return;
+                }
+                //No more variables needed
+                if (currentVarCounts[0] == currentVarCounts[1]) {
+                    if (config.scripts.scriptVerify === false) {
+                        module.exports.runScript(interaction, scriptName, bashVariables);
+                    } else {
+                        module.exports.verifyScript(interaction, scriptName, bashVariables);
+                    }
+                } else {
                     interaction.deferUpdate();
-                    let script = scriptList[s];
                     let currentVar = script.variables[varNumber - 1];
                     let varDescription = currentVar['varDescription'];
                     let varOptions = currentVar['varOptions'];
@@ -182,9 +193,9 @@ module.exports = {
                         components: allComponents
                     }).catch(console.error);
                     break;
-                }
-            } //End of s loop
-        } //End of more variables needed
+                } //End of more variables needed
+            } //End of = scriptName 
+        } //End of s loop
     }, //End of scriptVariables()
 
 
@@ -197,8 +208,12 @@ module.exports = {
                     new MessageButton().setCustomId(`${config.serverName}~verifyScript~yes`).setLabel(`Yes`).setStyle("SUCCESS"),
                     new MessageButton().setCustomId(`${config.serverName}~verifyScript~no`).setLabel(`No`).setStyle("DANGER")
                 )
+                var title = `Run script: ${scriptName}?`;
+                if (scriptList[s]['adminOnly'] === true) {
+                    title = title.concat(' 🔒');
+                }
                 interaction.message.channel.send({
-                    embeds: [new MessageEmbed().setTitle('Run the following script?').setDescription(`bash ${scriptList[s]['fullFilePath']} ${variables}`).setColor('0D00CA')],
+                    embeds: [new MessageEmbed().setTitle(title).setDescription(`bash ${scriptList[s]['fullFilePath']} ${variables}`).setColor('0D00CA')],
                     components: [optionRow]
                 }).catch(console.error);
             }
@@ -213,7 +228,6 @@ module.exports = {
         for (var s in scriptList) {
             if (scriptList[s]['customName'] === scriptName) {
                 fullBashCommand = `bash ${scriptList[s]['fullFilePath']} ${variables}`;
-                console.log("fullBash:", fullBashCommand);
             }
         } //End of s loop
         if (fullBashCommand !== '') {

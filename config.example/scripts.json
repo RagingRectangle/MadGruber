@@ -1,5 +1,6 @@
 [{
     "customName": "",
+    "adminOnly": false,
     "description": "",
     "fullFilePath": "",
     "variables": [{
@@ -17,11 +18,13 @@
     ]
 }, {
     "customName": "",
+    "adminOnly": false,
     "description": "",
     "fullFilePath": "",
     "variables": []
 }, {
     "customName": "",
+    "adminOnly": false,
     "description": "",
     "fullFilePath": "",
     "variables": []
