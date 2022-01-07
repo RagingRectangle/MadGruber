@@ -34,7 +34,8 @@
         "onlyRestartBeforeTime": 0
     },
     "scripts": {
-        "scriptVerify": true
+        "scriptVerify": true,
+        "scriptResponseDeleteSeconds": 0
     },
     "madDB": {
         "host": "",

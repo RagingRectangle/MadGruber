@@ -98,7 +98,7 @@ module.exports = {
                     try {
                         shell.exec(fullBashCommand, function (code, output) {
                             var description = `${interaction.message.embeds[0]['description']}\n\n**Response:**\n${output}`;
-                            if (code !== 0){
+                            if (code !== 0) {
                                 description = `${interaction.message.embeds[0]['description']}\n\n**Error Response:**\n${output}`;
                             }
                             interaction.message.edit({
@@ -106,6 +106,9 @@ module.exports = {
                                 components: []
                             }).catch(console.error);
                             console.log(`Ran script: \`${fullBashCommand}\``);
+                            if (config.scripts.scriptResponseDeleteSeconds > 0) {
+                                setTimeout(() => interaction.message.delete().catch(err => console.log("Error deleting script response message:", err)), (config.scripts.scriptResponseDeleteSeconds * 1000));
+                            }
                         });
                     } catch (err) {
                         interaction.message.edit({
@@ -113,6 +116,9 @@ module.exports = {
                             components: []
                         }).catch(console.error);
                         console.log(`Failed to run script: ${fullBashCommand}:`, err);
+                        if (config.scripts.scriptResponseDeleteSeconds > 0) {
+                            setTimeout(() => interaction.message.delete().catch(err => console.log("Error deleting script response message:", err)), (config.scripts.scriptResponseDeleteSeconds * 1000));
+                        }
                     }
                 } //End of yes
             }

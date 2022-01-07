@@ -233,16 +233,30 @@ module.exports = {
         if (fullBashCommand !== '') {
             try {
                 shell.exec(fullBashCommand, function (code, output) {
-                    var description = `Ran script: \`${fullBashCommand}\`\n\n**Response:**\n${output}`;
+                    var description = `\`${fullBashCommand}\`\n\n**Response:**\n${output}`;
                     if (code !== 0) {
-                        description = `Ran script: \`${fullBashCommand}\`\n\n**Error Response:**\n${output}`;
+                        description = `\`${fullBashCommand}\`\n\n**Error Response:**\n${output}`;
                     }
-                    interaction.message.channel.send(description).catch(console.error);
                     console.log(`Ran script: \`${fullBashCommand}\``);
+                    interaction.message.channel.send({
+                        embeds: [new MessageEmbed().setTitle('Ran script:').setDescription(description).setColor('00841E')],
+                    })
+                    .then(msg => {
+                        if (config.scripts.scriptResponseDeleteSeconds > 0) {
+                            setTimeout(() => msg.delete().catch(err => console.log("Error deleting script response message:", err)), (config.scripts.scriptResponseDeleteSeconds * 1000));
+                        }
+                    })
                 })
             } catch (err) {
-                interaction.message.channel.send(`Failed to run script: \`${fullBashCommand}\``).catch(console.error);
                 console.log(`Failed to run script: ${fullBashCommand}:`, err);
+                interaction.message.channel.send({
+                    embeds: [new MessageEmbed().setTitle('Failed to run script:').setDescription(description).setColor('9E0000')],
+                })
+                .then(msg => {
+                    if (config.scripts.scriptResponseDeleteSeconds > 0) {
+                        setTimeout(() => msg.delete().catch(err => console.log("Error deleting script response message:", err)), (config.scripts.scriptResponseDeleteSeconds * 1000));
+                    }
+                })
             }
         }
     }, //End of runScript()
