@@ -37,6 +37,9 @@ module.exports = {
                         buttonList.push(button);
                     }
                 }) //End of response.forEach
+                buttonList.sort(function (a, b) {
+                    return a.label.localeCompare(b.label);
+                });
                 let rowsNeeded = Math.ceil(buttonList.length / 5);
                 let buttonsNeeded = buttonList.length;
                 var buttonCount = 0;

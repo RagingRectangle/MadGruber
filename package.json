@@ -1,6 +1,6 @@
 {
   "name": "madgruber",
-  "version": "dev2.3.0",
+  "version": "dev2.4.0",
   "description": "Discord bot that does the stuffs",
   "main": "madgruber.js",
   "scripts": {
