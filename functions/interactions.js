@@ -73,9 +73,9 @@ module.exports = {
         //Scripts
         if (userPerms.includes('scripts')) {
             if (interactionID.startsWith('verifyScript~')) {
-                var scriptName = interaction.message.embeds[0]['title'].replace('Run script: ', '');
+                var scriptName = interaction.message.content.replace('Run script: ', '');
                 //Check if admin only
-                if (interaction.message.embeds[0]['title'].endsWith('🔒')) {
+                if (interaction.message.content.endsWith('🔒')) {
                     scriptName = scriptName.replace('? 🔒', '');
                     if (!userPerms.includes('admin')) {
                         console.log(`Non-admin ${interaction.user.username} tried to verify running ${scriptName}`);
@@ -87,38 +87,54 @@ module.exports = {
                 interaction.deferUpdate();
                 let runScript = interactionID.replace('verifyScript~', '');
                 if (runScript === 'no') {
-                    interaction.message.edit({
-                        embeds: [new MessageEmbed().setTitle('Did not run script:').setDescription(interaction.message.embeds[0]['description']).setColor('9E0000')],
-                        components: []
-                    }).catch(console.error);
-                    setTimeout(() => interaction.message.delete().catch(err => console.log("Error deleting verify script message:", err)), 10000);
+                    Scripts.sendScriptList(interaction, 'restart');
+                    interaction.message.channel.send({
+                            content: '**Did not run script:**',
+                            embeds: [new MessageEmbed().setDescription(interaction.message.embeds[0]['description']).setColor('9E0000')],
+                            components: []
+                        }).catch(console.error)
+                        .then(msg => {
+                            setTimeout(() => msg.delete().catch(err => console.log("Error deleting verify script message:", err)), 10000);
+                        })
                 } //End of no
                 else if (runScript === 'yes') {
                     let fullBashCommand = interaction.message.embeds[0]['description'];
+                    interaction.message.edit({
+                        content: '**Running script:**',
+                        embeds: [new MessageEmbed().setDescription(`\`${fullBashCommand}\``).setColor('0D00CA')],
+                        components: []
+                    }).catch(console.error);
                     try {
                         shell.exec(fullBashCommand, function (code, output) {
+                            Scripts.sendScriptList(interaction, "restart");
                             var description = `${interaction.message.embeds[0]['description']}\n\n**Response:**\n${output}`;
                             if (code !== 0) {
                                 description = `${interaction.message.embeds[0]['description']}\n\n**Error Response:**\n${output}`;
                             }
-                            interaction.message.edit({
-                                embeds: [new MessageEmbed().setTitle('Ran script:').setDescription(description).setColor('00841E')],
-                                components: []
-                            }).catch(console.error);
                             console.log(`Ran script: \`${fullBashCommand}\``);
-                            if (config.scripts.scriptResponseDeleteSeconds > 0) {
-                                setTimeout(() => interaction.message.delete().catch(err => console.log("Error deleting script response message:", err)), (config.scripts.scriptResponseDeleteSeconds * 1000));
-                            }
+                            interaction.message.channel.send({
+                                    content: '**Ran script:**',
+                                    embeds: [new MessageEmbed().setDescription(description).setColor('00841E')],
+                                    components: []
+                                }).catch(console.error)
+                                .then(msg => {
+                                    if (config.scripts.scriptResponseDeleteSeconds > 0) {
+                                        setTimeout(() => msg.delete().catch(err => console.log("Error deleting script response message:", err)), (config.scripts.scriptResponseDeleteSeconds * 1000));
+                                    }
+                                })
                         });
                     } catch (err) {
-                        interaction.message.edit({
-                            embeds: [new MessageEmbed().setTitle('Failed to run script:').setDescription(interaction.message.embeds[0]['description']).setColor('9E0000')],
-                            components: []
-                        }).catch(console.error);
                         console.log(`Failed to run script: ${fullBashCommand}:`, err);
-                        if (config.scripts.scriptResponseDeleteSeconds > 0) {
-                            setTimeout(() => interaction.message.delete().catch(err => console.log("Error deleting script response message:", err)), (config.scripts.scriptResponseDeleteSeconds * 1000));
-                        }
+                        Scripts.sendScriptList(interaction, "restart");
+                        interaction.message.channel.send({
+                                embeds: [new MessageEmbed().setTitle('Failed to run script:').setDescription(interaction.message.embeds[0]['description']).setColor('9E0000')],
+                                components: []
+                            }).catch(console.error)
+                            .then(msg => {
+                                if (config.scripts.scriptResponseDeleteSeconds > 0) {
+                                    setTimeout(() => msg.delete().catch(err => console.log("Error deleting script response message:", err)), (config.scripts.scriptResponseDeleteSeconds * 1000));
+                                }
+                            })
                     }
                 } //End of yes
             }
