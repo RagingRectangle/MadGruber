@@ -75,6 +75,7 @@ Truncate:
 
 Scripts:
 - **scriptVerify:** Whether or not to verify running script (true/false).
+- **scriptResponseDeleteSeconds:** How long to wait until script response is deleted (Set to 0 to never delete).
 
 madDB:
 - Enter your basic MAD database info. Make sure your user has access if the database is not local.  Leave blank if you don't plan on using the truncate quest feature.

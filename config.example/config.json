@@ -43,14 +43,5 @@
         "password": "",
         "database": "",
         "onlyRestartBeforeTime": ""
-    },
-    "links": [{
-        "label": "",
-        "url": "",
-        "emoji": ""
-    }, {
-        "label": "",
-        "url": "",
-        "emoji": ""
-    }]
+    }
 }
