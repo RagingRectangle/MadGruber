@@ -67,10 +67,10 @@ module.exports = {
             let truncateQuery = `TRUNCATE ${tables[t]}`;
             connection.query(truncateQuery, function (err, results) {
                 if (err) {
-                    console.log(`Error truncating ${config.madDB.database}.${tables[t]}:`, err);
+                    console.log(`(${interaction.user.username}) Error truncating ${config.madDB.database}.${tables[t]}:`, err);
                     bad.push(tables[t]);
                 } else {
-                    console.log(`${config.madDB.database}.${tables[t]} truncated`);
+                    console.log(`${config.madDB.database}.${tables[t]} truncated by ${interaction.user.username}`);
                     good.push(tables[t]);
                     if (tables[t] === 'trs_quest' && config.pm2.mads.length > 0) {
                         let date = new Date();
@@ -98,7 +98,7 @@ module.exports = {
             description = description.concat(`\n\nFailed:\n- ${bad.join('\n- ')}`);
         }
         interaction.message.edit({
-            embeds: [new MessageEmbed().setTitle('Truncate Results:').setDescription(description).setColor(color)],
+            embeds: [new MessageEmbed().setTitle('Truncate Results:').setDescription(description).setColor(color).setFooter(`${interaction.user.username}`)],
             components: []
         }).catch(console.error);
         if (restartMAD === true) {
@@ -139,10 +139,10 @@ module.exports = {
                     let processName = mads[m];
                     pm2.restart(processName, (err, response) => {
                         if (err) {
-                            console.error(`PM2 ${mads[m]} restart error:`, err);
+                            console.error(`(${interaction.user.username}) PM2 ${mads[m]} restart error:`, err);
                             bad.push(mads[m]);
                         } else {
-                            console.log(`${mads[m]} restarted`);
+                            console.log(`${mads[m]} restarted by ${interaction.user.username}`);
                             good.push(mads[m]);
                         }
                     }) //End of pm2.restart
@@ -162,7 +162,7 @@ module.exports = {
             newDescription = newDescription.concat(`Failed:\n- ${bad.join('\n- ')}`);
         }
         interaction.message.edit({
-            embeds: [new MessageEmbed().setTitle('Truncate Results:').setDescription(newDescription).setColor(color)],
+            embeds: [new MessageEmbed().setTitle('Truncate Results:').setDescription(newDescription).setColor(color).setFooter(`${interaction.user.username}`)],
             components: []
         }).catch(console.error);
         //})

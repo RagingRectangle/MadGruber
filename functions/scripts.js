@@ -64,7 +64,7 @@ module.exports = {
         if (fileTest === false) {
             module.exports.sendScriptList(interaction, "restart");
             interaction.deferUpdate();
-            console.log(`Script not found: \`${tempPath[0]}\``);
+            console.log(`(${interaction.user.username}) Script not found: \`${tempPath[0]}\``);
             interaction.message.channel.send(`Script not found: \`${tempPath[0]}\``).catch(console.error);
             return;
         }
@@ -243,13 +243,13 @@ module.exports = {
                     if (code !== 0) {
                         description = `\`${fullBashCommand}\`\n\n**Error Response:**\n${output}`;
                     }
-                    console.log(`Ran script: \`${fullBashCommand}\``);
+                    console.log(`${interaction.user.username} ran script: \`${fullBashCommand}\``);
                     interaction.message.channel.send({
-                            embeds: [new MessageEmbed().setTitle('Ran script:').setDescription(description).setColor('00841E')],
+                            embeds: [new MessageEmbed().setTitle('Ran script:').setDescription(description).setColor('00841E').setFooter(`${interaction.user.username}`)],
                         }).catch(console.error)
                         .then(msg => {
                             if (config.scripts.scriptResponseDeleteSeconds > 0) {
-                                setTimeout(() => msg.delete().catch(err => console.log("Error deleting script response message:", err)), (config.scripts.scriptResponseDeleteSeconds * 1000));
+                                setTimeout(() => msg.delete().catch(err => console.log(`(${interaction.user.username}) Error deleting script response message:`, err)), (config.scripts.scriptResponseDeleteSeconds * 1000));
                             }
                         })
                 })
@@ -257,11 +257,11 @@ module.exports = {
                 console.log(`Failed to run script: ${fullBashCommand}:`, err);
                 module.exports.sendScriptList(interaction, "restart");
                 interaction.message.channel.send({
-                        embeds: [new MessageEmbed().setTitle('Failed to run script:').setDescription(fullBashCommand).setColor('9E0000')],
+                        embeds: [new MessageEmbed().setTitle('Failed to run script:').setDescription(fullBashCommand).setColor('9E0000').setFooter(`${interaction.user.username}`)],
                     }).catch(console.error)
                     .then(msg => {
                         if (config.scripts.scriptResponseDeleteSeconds > 0) {
-                            setTimeout(() => msg.delete().catch(err => console.log("Error deleting script response message:", err)), (config.scripts.scriptResponseDeleteSeconds * 1000));
+                            setTimeout(() => msg.delete().catch(err => console.log(`(${interaction.user.username}) Error deleting script response message:`, err)), (config.scripts.scriptResponseDeleteSeconds * 1000));
                         }
                     })
             }
