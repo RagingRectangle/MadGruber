@@ -105,16 +105,18 @@ module.exports = {
                         components: []
                     }).catch(console.error);
                     try {
-                        shell.exec(fullBashCommand, function (code, output) {
+                        shell.exec(fullBashCommand, function (exitCode, output) {
                             Scripts.sendScriptList(interaction, "restart");
+                            var color = '00841E';
                             var description = `${interaction.message.embeds[0]['description']}\n\n**Response:**\n${output}`;
-                            if (code !== 0) {
+                            if (exitCode !== 0) {
+                                color = '9E0000';
                                 description = `${interaction.message.embeds[0]['description']}\n\n**Error Response:**\n${output}`;
                             }
                             console.log(`${interaction.user.username} ran script: \`${fullBashCommand}\``);
                             interaction.message.channel.send({
                                     content: '**Ran script:**',
-                                    embeds: [new MessageEmbed().setDescription(description).setColor('00841E').setFooter(`${interaction.user.username}`)],
+                                    embeds: [new MessageEmbed().setDescription(description).setColor(color).setFooter(`${interaction.user.username}`)],
                                     components: []
                                 }).catch(console.error)
                                 .then(msg => {

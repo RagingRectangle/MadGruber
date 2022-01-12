@@ -237,15 +237,17 @@ module.exports = {
                 components: []
             }).catch(console.error);
             try {
-                shell.exec(fullBashCommand, function (code, output) {
+                shell.exec(fullBashCommand, function (exitCode, output) {
                     module.exports.sendScriptList(interaction, "restart");
+                    var color = '00841E';
                     var description = `\`${fullBashCommand}\`\n\n**Response:**\n${output}`;
-                    if (code !== 0) {
+                    if (exitCode !== 0) {
+                        color = '9E0000';
                         description = `\`${fullBashCommand}\`\n\n**Error Response:**\n${output}`;
                     }
                     console.log(`${interaction.user.username} ran script: \`${fullBashCommand}\``);
                     interaction.message.channel.send({
-                            embeds: [new MessageEmbed().setTitle('Ran script:').setDescription(description).setColor('00841E').setFooter(`${interaction.user.username}`)],
+                            embeds: [new MessageEmbed().setTitle('Ran script:').setDescription(description).setColor(color).setFooter(`${interaction.user.username}`)],
                         }).catch(console.error)
                         .then(msg => {
                             if (config.scripts.scriptResponseDeleteSeconds > 0) {
