@@ -141,8 +141,8 @@ module.exports = {
                                     embeds: [new MessageEmbed().setDescription(`Failed to restart ${processName} process.`).setColor('9E0000').setFooter(`${interaction.user.username}`)],
                                 }).catch(console.error)
                                 .then(msg => {
-                                    if (config.pm2.pm2MessageDeleteSeconds > 0) {
-                                        setTimeout(() => msg.delete().catch(err => console.log(`(${interaction.user.username}) Error deleting PM2 restart response:`, err)), (config.pm2.pm2MessageDeleteSeconds * 1000));
+                                    if (config.pm2.pm2ResponseDeleteSeconds > 0) {
+                                        setTimeout(() => msg.delete().catch(err => console.log(`(${interaction.user.username}) Error deleting PM2 restart response:`, err)), (config.pm2.pm2ResponseDeleteSeconds * 1000));
                                     }
                                 });
                         } else {
@@ -151,8 +151,8 @@ module.exports = {
                                     embeds: [new MessageEmbed().setDescription(`PM2 process restarted: ${processName}`).setColor('00841E').setFooter(`${interaction.user.username}`)],
                                 }).catch(console.error)
                                 .then(msg => {
-                                    if (config.pm2.pm2MessageDeleteSeconds > 0) {
-                                        setTimeout(() => msg.delete().catch(err => console.log(`(${interaction.user.username}) Error deleting PM2 restart response:`, err)), (config.pm2.pm2MessageDeleteSeconds * 1000));
+                                    if (config.pm2.pm2ResponseDeleteSeconds > 0) {
+                                        setTimeout(() => msg.delete().catch(err => console.log(`(${interaction.user.username}) Error deleting PM2 restart response:`, err)), (config.pm2.pm2ResponseDeleteSeconds * 1000));
                                     }
                                 });
                         }
@@ -166,8 +166,8 @@ module.exports = {
                                     embeds: [new MessageEmbed().setDescription(`Failed to start ${processName} process.`).setColor('9E0000').setFooter(`${interaction.user.username}`)],
                                 }).catch(console.error)
                                 .then(msg => {
-                                    if (config.pm2.pm2MessageDeleteSeconds > 0) {
-                                        setTimeout(() => msg.delete().catch(err => console.log(`(${interaction.user.username}) Error deleting PM2 start response:`, err)), (config.pm2.pm2MessageDeleteSeconds * 1000));
+                                    if (config.pm2.pm2ResponseDeleteSeconds > 0) {
+                                        setTimeout(() => msg.delete().catch(err => console.log(`(${interaction.user.username}) Error deleting PM2 start response:`, err)), (config.pm2.pm2ResponseDeleteSeconds * 1000));
                                     }
                                 });
                         } else {
@@ -176,8 +176,8 @@ module.exports = {
                                     embeds: [new MessageEmbed().setDescription(`PM2 process started: ${processName}`).setColor('00841E').setFooter(`${interaction.user.username}`)],
                                 }).catch(console.error)
                                 .then(msg => {
-                                    if (config.pm2.pm2MessageDeleteSeconds > 0) {
-                                        setTimeout(() => msg.delete().catch(err => console.log(`(${interaction.user.username}) Error deleting PM2 start response:`, err)), (config.pm2.pm2MessageDeleteSeconds * 1000));
+                                    if (config.pm2.pm2ResponseDeleteSeconds > 0) {
+                                        setTimeout(() => msg.delete().catch(err => console.log(`(${interaction.user.username}) Error deleting PM2 start response:`, err)), (config.pm2.pm2ResponseDeleteSeconds * 1000));
                                     }
                                 });
                         }
@@ -191,8 +191,8 @@ module.exports = {
                                     embeds: [new MessageEmbed().setDescription(`Failed to stop ${processName} PM2 process.`).setColor('9E0000').setFooter(`${interaction.user.username}`)],
                                 }).catch(console.error)
                                 .then(msg => {
-                                    if (config.pm2.pm2MessageDeleteSeconds > 0) {
-                                        setTimeout(() => msg.delete().catch(err => console.log(`(${interaction.user.username}) Error deleting PM2 stop response:`, err)), (config.pm2.pm2MessageDeleteSeconds * 1000));
+                                    if (config.pm2.pm2ResponseDeleteSeconds > 0) {
+                                        setTimeout(() => msg.delete().catch(err => console.log(`(${interaction.user.username}) Error deleting PM2 stop response:`, err)), (config.pm2.pm2ResponseDeleteSeconds * 1000));
                                     }
                                 });
                         } else {
@@ -201,8 +201,8 @@ module.exports = {
                                     embeds: [new MessageEmbed().setDescription(`PM2 process stopped: ${processName}`).setColor('00841E').setFooter(`${interaction.user.username}`)],
                                 }).catch(console.error)
                                 .then(msg => {
-                                    if (config.pm2.pm2MessageDeleteSeconds > 0) {
-                                        setTimeout(() => msg.delete().catch(err => console.log(`(${interaction.user.username}) Error deleting PM2 stop response:`, err)), (config.pm2.pm2MessageDeleteSeconds * 1000));
+                                    if (config.pm2.pm2ResponseDeleteSeconds > 0) {
+                                        setTimeout(() => msg.delete().catch(err => console.log(`(${interaction.user.username}) Error deleting PM2 stop response:`, err)), (config.pm2.pm2ResponseDeleteSeconds * 1000));
                                     }
                                 });
                         }
