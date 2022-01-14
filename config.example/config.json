@@ -15,7 +15,8 @@
     },
     "pm2": {
         "mads": [""],
-        "ignore": [""]
+        "ignore": [""],
+        "pm2ResponseDeleteSeconds": 0
     },
     "roles": {
         "sendRoleMessage": true,

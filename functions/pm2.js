@@ -137,10 +137,24 @@ module.exports = {
                     pm2.restart(processName, (err, response) => {
                         if (err) {
                             console.log(`${interaction.user.username} failed to restart ${processName} PM2 process.`, err);
-                            interaction.message.channel.send(`Failed to restart ${processName} PM2 process.`).catch(console.error);
+                            interaction.message.channel.send({
+                                    embeds: [new MessageEmbed().setDescription(`Failed to restart ${processName} process.`).setColor('9E0000').setFooter(`${interaction.user.username}`)],
+                                }).catch(console.error)
+                                .then(msg => {
+                                    if (config.pm2.pm2MessageDeleteSeconds > 0) {
+                                        setTimeout(() => msg.delete().catch(err => console.log(`(${interaction.user.username}) Error deleting PM2 restart response:`, err)), (config.pm2.pm2MessageDeleteSeconds * 1000));
+                                    }
+                                });
                         } else {
                             console.log(`${processName} restarted by ${interaction.user.username}`);
-                            interaction.message.channel.send(`PM2 process restarted: ${processName}`).catch(console.error);
+                            interaction.message.channel.send({
+                                    embeds: [new MessageEmbed().setDescription(`PM2 process restarted: ${processName}`).setColor('00841E').setFooter(`${interaction.user.username}`)],
+                                }).catch(console.error)
+                                .then(msg => {
+                                    if (config.pm2.pm2MessageDeleteSeconds > 0) {
+                                        setTimeout(() => msg.delete().catch(err => console.log(`(${interaction.user.username}) Error deleting PM2 restart response:`, err)), (config.pm2.pm2MessageDeleteSeconds * 1000));
+                                    }
+                                });
                         }
                     });
                 } else if (interactionID.startsWith('start~')) {
@@ -148,10 +162,24 @@ module.exports = {
                     pm2.start(processName, (err, response) => {
                         if (err) {
                             console.log(`${interaction.user.username} failed to start ${processName} PM2 process.`, err);
-                            interaction.message.channel.send(`Failed to start ${processName} PM2 process.`).catch(console.error);
+                            interaction.message.channel.send({
+                                    embeds: [new MessageEmbed().setDescription(`Failed to start ${processName} process.`).setColor('9E0000').setFooter(`${interaction.user.username}`)],
+                                }).catch(console.error)
+                                .then(msg => {
+                                    if (config.pm2.pm2MessageDeleteSeconds > 0) {
+                                        setTimeout(() => msg.delete().catch(err => console.log(`(${interaction.user.username}) Error deleting PM2 start response:`, err)), (config.pm2.pm2MessageDeleteSeconds * 1000));
+                                    }
+                                });
                         } else {
                             console.log(`${processName} started by ${interaction.user.username}`);
-                            interaction.message.channel.send(`PM2 process started: ${processName}`).catch(console.error);
+                            interaction.message.channel.send({
+                                    embeds: [new MessageEmbed().setDescription(`PM2 process started: ${processName}`).setColor('00841E').setFooter(`${interaction.user.username}`)],
+                                }).catch(console.error)
+                                .then(msg => {
+                                    if (config.pm2.pm2MessageDeleteSeconds > 0) {
+                                        setTimeout(() => msg.delete().catch(err => console.log(`(${interaction.user.username}) Error deleting PM2 start response:`, err)), (config.pm2.pm2MessageDeleteSeconds * 1000));
+                                    }
+                                });
                         }
                     });
                 } else if (interactionID.startsWith('stop~')) {
@@ -159,10 +187,24 @@ module.exports = {
                     pm2.stop(processName, (err, response) => {
                         if (err) {
                             console.log(`${interaction.user.username} failed to stop ${processName} PM2 process.`, err);
-                            interaction.message.channel.send(`Failed to stop ${processName} PM2 process.`).catch(console.error);
+                            interaction.message.channel.send({
+                                    embeds: [new MessageEmbed().setDescription(`Failed to stop ${processName} PM2 process.`).setColor('9E0000').setFooter(`${interaction.user.username}`)],
+                                }).catch(console.error)
+                                .then(msg => {
+                                    if (config.pm2.pm2MessageDeleteSeconds > 0) {
+                                        setTimeout(() => msg.delete().catch(err => console.log(`(${interaction.user.username}) Error deleting PM2 stop response:`, err)), (config.pm2.pm2MessageDeleteSeconds * 1000));
+                                    }
+                                });
                         } else {
                             console.log(`${processName} stopped by ${interaction.user.username}`);
-                            interaction.message.channel.send(`PM2 process stopped: ${processName}`).catch(console.error);
+                            interaction.message.channel.send({
+                                    embeds: [new MessageEmbed().setDescription(`PM2 process stopped: ${processName}`).setColor('00841E').setFooter(`${interaction.user.username}`)],
+                                }).catch(console.error)
+                                .then(msg => {
+                                    if (config.pm2.pm2MessageDeleteSeconds > 0) {
+                                        setTimeout(() => msg.delete().catch(err => console.log(`(${interaction.user.username}) Error deleting PM2 stop response:`, err)), (config.pm2.pm2MessageDeleteSeconds * 1000));
+                                    }
+                                });
                         }
                     });
                 }
