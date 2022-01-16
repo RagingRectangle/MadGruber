@@ -13,6 +13,7 @@ const client = new Client({
 });
 const fs = require('fs');
 const pm2 = require('pm2');
+const GenerateMadInfo = require('./functions/generateMadInfo.js');
 const Scripts = require('./functions/scripts.js');
 const Queries = require('./functions/queries.js');
 const Interactions = require('./functions/interactions.js');
@@ -33,6 +34,10 @@ roleConfig.forEach(role => {
 
 client.on('ready', () => {
 	console.log("MadGruber Bot Logged In");
+	//Generate database info
+	if (config.madDB.host){
+		GenerateMadInfo.generate();
+	}
 });
 
 
