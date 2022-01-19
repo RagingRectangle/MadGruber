@@ -20,6 +20,7 @@ const Interactions = require('./functions/interactions.js');
 const Pm2Buttons = require('./functions/pm2.js');
 const Truncate = require('./functions/truncate.js');
 const Links = require('./functions/links.js');
+const Devices = require('./functions/devices.js');
 const Roles = require('./functions/roles.js');
 const Help = require('./functions/help.js');
 const config = require('./config/config.json');
@@ -35,7 +36,7 @@ roleConfig.forEach(role => {
 client.on('ready', () => {
 	console.log("MadGruber Bot Logged In");
 	//Generate database info
-	if (config.madDB.host){
+	if (config.madDB.host) {
 		GenerateMadInfo.generate();
 	}
 });
@@ -85,7 +86,7 @@ client.on('messageCreate', async (receivedMessage) => {
 		}
 	}
 	//Run Queries
-	else if (config.discord.madQueryCommand && message === `${config.discord.prefix}${config.discord.madQueryCommand}`) {
+	else if (config.madDB.host && config.discord.madQueryCommand && message === `${config.discord.prefix}${config.discord.madQueryCommand}`) {
 		if (userPerms.includes('admin') || userPerms.includes('queries')) {
 			Queries.queries(receivedMessage);
 		}
@@ -94,6 +95,11 @@ client.on('messageCreate', async (receivedMessage) => {
 	else if (config.discord.linksCommand && message === `${config.discord.prefix}${config.discord.linksCommand}`) {
 		if (userPerms.includes('admin') || userPerms.includes('links')) {
 			Links.links(receivedMessage);
+		}
+	} //Device Info
+	else if (config.madDB.host && config.discord.devicesCommand && message === `${config.discord.prefix}${config.discord.devicesCommand}`) {
+		if (userPerms.includes('admin') || userPerms.includes('deviceInfoControl') || userPerms.includes('deviceInfo')) {
+			Devices.deviceStatus(receivedMessage);
 		}
 	} //Help Menu
 	else if (config.discord.helpCommand && receivedMessage.channel.type !== "DM" && message === `${config.discord.prefix}${config.discord.helpCommand}`) {

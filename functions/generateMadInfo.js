@@ -24,7 +24,7 @@ module.exports = {
             let deviceQuery = `SELECT * FROM settings_device`;
             connection.query(deviceQuery, function (err, results) {
                 if (err) {
-                    console.log("Walker Query Error:", err);
+                    console.log("Device Query Error:", err);
                     connection.end();
                 } else {
                     var devices = {};

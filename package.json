@@ -1,6 +1,6 @@
 {
   "name": "madgruber",
-  "version": "dev2.8.0",
+  "version": "dev2.9.0",
   "description": "Discord bot that does the stuffs",
   "main": "madgruber.js",
   "scripts": {
@@ -20,8 +20,11 @@
     "discord.js": "13.3.1",
     "file-exists": "^5.0.1",
     "fs": "0.0.1-security",
+    "moment": "^2.29.1",
     "mysql": "^2.18.1",
     "pm2": "^5.1.2",
-    "shelljs": "^0.8.4"
+    "quickchart-js": "^2.0.3",
+    "shelljs": "^0.8.4",
+    "sort-by": "^1.2.0"
   }
 }

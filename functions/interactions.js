@@ -14,6 +14,7 @@ const Pm2Buttons = require('./pm2.js');
 const Truncate = require('./truncate.js');
 const Scripts = require('./scripts.js');
 const Queries = require('./queries.js');
+const Devices = require('./devices.js');
 const config = require('../config/config.json');
 const scriptConfig = require('../config/scripts.json');
 
@@ -177,6 +178,15 @@ module.exports = {
                 }
             } //End of run truncate
         } //End of truncate
+
+        //Devices
+        if (userPerms.includes('deviceInfoControl') || userPerms.includes('deviceInfo')) {
+            if (interactionID.startsWith('deviceInfo~')) {
+                interaction.deferUpdate();
+                let deviceID = interactionID.replace('deviceInfo~', '');
+                Devices.getDeviceInfo(interaction, deviceID);
+            }
+        } //End of devices
 
     }, //End of buttonInteraction()
 }
