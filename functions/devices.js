@@ -72,11 +72,10 @@ module.exports = {
                 }); //End of forEach
                 instanceList = Array.from(new Set(instanceList));
                 buttonArray.sort(sortBy('name'));
-                var contentTxt = 'Status of';
                 //Split by instance
                 instanceList.forEach(instance => {
+                    var contentTxt = 'Status of';
                     var instanceButtons = [];
-                    var inst2 = [];
                     buttonArray.forEach(buttonObj => {
                         if (instance === buttonObj.instance) {
                             instanceButtons.push(buttonObj.button);
@@ -99,11 +98,16 @@ module.exports = {
                             messageComponents.push(buttonRow);
                         } //End of n loop
                         receivedMessage.channel.send({
-                            content: `**${contentTxt} ${instance} devices:**`,
-                            components: messageComponents
-                        }).catch(console.error);
-                        contentTxt = 'More';
-                        let tempButtons = instanceButtons.slice(10);
+                                content: `**${contentTxt} ${instance} devices:**`,
+                                components: messageComponents
+                            }).catch(console.error)
+                            .then(msg => {
+                                if (config.devices.statusButtonsDeleteMinutes > 0) {
+                                    setTimeout(() => msg.delete().catch(err => console.log(`Error deleting device status message:`, err)), (config.devices.statusButtonsDeleteMinutes * 1000 * 60));
+                                }
+                            })
+                        contentTxt = '‎';
+                        let tempButtons = instanceButtons.slice(25);
                         instanceButtons = tempButtons;
                     } //End of message m loop
                 }) //End of forEach(instance)
@@ -130,7 +134,7 @@ module.exports = {
             let hoursSinceLastSeen = timeDiffLastSeen / (1000 * 3600) + config.timezoneOffsetHours;
             let minutesSinceLastSeen = (hoursSinceLastSeen * 60).toFixed(2);
             let area = `**- Area:** ${dbInfo.areas[device.area_id]['name']} (${dbInfo.areas[device.area_id]['mode']})\n`;
-            var paused = deviceID = instance = restartInfo = rebootInfo = login = '';
+            var paused = deviceID = instance = restartInfo = rebootInfo = loginInfo = '';
             //Running well
             var color = '00841E';
             //If idle
@@ -156,10 +160,10 @@ module.exports = {
             if (config.devices.displayOptions.rebootInfo === true) {
                 rebootInfo = `**- Last Reboot:** ${moment(device.lastPogoReboot).from(moment())}\n**- Reboot Count:** ${device.globalrebootcount}\n`;
             }
-            if (config.devices.displayOptions.login === true) {
-                login = `**- Login Type:** ${dbInfo.devices[device.device_id]['loginType']}\n**- Login Account:** ${dbInfo.devices[device.device_id]['loginAccount']}`;
+            if (config.devices.displayOptions.loginInfo === true) {
+                loginInfo = `**- Login Type:** ${dbInfo.devices[device.device_id]['loginType']}\n**- Login Account:** ${dbInfo.devices[device.device_id]['loginAccount']}`;
             }
-            let description = `${deviceID}${instance}${paused}${area}${lastSeen}${restartInfo}${rebootInfo}${login}`;
+            let description = `${deviceID}${instance}${paused}${area}${lastSeen}${restartInfo}${rebootInfo}${loginInfo}`;
             interaction.message.channel.send({
                     embeds: [new MessageEmbed().setTitle(`${dbInfo.devices[device.device_id]['name']} Info:`).setDescription(`${description}`).setColor(color).setFooter(`${interaction.user.username}`)],
                     components: []

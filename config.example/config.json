@@ -50,13 +50,14 @@
     "devices": {
         "noProtoMinutes": 20,
         "infoMessageDeleteSeconds": 0,
+        "statusButtonsDeleteMinutes": 0,
         "buttonLabelRemove": ["ATV"],
         "displayOptions": {
             "deviceID": true,
             "instance": true,
             "restartInfo": true,
             "rebootInfo": true,
-            "login": true
+            "loginInfo": true
         }
     }
 }
