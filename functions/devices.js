@@ -130,9 +130,9 @@ module.exports = {
         connection.end();
 
         async function parseDeviceInfo(device) {
-            let lastSeen = `**- Last Seen:** ${moment(device.lastProtoDateTime).from(moment().add(config.timezoneOffsetHours * 1, 'hours'))}\n`;
+            let lastSeen = `**- Last Seen:** ${moment(device.lastProtoDateTime).from(moment())}\n`;
             let timeDiffLastSeen = Math.abs(Date.now() - Date.parse(device.lastProtoDateTime));
-            let hoursSinceLastSeen = timeDiffLastSeen / (1000 * 3600) + config.timezoneOffsetHours;
+            let hoursSinceLastSeen = timeDiffLastSeen / (1000 * 3600);
             let minutesSinceLastSeen = (hoursSinceLastSeen * 60).toFixed(2);
             let area = `**- Area:** ${dbInfo.areas[device.area_id]['name']} (${dbInfo.areas[device.area_id]['mode']})\n`;
             var paused = deviceID = instance = restartInfo = rebootInfo = loginInfo = '';
