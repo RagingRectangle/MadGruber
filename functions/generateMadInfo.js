@@ -24,7 +24,7 @@ module.exports = {
             let deviceQuery = `SELECT * FROM settings_device`;
             connection.query(deviceQuery, function (err, results) {
                 if (err) {
-                    console.log("Device Query Error:", err);
+                    console.log("Walker Query Error:", err);
                     connection.end();
                 } else {
                     var devices = {};
@@ -32,7 +32,8 @@ module.exports = {
                         let deviceObj = {
                             name: device.name,
                             instance_id: device.instance_id,
-                            login: device.ggl_login_mail,
+                            loginType: device.logintype,
+                            loginAccount: device.ggl_login_mail,
                             mac: device.mac_address
                         }
                         devices[device.device_id] = deviceObj;

@@ -123,6 +123,7 @@ module.exports = {
             }
         }) //End of query
         connection.end();
+
         async function parseDeviceInfo(device) {
             let lastSeen = `**- Last Seen:** ${moment(device.lastProtoDateTime).from(moment().add(config.timezoneOffsetHours * 1, 'hours'))}\n`;
             let timeDiffLastSeen = Math.abs(Date.now() - Date.parse(device.lastProtoDateTime));
@@ -156,7 +157,7 @@ module.exports = {
                 rebootInfo = `**- Last Reboot:** ${moment(device.lastPogoReboot).from(moment())}\n**- Reboot Count:** ${device.globalrebootcount}\n`;
             }
             if (config.devices.displayOptions.login === true) {
-                login = `**- Login:** ${dbInfo.devices[device.device_id['login']]}\n`;
+                login = `**- Login Type:** ${dbInfo.devices[device.device_id]['loginType']}\n**- Login Account:** ${dbInfo.devices[device.device_id]['loginAccount']}`;
             }
             let description = `${deviceID}${instance}${paused}${area}${lastSeen}${restartInfo}${rebootInfo}${login}`;
             interaction.message.channel.send({
