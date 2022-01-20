@@ -74,7 +74,7 @@ module.exports = {
                 buttonArray.sort(sortBy('name'));
                 //Split by instance
                 instanceList.forEach(instance => {
-                    var contentTxt = 'Status of';
+                    var content = `**Status of ${instance} devices:**`;
                     var instanceButtons = [];
                     buttonArray.forEach(buttonObj => {
                         if (instance === buttonObj.instance) {
@@ -87,6 +87,7 @@ module.exports = {
                         let rowsNeeded = Math.ceil(buttonsNeeded / 5);
                         var buttonCount = 0;
                         var messageComponents = [];
+
                         for (var n = 0; n < rowsNeeded && n < 4; n++) {
                             var buttonRow = new MessageActionRow();
                             for (var r = 0; r < 5; r++) {
@@ -98,7 +99,7 @@ module.exports = {
                             messageComponents.push(buttonRow);
                         } //End of n loop
                         receivedMessage.channel.send({
-                                content: `**${contentTxt} ${instance} devices:**`,
+                                content: content,
                                 components: messageComponents
                             }).catch(console.error)
                             .then(msg => {
@@ -106,7 +107,7 @@ module.exports = {
                                     setTimeout(() => msg.delete().catch(err => console.log(`Error deleting device status message:`, err)), (config.devices.statusButtonsDeleteMinutes * 1000 * 60));
                                 }
                             })
-                        contentTxt = '‎';
+                        content = '‎';
                         let tempButtons = instanceButtons.slice(25);
                         instanceButtons = tempButtons;
                     } //End of message m loop
