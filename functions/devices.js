@@ -156,7 +156,7 @@ module.exports = {
                 rebootInfo = `**- Last Reboot:** ${moment(device.lastPogoReboot).from(moment())}\n**- Reboot Count:** ${device.globalrebootcount}\n`;
             }
             if (config.devices.displayOptions.login === true) {
-                login = `**- Login:** ${device.login}\n`;
+                login = `**- Login:** ${dbInfo.devices[device.device_id['login']]}\n`;
             }
             let description = `${deviceID}${instance}${paused}${area}${lastSeen}${restartInfo}${rebootInfo}${login}`;
             interaction.message.channel.send({
