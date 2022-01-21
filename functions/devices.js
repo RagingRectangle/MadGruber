@@ -118,6 +118,7 @@ module.exports = {
     }, //End of deviceStatus()
 
     getDeviceInfo: async function getDeviceInfo(interaction, deviceID) {
+        let dbInfo = require('../MAD_Database_Info.json');
         let connection = mysql.createConnection(config.madDB);
         let deviceQuery = `SELECT * FROM trs_status WHERE device_id = "${deviceID}"`;
         connection.query(deviceQuery, function (err, deviceResults) {
