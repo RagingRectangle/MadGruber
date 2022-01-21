@@ -11,10 +11,10 @@ const fs = require('fs');
 const mysql = require('mysql');
 const moment = require('moment');
 const config = require('../config/config.json');
-const dbInfo = require('../MAD_Database_Info.json');
 
 module.exports = {
     deviceStatus: async function deviceStatus(receivedMessage) {
+        let dbInfo = require('../MAD_Database_Info.json');
         console.log(`${receivedMessage.author.username} requested the status of all devices`);
         let connection = mysql.createConnection(config.madDB);
         let statusQuery = `SELECT * FROM trs_status`;
