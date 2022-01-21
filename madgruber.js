@@ -113,7 +113,7 @@ client.on('messageCreate', async (receivedMessage) => {
 		}
 	}
 	//No Proto Devices
-	else if (config.madDB.host && config.discord.noProtoDevicesCommand && message === `${config.discord.prefix}${config.discord.noProtoDevicesCommand}`) {
+	else if (config.madDB.host && config.discord.noProtoCommand && message === `${config.discord.prefix}${config.discord.noProtoCommand}`) {
 		if (userPerms.includes('admin') || userPerms.includes('deviceInfoControl') || userPerms.includes('deviceInfo')) {
 			Devices.noProtoDevices(client, receivedMessage, 'search');
 		}
