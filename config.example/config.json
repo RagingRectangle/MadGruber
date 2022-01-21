@@ -12,7 +12,8 @@
         "scriptCommand": "scripts",
         "madQueryCommand": "mad",
         "linksCommand": "links",
-        "devicesCommand": "devices"
+        "devicesCommand": "devices",
+        "noProtoCommand": "noproto"
     },
     "pm2": {
         "mads": [""],
@@ -49,6 +50,9 @@
     },
     "devices": {
         "noProtoMinutes": 20,
+        "noProtoCheckMinutes": 20,
+        "noProtoChannelID": "",
+        "checkDeleteMinutes": 20,
         "infoMessageDeleteSeconds": 0,
         "statusButtonsDeleteMinutes": 0,
         "buttonLabelRemove": ["ATV"],

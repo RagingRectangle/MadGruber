@@ -13,6 +13,7 @@ const client = new Client({
 });
 const fs = require('fs');
 const pm2 = require('pm2');
+const CronJob = require('./node_modules/cron/lib/cron.js').CronJob;
 const GenerateMadInfo = require('./functions/generateMadInfo.js');
 const Scripts = require('./functions/scripts.js');
 const Queries = require('./functions/queries.js');
@@ -38,6 +39,14 @@ client.on('ready', () => {
 	//Generate database info
 	if (config.madDB.host) {
 		GenerateMadInfo.generate();
+	}
+	//No Proto Checker
+	if (config.madDB.host && config.devices.noProtoCheckMinutes > 0 && config.devices.noProtoChannelID !== "") {
+		var CronJob = require('cron').CronJob;
+		var job = new CronJob(`*/${config.devices.noProtoCheckMinutes} * * * *`, function () {
+			Devices.noProtoDevices(client, '', 'cron');
+		}, null, true, null);
+		job.start();
 	}
 });
 
@@ -96,12 +105,20 @@ client.on('messageCreate', async (receivedMessage) => {
 		if (userPerms.includes('admin') || userPerms.includes('links')) {
 			Links.links(receivedMessage);
 		}
-	} //Device Info
+	}
+	//Device Info
 	else if (config.madDB.host && config.discord.devicesCommand && message === `${config.discord.prefix}${config.discord.devicesCommand}`) {
 		if (userPerms.includes('admin') || userPerms.includes('deviceInfoControl') || userPerms.includes('deviceInfo')) {
 			Devices.deviceStatus(receivedMessage);
 		}
-	} //Help Menu
+	}
+	//No Proto Devices
+	else if (config.madDB.host && config.discord.noProtoDevicesCommand && message === `${config.discord.prefix}${config.discord.noProtoDevicesCommand}`) {
+		if (userPerms.includes('admin') || userPerms.includes('deviceInfoControl') || userPerms.includes('deviceInfo')) {
+			Devices.noProtoDevices(client, receivedMessage, 'search');
+		}
+	}
+	//Help Menu
 	else if (config.discord.helpCommand && receivedMessage.channel.type !== "DM" && message === `${config.discord.prefix}${config.discord.helpCommand}`) {
 		Help.helpMenu(client, receivedMessage);
 	}

@@ -1,6 +1,6 @@
 {
   "name": "madgruber",
-  "version": "dev2.10.4",
+  "version": "dev2.11.0",
   "description": "Discord bot that does the stuffs",
   "main": "madgruber.js",
   "scripts": {
@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/RagingRectangle/MadGruber#readme",
   "dependencies": {
+    "cron": "^1.8.2",
     "discord.js": "13.3.1",
     "file-exists": "^5.0.1",
     "fs": "0.0.1-security",

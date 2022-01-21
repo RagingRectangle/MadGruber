@@ -74,7 +74,7 @@ module.exports = {
                 buttonArray.sort(sortBy('name'));
                 //Split by instance
                 instanceList.forEach(instance => {
-                    var content = `**Status of ${instance} devices:**`;
+                    var content = `**Status of ${instance} Devices:**`;
                     var instanceButtons = [];
                     buttonArray.forEach(buttonObj => {
                         if (instance === buttonObj.instance) {
@@ -87,7 +87,6 @@ module.exports = {
                         let rowsNeeded = Math.ceil(buttonsNeeded / 5);
                         var buttonCount = 0;
                         var messageComponents = [];
-
                         for (var n = 0; n < rowsNeeded && n < 4; n++) {
                             var buttonRow = new MessageActionRow();
                             for (var r = 0; r < 5; r++) {
@@ -117,6 +116,126 @@ module.exports = {
         connection.end();
     }, //End of deviceStatus()
 
+
+    noProtoDevices: async function noProtoDevices(client, receivedMessage, type) {
+        let postChannel = await client.channels.fetch('921669404142489641');
+        let dbInfo = require('../MAD_Database_Info.json');
+        if (type === 'search') {
+            console.log(`${receivedMessage.author.username} requested the status of all noProto devices`);
+        }
+        let connection = mysql.createConnection(config.madDB);
+        let statusQuery = `SELECT * FROM trs_status`;
+        connection.query(statusQuery, function (err, results) {
+            if (err) {
+                console.log("noProto Status Query Error:", err);
+            } else {
+                var instanceList = [];
+                var sortBy = require('sort-by'),
+                    buttonArray = [];
+                results.forEach(device => {
+                    let minutesSinceSeen = ((Math.abs(Date.now() - Date.parse(device.lastProtoDateTime)) / (1000 * 3600)) * 60).toFixed(0);
+                    var deviceName = dbInfo.devices[device.device_id]['name'];
+                    for (var b = 0; b < config.devices.buttonLabelRemove.length; b++) {
+                        let remove = config.devices.buttonLabelRemove[b];
+                        if (deviceName.includes(remove)) {
+                            deviceName = deviceName.replace(remove, '');
+                            break;
+                        }
+                    } //End of b loop
+                    if (minutesSinceSeen > config.devices.noProtoMinutes) {
+                        instanceList.push(dbInfo.instances[device.instance_id]);
+                        var buttonStyle = 'DANGER';
+                        //If idle
+                        if (device.idle === 1) {
+                            buttonStyle = 'PRIMARY';
+                            //If paused
+                            if (dbInfo.areas[device.area_id]['mode'] !== 'idle') {
+                                buttonStyle = 'SECONDARY';
+                            }
+                        }
+                        var buttonLabel = `${deviceName} (${minutesSinceSeen}m)`;
+                        if (Math.round(minutesSinceSeen) > 119) {
+                            let hoursSince = (Math.round(minutesSinceSeen) / 60).toFixed(0);
+                            buttonLabel = `${deviceName} (${hoursSince}h)`;
+                            if (hoursSince > 47) {
+                                let daysSince = (Math.round(hoursSince / 24)).toFixed(0);
+                                buttonLabel = `${deviceName} (${daysSince}d)`;
+                            }
+                        }
+                        let buttonID = `${config.serverName}~deviceInfo~${device.device_id}`;
+                        let button = new MessageButton().setCustomId(buttonID).setLabel(buttonLabel).setStyle(buttonStyle);
+                        let buttonObj = {
+                            name: deviceName,
+                            instance: dbInfo.instances[device.instance_id],
+                            button: button
+                        }
+                        buttonArray.push(buttonObj);
+                    } //End of noProto breach
+                }); //End of forEach(device)
+                instanceList = Array.from(new Set(instanceList));
+                buttonArray.sort(sortBy('name'));
+                //Split by instance
+                instanceList.forEach(instance => {
+                    var content = `**${instance} No Proto Devices:**`;
+                    var instanceButtons = [];
+                    buttonArray.forEach(buttonObj => {
+                        if (instance === buttonObj.instance) {
+                            instanceButtons.push(buttonObj.button);
+                        }
+                    }) //End of forEach(buttonObj)
+                    let messagesNeeded = Math.ceil(instanceButtons.length / 25);
+                    for (var m = 0; m < messagesNeeded; m++) {
+                        let buttonsNeeded = Math.min(25, instanceButtons.length);
+                        let rowsNeeded = Math.ceil(buttonsNeeded / 5);
+                        var buttonCount = 0;
+                        var messageComponents = [];
+                        for (var n = 0; n < rowsNeeded && n < 4; n++) {
+                            var buttonRow = new MessageActionRow();
+                            for (var r = 0; r < 5; r++) {
+                                if (buttonCount < buttonsNeeded) {
+                                    buttonRow.addComponents(instanceButtons[buttonCount]);
+                                    buttonCount++;
+                                }
+                            } //End of r loop
+                            messageComponents.push(buttonRow);
+                        } //End of n loop
+                        if (type === 'search') {
+                            receivedMessage.channel.send({
+                                    content: content,
+                                    components: messageComponents
+                                }).catch(console.error)
+                                .then(msg => {
+                                    if (config.devices.statusButtonsDeleteMinutes > 0) {
+                                        setTimeout(() => msg.delete().catch(err => console.log(`Error deleting noProto status message:`, err)), (config.devices.statusButtonsDeleteMinutes * 1000 * 60));
+                                    }
+                                })
+                        } //End of search
+                        else if (type === 'cron') {
+                            try {
+                                postChannel.send({
+                                        content: content,
+                                        components: messageComponents
+                                    }).catch(console.error)
+                                    .then(msg => {
+                                        if (config.devices.checkDeleteMinutes > 0) {
+                                            setTimeout(() => msg.delete().catch(err => console.log(`Error deleting noProto check message:`, err)), (config.devices.checkDeleteMinutes * 1000 * 60));
+                                        }
+                                    })
+                            } catch (err) {
+                                console.log("Failed to fetch noProto post channel:", err);
+                            }
+                        } //End of cron
+                        content = '‎';
+                        let tempButtons = instanceButtons.slice(25);
+                        instanceButtons = tempButtons;
+                    } //End of message m loop
+                }) //End of forEach(instance)
+            }
+        }); //End of query
+        connection.end();
+    }, //End of noProtoDevices()
+
+
     getDeviceInfo: async function getDeviceInfo(interaction, deviceID) {
         let dbInfo = require('../MAD_Database_Info.json');
         let connection = mysql.createConnection(config.madDB);
@@ -129,7 +248,6 @@ module.exports = {
             }
         }) //End of query
         connection.end();
-
         async function parseDeviceInfo(device) {
             let lastSeen = `**- Last Seen:** ${moment(device.lastProtoDateTime).from(moment())}\n`;
             let timeDiffLastSeen = Math.abs(Date.now() - Date.parse(device.lastProtoDateTime));
