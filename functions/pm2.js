@@ -29,7 +29,7 @@ module.exports = {
                     if (buttonStyle === undefined) {
                         buttonStyle = process['pm2_env']['status']
                     }
-                    buttonStyle = buttonStyle.replace('online', 'SUCCESS').replace('stopping', 'DANGER').replace('stopped', 'DANGER').replace('launching', 'SUCCESS').replace('errored', 'DANGER').replace('one-launch-status', 'DANGER');
+                    buttonStyle = buttonStyle.replace('online', 'SUCCESS').replace('stopping', 'DANGER').replace('stopped', 'DANGER').replace('launching', 'SUCCESS').replace('errored', 'DANGER').replace('one-launch-status', 'DANGER').replace('waiting restart','SECONDARY');
                     let buttonLabel = process['name'];
                     let buttonID = `${config.serverName}~process~restart~${buttonLabel}`;
                     let button = new MessageButton().setCustomId(buttonID).setLabel(buttonLabel).setStyle(buttonStyle);
