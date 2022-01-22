@@ -118,7 +118,7 @@ module.exports = {
 
 
     noProtoDevices: async function noProtoDevices(client, receivedMessage, type) {
-        let postChannel = await client.channels.fetch('921669404142489641');
+        let postChannel = await client.channels.fetch(config.devices.noProtoChannelID);
         let dbInfo = require('../MAD_Database_Info.json');
         if (type === 'search') {
             console.log(`${receivedMessage.author.username} requested the status of all noProto devices`);
