@@ -255,6 +255,7 @@ module.exports = {
             let minutesSinceLastSeen = (hoursSinceLastSeen * 60).toFixed(2);
             let area = `**- Area:** ${dbInfo.areas[device.area_id]['name']} (${dbInfo.areas[device.area_id]['mode']})\n`;
             var paused = deviceID = instance = restartInfo = rebootInfo = loginInfo = '';
+            let origin = dbInfo.devices[device.device_id]['name'];
             //Running well
             var color = '00841E';
             //If idle
@@ -284,13 +285,53 @@ module.exports = {
                 loginInfo = `**- Login Type:** ${dbInfo.devices[device.device_id]['loginType']}\n**- Login Account:** ${dbInfo.devices[device.device_id]['loginAccount']}`;
             }
             let description = `${deviceID}${instance}${paused}${area}${lastSeen}${restartInfo}${rebootInfo}${loginInfo}`;
+            var controlComponent = [];
+            if (config.deviceControl.path) {
+                let selectList = [{
+                        label: `Pause ${origin}`,
+                        value: `${config.serverName}~deviceControl~${origin}~pauseDevice`
+                    },
+                    {
+                        label: `Unpause ${origin}`,
+                        value: `${config.serverName}~deviceControl~${origin}~unpauseDevice`
+                    },
+                    {
+                        label: `Start PoGo on ${origin}`,
+                        value: `${config.serverName}~deviceControl~${origin}~startPogo`
+                    },
+                    {
+                        label: `Quit PoGo on ${origin}`,
+                        value: `${config.serverName}~deviceControl~${origin}~quitPogo`
+                    },
+                    {
+                        label: `Reboot ${origin}`,
+                        value: `${config.serverName}~deviceControl~${origin}~rebootDevice`
+                    },
+                    {
+                        label: `Logcat for ${origin}`,
+                        value: `${config.serverName}~deviceControl~${origin}~logcatDevice`
+                    },
+                    {
+                        label: `Clear game data on ${origin}`,
+                        value: `${config.serverName}~deviceControl~${origin}~clearGame`
+                    }
+                ]
+                let controlList = new MessageActionRow()
+                    .addComponents(
+                        new MessageSelectMenu()
+                        .setCustomId(`${config.serverName}~deviceControl`)
+                        .setPlaceholder(`${origin} DeviceControl`)
+                        .addOptions(selectList),
+                    )
+                controlComponent.push(controlList)
+            }
             interaction.message.channel.send({
-                    embeds: [new MessageEmbed().setTitle(`${dbInfo.devices[device.device_id]['name']} Info:`).setDescription(`${description}`).setColor(color).setFooter(`${interaction.user.username}`)],
-                    components: []
+                    embeds: [new MessageEmbed().setTitle(`${origin} Info:`).setDescription(`${description}`).setColor(color).setFooter(`${interaction.user.username}`)],
+                    components: controlComponent
                 }).catch(console.error)
                 .then(msg => {
                     if (config.devices.infoMessageDeleteSeconds > 0) {
-                        setTimeout(() => msg.delete().catch(err => console.log(`Error deleting ${dbInfo.devices[device.device_id]['name']} device message:`, err)), (config.devices.infoMessageDeleteSeconds * 1000));
+                        setTimeout(() => msg.delete().catch(err => console.log(`Error deleting ${origin} device message:`, err)), (config.devices.infoMessageDeleteSeconds * 1000));
                     }
                 })
         } //End of parseDeviceInfo()

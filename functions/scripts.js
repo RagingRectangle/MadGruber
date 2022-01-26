@@ -36,8 +36,13 @@ module.exports = {
                 .setCustomId(`${config.serverName}~scriptList`)
                 .setPlaceholder('List of Scripts')
                 .addOptions(selectList))
-
         if (type === 'new') {
+            if (selectList.length == 0){
+                messageOrInteraction.channel.send({
+                    embeds: [new MessageEmbed().setDescription("Error: No scripts found in scripts.json").setColor('9E0000').setFooter(`${interaction.user.username}`)]
+                }).catch(console.error);
+                return;
+            }
             messageOrInteraction.channel.send({
                 content: 'Select a script below to run it.',
                 components: [fullList]
@@ -214,7 +219,7 @@ module.exports = {
                 }
                 interaction.message.edit({
                     content: title,
-                    embeds: [new MessageEmbed().setDescription(`bash ${scriptList[s]['fullFilePath']} ${variables}`).setColor('0D00CA')],
+                    embeds: [new MessageEmbed().setDescription(`bash ${scriptList[s]['fullFilePath']} ${variables}`).setColor('0D00CA').setFooter(`${interaction.user.username}`)],
                     components: [optionRow]
                 }).catch(console.error);
             }
@@ -233,7 +238,7 @@ module.exports = {
         if (fullBashCommand !== '') {
             interaction.message.edit({
                 content: '**Running script:**',
-                embeds: [new MessageEmbed().setDescription(`\`${fullBashCommand}\``).setColor('0D00CA')],
+                embeds: [new MessageEmbed().setDescription(`\`${fullBashCommand}\``).setColor('0D00CA').setFooter(`${interaction.user.username}`)],
                 components: []
             }).catch(console.error);
             try {

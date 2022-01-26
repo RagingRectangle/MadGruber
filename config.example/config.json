@@ -63,5 +63,10 @@
             "rebootInfo": true,
             "loginInfo": true
         }
+    },
+    "deviceControl": {
+        "path": "/home/USERNAME/deviceControl/",
+        "controlResponseDeleteSeconds": 0,
+        "logcatDeleteSeconds": 0
     }
 }

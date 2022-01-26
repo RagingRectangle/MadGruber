@@ -15,6 +15,7 @@ const Truncate = require('./truncate.js');
 const Scripts = require('./scripts.js');
 const Queries = require('./queries.js');
 const Devices = require('./devices.js');
+const DeviceControl = require('./deviceControl.js');
 const config = require('../config/config.json');
 const scriptConfig = require('../config/scripts.json');
 
@@ -48,6 +49,14 @@ module.exports = {
                 Queries.queryCount(interaction, countType);
             }
         } //End of queries
+
+        //DeviceControl
+        if (userPerms.includes('deviceInfoControl')) {
+            if (interactionID === 'deviceControl') {
+                interaction.deferUpdate();
+                DeviceControl.deviceControl(interaction);
+            }
+        }
     }, //End of listInteraction()
 
 
