@@ -36,9 +36,9 @@ module.exports = {
                     if (exitCode !== 0) {
                         color = '9E0000';
                         description = `**${origin} ${controlType} failed**\n\n**Error Response:**\n${output}`;
-                        console.log(`${interaction.user.username} failed to run deviceControl.sh ${origin} ${controlType}`);
+                        console.log(`${interaction.user.username} failed to run devicecontrol.sh ${origin} ${controlType}`);
                     } else {
-                        console.log(`${interaction.user.username} ran deviceControl.sh ${origin} ${controlType}`);
+                        console.log(`${interaction.user.username} ran devicecontrol.sh ${origin} ${controlType}`);
                     }
                     if (controlType === 'logcatDevice') {
                         fs.renameSync('./logcat.txt', `logcat_${origin}.txt`);

@@ -67,6 +67,7 @@
     "deviceControl": {
         "path": "/home/USERNAME/deviceControl/",
         "controlResponseDeleteSeconds": 0,
-        "logcatDeleteSeconds": 0
+        "logcatDeleteSeconds": 0,
+        "powerCycleType": ""
     }
 }

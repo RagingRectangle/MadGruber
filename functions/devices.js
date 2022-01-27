@@ -87,7 +87,7 @@ module.exports = {
                         let rowsNeeded = Math.ceil(buttonsNeeded / 5);
                         var buttonCount = 0;
                         var messageComponents = [];
-                        for (var n = 0; n < rowsNeeded && n < 4; n++) {
+                        for (var n = 0; n < rowsNeeded && n < 5; n++) {
                             var buttonRow = new MessageActionRow();
                             for (var r = 0; r < 5; r++) {
                                 if (buttonCount < buttonsNeeded) {
@@ -118,6 +118,9 @@ module.exports = {
 
 
     noProtoDevices: async function noProtoDevices(client, receivedMessage, type) {
+        if (type === 'cron' && !config.devices.noProtoChannelID){
+            console.log("Error: 'noProtoChannelID' not set in config.json");
+        }
         let postChannel = await client.channels.fetch(config.devices.noProtoChannelID);
         let dbInfo = require('../MAD_Database_Info.json');
         if (type === 'search') {
@@ -162,7 +165,7 @@ module.exports = {
                                 buttonLabel = `${deviceName} (${daysSince}d)`;
                             }
                         }
-                        let buttonID = `${config.serverName}~deviceInfo~${device.device_id}`;
+                        var buttonID = `${config.serverName}~deviceInfo~${device.device_id}`;
                         let button = new MessageButton().setCustomId(buttonID).setLabel(buttonLabel).setStyle(buttonStyle);
                         let buttonObj = {
                             name: deviceName,
@@ -189,7 +192,7 @@ module.exports = {
                         let rowsNeeded = Math.ceil(buttonsNeeded / 5);
                         var buttonCount = 0;
                         var messageComponents = [];
-                        for (var n = 0; n < rowsNeeded && n < 4; n++) {
+                        for (var n = 0; n < rowsNeeded && n < 5; n++) {
                             var buttonRow = new MessageActionRow();
                             for (var r = 0; r < 5; r++) {
                                 if (buttonCount < buttonsNeeded) {
@@ -316,6 +319,15 @@ module.exports = {
                         value: `${config.serverName}~deviceControl~${origin}~clearGame`
                     }
                 ]
+                if (config.deviceControl.powerCycleType.toLowerCase() === 'devicecontrol'){
+                    selectList.push({
+                        label: `Power cycle ${origin}`,
+                        value: `${config.serverName}~deviceControl~${origin}~cycle`
+                    })
+                }
+                else if (config.deviceControl.powerCycleType.toLowerCase() === 'raspberry'){
+                    //Add raspberryRelay stuff here
+                }
                 let controlList = new MessageActionRow()
                     .addComponents(
                         new MessageSelectMenu()
