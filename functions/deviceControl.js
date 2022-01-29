@@ -9,6 +9,7 @@ const {
     MessageButton
 } = require('discord.js');
 const fs = require('fs');
+const mysql = require('mysql');
 const shell = require('shelljs');
 const config = require('../config/config.json');
 
@@ -30,7 +31,6 @@ module.exports = {
             .then(async msg => {
                 let logFile = [];
                 shell.exec(bashControlCommand, async function (exitCode, output) {
-                    console.log("exitCode:", exitCode);
                     var color = '00841E';
                     var description = `${origin} ${controlType}`;
                     if (exitCode !== 0) {
@@ -39,6 +39,9 @@ module.exports = {
                         console.log(`${interaction.user.username} failed to run devicecontrol.sh ${origin} ${controlType}`);
                     } else {
                         console.log(`${interaction.user.username} ran devicecontrol.sh ${origin} ${controlType}`);
+                        if (controlType === 'pauseDevice' || controlType === 'unpauseDevice') {
+                            changeIdleStatus(origin, controlType);
+                        }
                     }
                     if (controlType === 'logcatDevice') {
                         fs.renameSync('./logcat.txt', `logcat_${origin}.txt`);
@@ -66,5 +69,31 @@ module.exports = {
                     }
                 }) //End of shell.exec()
             }); //End of msg()
+
+        async function changeIdleStatus(origin, controlType) {
+            let dbInfo = require('../MAD_Database_Info.json');
+            let devices = dbInfo.devices;
+            for (const [key, value] of Object.entries(dbInfo.devices)) {
+                if (value.name === origin) {
+                    var status = 0;
+                    if (controlType === 'pauseDevice') {
+                        status = 1;
+                    }
+                    let idleQuery = `UPDATE trs_status SET idle = ${status} WHERE device_id = ${key}`;
+                    let connectionIdle = mysql.createConnection(config.madDB);
+                    connectionIdle.query(idleQuery, function (err, statusResults) {
+                        if (err) {
+                            console.log(`Error manually updating idle status for ${origin} ${controlType}:`, err);
+                        } else {
+                            if (statusResults['changedRows'] == 1) {
+                                //Seems like only errors should be logged for this?
+                                //console.log(`Manually updated idle status for ${origin} ${statusResults}`);
+                            }
+                        }
+                    }); //End of query
+                    connectionIdle.end();
+                }
+            }
+        } //End of changeIdleStatus()
     } //End of deviceControl()
 }
