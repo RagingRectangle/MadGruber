@@ -118,17 +118,16 @@ module.exports = {
 
 
     noProtoDevices: async function noProtoDevices(client, receivedMessage, type) {
-        if (type === 'cron' && !config.devices.noProtoChannelID){
+        if (type === 'cron' && !config.devices.noProtoChannelID) {
             console.log("Error: 'noProtoChannelID' not set in config.json");
         }
-        let postChannel = await client.channels.fetch(config.devices.noProtoChannelID);
         let dbInfo = require('../MAD_Database_Info.json');
         if (type === 'search') {
             console.log(`${receivedMessage.author.username} requested the status of all noProto devices`);
         }
-        let connection = mysql.createConnection(config.madDB);
+        let connectionMAD = mysql.createConnection(config.madDB);
         let statusQuery = `SELECT * FROM trs_status`;
-        connection.query(statusQuery, function (err, results) {
+        connectionMAD.query(statusQuery, function (err, results) {
             if (err) {
                 console.log("noProto Status Query Error:", err);
             } else {
@@ -172,13 +171,21 @@ module.exports = {
                             instance: dbInfo.instances[device.instance_id],
                             button: button
                         }
-                        buttonArray.push(buttonObj);
+                        if (type === "search") {
+                            buttonArray.push(buttonObj);
+                        } else {
+                            if (device.idle != 1) {
+                                buttonArray.push(buttonObj);
+                            } else if (config.devices.noProtoIncludeIdle === true) {
+                                buttonArray.push(buttonObj);
+                            }
+                        }
                     } //End of noProto breach
                 }); //End of forEach(device)
                 instanceList = Array.from(new Set(instanceList));
                 buttonArray.sort(sortBy('name'));
                 //Split by instance
-                instanceList.forEach(instance => {
+                instanceList.forEach(async instance => {
                     var content = `**${instance} No Proto Devices:**`;
                     var instanceButtons = [];
                     buttonArray.forEach(buttonObj => {
@@ -215,6 +222,7 @@ module.exports = {
                         } //End of search
                         else if (type === 'cron') {
                             try {
+                                let postChannel = await client.channels.fetch(config.devices.noProtoChannelID);
                                 postChannel.send({
                                         content: content,
                                         components: messageComponents
@@ -233,9 +241,19 @@ module.exports = {
                         instanceButtons = tempButtons;
                     } //End of message m loop
                 }) //End of forEach(instance)
+                if (instanceList.length == 0 && type == "search") {
+                    receivedMessage.channel.send("No problems detected!")
+                        .catch(console.error)
+                        .then(msg => {
+                            if (config.devices.statusButtonsDeleteMinutes > 0) {
+                                setTimeout(() => msg.delete().catch(err => console.log(`Error deleting noProto status message:`, err)), (config.devices.statusButtonsDeleteMinutes * 1000 * 60));
+                            }
+                        })
+                }
+
             }
         }); //End of query
-        connection.end();
+        connectionMAD.end();
     }, //End of noProtoDevices()
 
 
