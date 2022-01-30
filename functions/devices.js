@@ -16,9 +16,9 @@ module.exports = {
     deviceStatus: async function deviceStatus(receivedMessage) {
         let dbInfo = require('../MAD_Database_Info.json');
         console.log(`${receivedMessage.author.username} requested the status of all devices`);
-        let connection = mysql.createConnection(config.madDB);
+        let connectionMAD = mysql.createConnection(config.madDB);
         let statusQuery = `SELECT * FROM trs_status`;
-        connection.query(statusQuery, function (err, results) {
+        connectionMAD.query(statusQuery, function (err, results) {
             if (err) {
                 console.log("Status Query Error:", err);
             } else {
@@ -113,9 +113,8 @@ module.exports = {
                 }) //End of forEach(instance)
             }
         }); //End of query
-        connection.end();
+        connectionMAD.end();
     }, //End of deviceStatus()
-
 
     noProtoDevices: async function noProtoDevices(client, receivedMessage, type) {
         if (type === 'cron' && !config.devices.noProtoChannelID) {
@@ -210,6 +209,7 @@ module.exports = {
                             messageComponents.push(buttonRow);
                         } //End of n loop
                         if (type === 'search') {
+                            console.log("search")
                             receivedMessage.channel.send({
                                     content: content,
                                     components: messageComponents
@@ -250,33 +250,30 @@ module.exports = {
                             }
                         })
                 }
-
             }
         }); //End of query
         connectionMAD.end();
     }, //End of noProtoDevices()
 
-
     getDeviceInfo: async function getDeviceInfo(interaction, deviceID) {
         let dbInfo = require('../MAD_Database_Info.json');
-        let connection = mysql.createConnection(config.madDB);
+        let connectionMAD = mysql.createConnection(config.madDB);
         let deviceQuery = `SELECT * FROM trs_status WHERE device_id = "${deviceID}"`;
-        connection.query(deviceQuery, function (err, deviceResults) {
+        connectionMAD.query(deviceQuery, function (err, deviceResults) {
             if (err) {
                 console.log("Device Info Query Error:", err);
             } else {
                 parseDeviceInfo(deviceResults[0]);
             }
-        }) //End of query
-        connection.end();
+        }); //End of query
+        connectionMAD.end();
         async function parseDeviceInfo(device) {
-            let lastSeen = `**- Last Seen:** ${moment(device.lastProtoDateTime).from(moment())}\n`;
             let timeDiffLastSeen = Math.abs(Date.now() - Date.parse(device.lastProtoDateTime));
             let hoursSinceLastSeen = timeDiffLastSeen / (1000 * 3600);
             let minutesSinceLastSeen = (hoursSinceLastSeen * 60).toFixed(2);
-            let area = `**- Area:** ${dbInfo.areas[device.area_id]['name']} (${dbInfo.areas[device.area_id]['mode']})\n`;
             var paused = deviceID = instance = restartInfo = rebootInfo = loginInfo = '';
             let origin = dbInfo.devices[device.device_id]['name'];
+            var deviceInfoArray = [];
             //Running well
             var color = '00841E';
             //If idle
@@ -290,25 +287,123 @@ module.exports = {
             } else if (minutesSinceLastSeen > config.devices.noProtoMinutes) {
                 color = '9E0000';
             }
-            if (config.devices.displayOptions.deviceID === true) {
-                deviceID = `**- DeviceID:** ${device.device_id}\n`;
-            }
-            if (config.devices.displayOptions.instance === true) {
-                instance = `**- Instance:** ${dbInfo.instances[device.instance_id]}\n`;
-            }
+            deviceInfoArray.push(`**area:** ${dbInfo.areas[device.area_id]['name']} (${dbInfo.areas[device.area_id]['mode']})`);
+            deviceInfoArray.push(`**last seen:** ${moment(device.lastProtoDateTime).from(moment())}`);
             if (config.devices.displayOptions.restartInfo === true) {
-                restartInfo = `**- Last Restart:** ${moment(device.lastPogoRestart).from(moment())}\n**- Restart Count:** ${device.globalrestartcount}\n`;
+                deviceInfoArray.push(`**last restart:** ${moment(device.lastPogoRestart).from(moment())}\n- **restart count:** ${device.globalrestartcount}`);
             }
             if (config.devices.displayOptions.rebootInfo === true) {
-                rebootInfo = `**- Last Reboot:** ${moment(device.lastPogoReboot).from(moment())}\n**- Reboot Count:** ${device.globalrebootcount}\n`;
+                deviceInfoArray.push(`**last reboot:** ${moment(device.lastPogoReboot).from(moment())}\n- **reboot count:** ${device.globalrebootcount}`);
+            }
+            if (config.devices.displayOptions.deviceID === true) {
+                deviceInfoArray.push(`**deviceID:** ${device.device_id}`);
+            }
+            if (config.devices.displayOptions.instance === true) {
+                deviceInfoArray.push(`**instance:** ${dbInfo.instances[device.instance_id]}`);
             }
             if (config.devices.displayOptions.loginInfo === true) {
-                loginInfo = `**- Login Type:** ${dbInfo.devices[device.device_id]['loginType']}\n**- Login Account:** ${dbInfo.devices[device.device_id]['loginAccount']}`;
+                deviceInfoArray.push(`**login type:** ${dbInfo.devices[device.device_id]['loginType']}\n- **login account:** ${dbInfo.devices[device.device_id]['loginAccount']}`);
             }
-            let description = `${deviceID}${instance}${paused}${area}${lastSeen}${restartInfo}${rebootInfo}${loginInfo}`;
-            var controlComponent = [];
+            if (!config.stats.database.host) {
+                sendDeviceInfo(origin, color, deviceInfoArray, '');
+            } else {
+                let connectionDeviceInfo = mysql.createConnection(config.stats.database);
+                let basicStatsQuery = `SELECT * FROM ATVgeneral WHERE origin = "${origin}" AND arch != "null" ORDER BY datetime DESC`;
+                connectionDeviceInfo.query(basicStatsQuery, function (err, statsResults) {
+                    if (err) {
+                        console.log("Stats Info Query Error:", err);
+                    } else {
+                        getStatsDeviceInfo(origin, color, deviceInfoArray, statsResults[0]);
+                    }
+                }); //End of query
+                connectionDeviceInfo.end();
+            }
+        } //End of parseDeviceInfo()
+
+        async function getStatsDeviceInfo(origin, color, deviceInfoArray, statsDevice) {
+            for (const [key, value] of Object.entries(statsDevice)) {
+                if (config.stats.deviceInfo[key] === true) {
+                    if (key === 'ip'){
+                        let bothIP = value.split('\n');
+                        deviceInfoArray.push(`**${key}:** ${bothIP[0]}`);
+                        if (config.stats.deviceInfo.ex_ip === true){
+                            deviceInfoArray.push(`**ex_ip:** ${bothIP[1]}`);
+                        }
+                    }
+                    else if (key === 'ex_ip'){
+                        //Do nothing for now
+                    }
+                    else {
+                        deviceInfoArray.push(`**${key}:** ${value}`);
+                    }
+                }
+            }
+            createStatsList(origin, color, deviceInfoArray);
+        } //End of getStatsDeviceInfo()
+
+        async function createStatsList(origin, color, deviceInfoArray) {
+            let statsSelectList = [{
+                    label: `Temperature`,
+                    value: `${config.serverName}~deviceStats~${origin}~temperature~daily`
+                },
+                {
+                    label: `Mons Scanned (hourly)`,
+                    value: `${config.serverName}~deviceStats~${origin}~monsScanned~hourly`
+                },
+                {
+                    label: `Mons Scanned (daily)`,
+                    value: `${config.serverName}~deviceStats~${origin}~monsScanned~daily`
+                },
+                {
+                    label: `Restarts/Reboots (hourly)`,
+                    value: `${config.serverName}~deviceStats~${origin}~restartReboot~hourly`
+                },
+                {
+                    label: `Restarts/Reboots (daily)`,
+                    value: `${config.serverName}~deviceStats~${origin}~restartReboot~daily`
+                },
+                {
+                    label: `Proto Success Rate (hourly)`,
+                    value: `${config.serverName}~deviceStats~${origin}~protoSuccess~hourly`
+                },
+                {
+                    label: `Proto Success Rate (daily)`,
+                    value: `${config.serverName}~deviceStats~${origin}~protoSuccess~daily`
+                },
+                {
+                    label: `Locations Handled (hourly)`,
+                    value: `${config.serverName}~deviceStats~${origin}~locationsHandled~hourly`
+                },
+                {
+                    label: `Locations Handled (daily)`,
+                    value: `${config.serverName}~deviceStats~${origin}~locationsHandled~daily`
+                },
+                {
+                    label: `Location Success Rate (hourly)`,
+                    value: `${config.serverName}~deviceStats~${origin}~locationsSuccess~hourly`
+                },
+                {
+                    label: `Location Success Rate (daily)`,
+                    value: `${config.serverName}~deviceStats~${origin}~locationsSuccess~daily`
+                }
+            ];
+
+            let statsListComponent = new MessageActionRow()
+                .addComponents(
+                    new MessageSelectMenu()
+                    .setCustomId(`${config.serverName}~deviceStats`)
+                    .setPlaceholder(`${origin} Stats`)
+                    .addOptions(statsSelectList)
+                );
+
+
+            sendDeviceInfo(origin, color, deviceInfoArray, statsListComponent);
+        } //End of createStatsList()
+
+        async function sendDeviceInfo(origin, color, deviceInfoArray, statsListComponent) {
+            var deviceComponents = [];
             if (config.deviceControl.path) {
-                let selectList = [{
+                let controlSelectList = [{
                         label: `Pause ${origin}`,
                         value: `${config.serverName}~deviceControl~${origin}~pauseDevice`
                     },
@@ -335,35 +430,41 @@ module.exports = {
                     {
                         label: `Clear game data on ${origin}`,
                         value: `${config.serverName}~deviceControl~${origin}~clearGame`
+                    },
+                    {
+                        label: `Screenshot of ${origin}`,
+                        value: `${config.serverName}~deviceControl~${origin}~screenshot`
                     }
                 ]
-                if (config.deviceControl.powerCycleType.toLowerCase() === 'devicecontrol'){
-                    selectList.push({
+                if (config.deviceControl.powerCycleType.toLowerCase() === 'devicecontrol') {
+                    controlSelectList.push({
                         label: `Power cycle ${origin}`,
                         value: `${config.serverName}~deviceControl~${origin}~cycle`
                     })
-                }
-                else if (config.deviceControl.powerCycleType.toLowerCase() === 'raspberry'){
+                } else if (config.deviceControl.powerCycleType.toLowerCase() === 'raspberry') {
                     //Add raspberryRelay stuff here
                 }
-                let controlList = new MessageActionRow()
+                let controlListComponent = new MessageActionRow()
                     .addComponents(
                         new MessageSelectMenu()
                         .setCustomId(`${config.serverName}~deviceControl`)
                         .setPlaceholder(`${origin} DeviceControl`)
-                        .addOptions(selectList),
-                    )
-                controlComponent.push(controlList)
+                        .addOptions(controlSelectList),
+                    );
+                deviceComponents.push(controlListComponent);
+            } //End of deviceControl
+            if (statsListComponent !== '') {
+                deviceComponents.push(statsListComponent);
             }
             interaction.message.channel.send({
-                    embeds: [new MessageEmbed().setTitle(`${origin} Info:`).setDescription(`${description}`).setColor(color).setFooter(`${interaction.user.username}`)],
-                    components: controlComponent
+                    embeds: [new MessageEmbed().setTitle(`${origin} Info:`).setDescription(`- ${deviceInfoArray.join('\n- ')}`).setColor(color).setFooter(`${interaction.user.username}`)],
+                    components: deviceComponents
                 }).catch(console.error)
                 .then(msg => {
                     if (config.devices.infoMessageDeleteSeconds > 0) {
                         setTimeout(() => msg.delete().catch(err => console.log(`Error deleting ${origin} device message:`, err)), (config.devices.infoMessageDeleteSeconds * 1000));
                     }
-                })
-        } //End of parseDeviceInfo()
+                });
+        } //End of sendDeviceInfo()
     }, //End of getDeviceInfo()
 }

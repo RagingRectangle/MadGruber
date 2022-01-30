@@ -47,6 +47,10 @@ module.exports = {
                         fs.renameSync('./logcat.txt', `logcat_${origin}.txt`);
                         logFile.push(new MessageAttachment(`logcat_${origin}.txt`));
                     }
+                    if (controlType === 'screenshot') {
+                        fs.renameSync('./screenshot.jpg', `screenshot_${origin}.jpg`);
+                        logFile.push(new MessageAttachment(`screenshot_${origin}.jpg`));
+                    }
                     msg.edit({
                         content: '**Ran deviceControl script:**',
                         embeds: [new MessageEmbed().setDescription(description).setColor(color).setFooter(`${interaction.user.username}`)],
@@ -64,6 +68,19 @@ module.exports = {
                                 fs.rmSync(`logcat_${origin}.txt`);
                             });
                     }
+                    if (controlType === 'screenshot' && exitCode !== 1) {
+                        interaction.message.channel.send({
+                                files: logFile
+                            }).catch(console.error)
+                            .then(logcatMsg => {
+                                if (config.deviceControl.screenshotDeleteSeconds > 0) {
+                                    setTimeout(() => logcatMsg.delete().catch(err => console.log(`(${interaction.user.username}) Error deleting screenshot message:`, err)), (config.deviceControl.screenshotDeleteSeconds * 1000));
+                                }
+                            })
+                            .then(() => {
+                                fs.rmSync(`screenshot_${origin}.jpg`);
+                            });
+                    }
                     if (config.deviceControl.controlResponseDeleteSeconds > 0) {
                         setTimeout(() => msg.delete().catch(err => console.log(`(${interaction.user.username}) Error deleting deviceControl message:`, err)), (config.deviceControl.controlResponseDeleteSeconds * 1000));
                     }
@@ -72,7 +89,6 @@ module.exports = {
 
         async function changeIdleStatus(origin, controlType) {
             let dbInfo = require('../MAD_Database_Info.json');
-            let devices = dbInfo.devices;
             for (const [key, value] of Object.entries(dbInfo.devices)) {
                 if (value.name === origin) {
                     var status = 0;

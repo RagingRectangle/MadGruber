@@ -4,6 +4,7 @@ const {
     MessageEmbed,
     Permissions,
     MessageActionRow,
+    MessageAttachment,
     MessageSelectMenu,
     MessageButton
 } = require('discord.js');
@@ -16,6 +17,7 @@ const Scripts = require('./scripts.js');
 const Queries = require('./queries.js');
 const Devices = require('./devices.js');
 const DeviceControl = require('./deviceControl.js');
+const Stats = require('./stats.js');
 const config = require('../config/config.json');
 const scriptConfig = require('../config/scripts.json');
 
@@ -40,7 +42,7 @@ module.exports = {
                     Scripts.scriptVariables(interaction, userPerms);
                 }
             }
-        } //End of scripts
+        } //End of Scripts
 
         //Queries
         if (userPerms.includes('queries')) {
@@ -56,7 +58,18 @@ module.exports = {
                 interaction.deferUpdate();
                 DeviceControl.deviceControl(interaction);
             }
-        }
+        } //End of DeviceControl
+
+        //DeviceStats
+        if (userPerms.includes('deviceInfoControl') || userPerms.includes('deviceInfo')) {
+            if (interactionID === 'deviceStats') {
+                interaction.deferUpdate();
+                let statVariables = interaction.values[0].replace(`${config.serverName}~deviceStats~`, '').split('~');
+                let origin = statVariables[0];
+                let statVars = interaction.values[0].replace(`${config.serverName}~deviceStats~${origin}~`, '');
+                Stats.deviceStats(interaction, origin, statVars);
+            }
+        } //End of DeviceStats
     }, //End of listInteraction()
 
 
@@ -196,6 +209,5 @@ module.exports = {
                 Devices.getDeviceInfo(interaction, deviceID);
             }
         } //End of devices
-
     }, //End of buttonInteraction()
 }
