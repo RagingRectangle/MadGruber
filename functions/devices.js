@@ -323,19 +323,7 @@ module.exports = {
         async function getStatsDeviceInfo(origin, color, deviceInfoArray, statsDevice) {
             for (const [key, value] of Object.entries(statsDevice)) {
                 if (config.stats.deviceInfo[key] === true) {
-                    if (key === 'ip'){
-                        let bothIP = value.split('\n');
-                        deviceInfoArray.push(`**${key}:** ${bothIP[0]}`);
-                        if (config.stats.deviceInfo.ex_ip === true){
-                            deviceInfoArray.push(`**ex_ip:** ${bothIP[1]}`);
-                        }
-                    }
-                    else if (key === 'ex_ip'){
-                        //Do nothing for now
-                    }
-                    else {
-                        deviceInfoArray.push(`**${key}:** ${value}`);
-                    }
+                    deviceInfoArray.push(`**${key}:** ${value}`);
                 }
             }
             createStatsList(origin, color, deviceInfoArray);
