@@ -37,7 +37,7 @@ module.exports = {
         connection.connect();
         //Temperature
         if (statType === 'temperature') {
-            let statTemperatureQuery = `SELECT * FROM ATVgeneral WHERE origin = "${origin}" AND temperature != "null" ORDER BY datetime LIMIT ${rplLength}`;
+            let statTemperatureQuery = `SELECT * FROM ATVgeneral WHERE origin = "${origin}" ORDER BY datetime LIMIT ${rplLength}`;
             connection.query(statTemperatureQuery, async function (err, results) {
                 if (err) {
                     console.log(`Error getting temperature stats:`, err);
@@ -129,16 +129,16 @@ module.exports = {
                                     label: `Restarts`,
                                     data: restarts,
                                     fill: true,
-                                    borderColor: 'blue',
-                                    backgroundColor: 'rgba(0, 0, 255, .5)',
+                                    borderColor: 'orange',
+                                    backgroundColor: 'rgba(245, 166, 35, .5)',
                                     pointRadius: 0,
                                 },
                                 {
                                     label: `Reboots`,
                                     data: reboots,
                                     fill: true,
-                                    borderColor: 'red',
-                                    backgroundColor: 'rgba(255, 0, 0, .5)',
+                                    borderColor: 'green',
+                                    backgroundColor: 'rgba(100, 182, 0, .5)',
                                     pointRadius: 0,
                                 }
                             ]
@@ -275,17 +275,58 @@ module.exports = {
                 }
             })
         } //End of locationsSuccess
+        else if (statType === 'locationsTime') {
+            connection.query(statQuery, async function (err, resultsTemp) {
+                if (err) {
+                    console.log(`Error getting location time stats:`, err);
+                } else {
+                    let results = resultsTemp.reverse();
+                    var labels = [];
+                    var locationTime = [];
+                    results.forEach(entry => {
+                        labels.push(moment(entry.Datetime).format(rplStamp));
+                        locationTime.push(entry.TpSt / entry.TpOk);
+                    }); //End of forEach(entry)
+                    let myChart = new QuickChart();
+                    myChart.setConfig({
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: `Time`,
+                                data: locationTime,
+                                fill: false,
+                                borderColor: QuickChart.getGradientFillHelper('vertical', ["#FF000B", "#FDB813", "#00A650"]),
+                                pointRadius: 0,
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                yAxes: [{
+                                    ticks: {
+                                        suggestedMin: 0,
+                                        suggestedMax: 4,
+                                    }
+                                }],
+                            }
+                        }
+                    });
+                    const url = await myChart.getShortUrl();
+                    sendChart(`${origin} Location Time (${rplType})`, url);
+                }
+            })
+        } //End of locationsTime
         connection.end();
 
         async function sendChart(title, url) {
             interaction.message.channel.send({
-                embeds: [new MessageEmbed().setTitle(title).setImage(url).setFooter(`${interaction.user.username}`)],
-            }).catch(console.error)
-            .then(async msg => {
-                if (config.stats.graphDeleteSeconds > 0) {
-                    setTimeout(() => msg.delete().catch(err => console.log(`(${interaction.user.username}) Error deleting screenshot:`, err)), (config.stats.graphDeleteSeconds * 1000));
-                }
-            })
+                    embeds: [new MessageEmbed().setTitle(title).setImage(url).setFooter(`${interaction.user.username}`)],
+                }).catch(console.error)
+                .then(async msg => {
+                    if (config.stats.graphDeleteSeconds > 0) {
+                        setTimeout(() => msg.delete().catch(err => console.log(`(${interaction.user.username}) Error deleting screenshot:`, err)), (config.stats.graphDeleteSeconds * 1000));
+                    }
+                })
         } //End of sendChart()
     } //End of deviceStats()
 }

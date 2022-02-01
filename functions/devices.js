@@ -290,10 +290,10 @@ module.exports = {
             deviceInfoArray.push(`**area:** ${dbInfo.areas[device.area_id]['name']} (${dbInfo.areas[device.area_id]['mode']})`);
             deviceInfoArray.push(`**last seen:** ${moment(device.lastProtoDateTime).from(moment())}`);
             if (config.devices.displayOptions.restartInfo === true) {
-                deviceInfoArray.push(`**last restart:** ${moment(device.lastPogoRestart).from(moment())}\n- **restart count:** ${device.globalrestartcount}`);
+                deviceInfoArray.push(`**last restart:** ${moment(device.lastPogoRestart).from(moment())} (#${device.globalrestartcount})`);
             }
             if (config.devices.displayOptions.rebootInfo === true) {
-                deviceInfoArray.push(`**last reboot:** ${moment(device.lastPogoReboot).from(moment())}\n- **reboot count:** ${device.globalrebootcount}`);
+                deviceInfoArray.push(`**last reboot:** ${moment(device.lastPogoReboot).from(moment())} (#${device.globalrebootcount})`);
             }
             if (config.devices.displayOptions.deviceID === true) {
                 deviceInfoArray.push(`**deviceID:** ${device.device_id}`);
@@ -331,8 +331,28 @@ module.exports = {
 
         async function createStatsList(origin, color, deviceInfoArray) {
             let statsSelectList = [{
-                    label: `Temperature`,
-                    value: `${config.serverName}~deviceStats~${origin}~temperature~daily`
+                    label: `Locations Handled (daily)`,
+                    value: `${config.serverName}~deviceStats~${origin}~locationsHandled~daily`
+                },
+                {
+                    label: `Locations Handled (hourly)`,
+                    value: `${config.serverName}~deviceStats~${origin}~locationsHandled~hourly`
+                },
+                {
+                    label: `Locations Success (hourly)`,
+                    value: `${config.serverName}~deviceStats~${origin}~locationsSuccess~hourly`
+                },
+                {
+                    label: `Location Success (daily)`,
+                    value: `${config.serverName}~deviceStats~${origin}~locationsSuccess~daily`
+                },
+                {
+                    label: `Locations Time (hourly)`,
+                    value: `${config.serverName}~deviceStats~${origin}~locationsTime~hourly`
+                },
+                {
+                    label: `Locations Time (daily)`,
+                    value: `${config.serverName}~deviceStats~${origin}~locationsTime~daily`
                 },
                 {
                     label: `Mons Scanned (hourly)`,
@@ -343,14 +363,6 @@ module.exports = {
                     value: `${config.serverName}~deviceStats~${origin}~monsScanned~daily`
                 },
                 {
-                    label: `Restarts/Reboots (hourly)`,
-                    value: `${config.serverName}~deviceStats~${origin}~restartReboot~hourly`
-                },
-                {
-                    label: `Restarts/Reboots (daily)`,
-                    value: `${config.serverName}~deviceStats~${origin}~restartReboot~daily`
-                },
-                {
                     label: `Proto Success Rate (hourly)`,
                     value: `${config.serverName}~deviceStats~${origin}~protoSuccess~hourly`
                 },
@@ -359,21 +371,17 @@ module.exports = {
                     value: `${config.serverName}~deviceStats~${origin}~protoSuccess~daily`
                 },
                 {
-                    label: `Locations Handled (hourly)`,
-                    value: `${config.serverName}~deviceStats~${origin}~locationsHandled~hourly`
+                    label: `Restarts/Reboots (hourly)`,
+                    value: `${config.serverName}~deviceStats~${origin}~restartReboot~hourly`
                 },
                 {
-                    label: `Locations Handled (daily)`,
-                    value: `${config.serverName}~deviceStats~${origin}~locationsHandled~daily`
+                    label: `Restarts/Reboots (daily)`,
+                    value: `${config.serverName}~deviceStats~${origin}~restartReboot~daily`
                 },
                 {
-                    label: `Location Success Rate (hourly)`,
-                    value: `${config.serverName}~deviceStats~${origin}~locationsSuccess~hourly`
+                    label: `Temperature`,
+                    value: `${config.serverName}~deviceStats~${origin}~temperature~daily`
                 },
-                {
-                    label: `Location Success Rate (daily)`,
-                    value: `${config.serverName}~deviceStats~${origin}~locationsSuccess~daily`
-                }
             ];
 
             let statsListComponent = new MessageActionRow()
