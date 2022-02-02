@@ -4,6 +4,7 @@ const {
     MessageEmbed,
     Permissions,
     MessageActionRow,
+    MessageAttachment,
     MessageSelectMenu,
     MessageButton
 } = require('discord.js');
@@ -14,6 +15,9 @@ const Pm2Buttons = require('./pm2.js');
 const Truncate = require('./truncate.js');
 const Scripts = require('./scripts.js');
 const Queries = require('./queries.js');
+const Devices = require('./devices.js');
+const DeviceControl = require('./deviceControl.js');
+const Stats = require('./stats.js');
 const config = require('../config/config.json');
 const scriptConfig = require('../config/scripts.json');
 
@@ -38,7 +42,7 @@ module.exports = {
                     Scripts.scriptVariables(interaction, userPerms);
                 }
             }
-        } //End of scripts
+        } //End of Scripts
 
         //Queries
         if (userPerms.includes('queries')) {
@@ -47,6 +51,25 @@ module.exports = {
                 Queries.queryCount(interaction, countType);
             }
         } //End of queries
+
+        //DeviceControl
+        if (userPerms.includes('deviceInfoControl')) {
+            if (interactionID === 'deviceControl') {
+                interaction.deferUpdate();
+                DeviceControl.deviceControl(interaction);
+            }
+        } //End of DeviceControl
+
+        //DeviceStats
+        if (userPerms.includes('deviceInfoControl') || userPerms.includes('deviceInfo')) {
+            if (interactionID === 'deviceStats') {
+                interaction.deferUpdate();
+                let statVariables = interaction.values[0].replace(`${config.serverName}~deviceStats~`, '').split('~');
+                let origin = statVariables[0];
+                let statVars = interaction.values[0].replace(`${config.serverName}~deviceStats~${origin}~`, '');
+                Stats.deviceStats(interaction, origin, statVars);
+            }
+        } //End of DeviceStats
     }, //End of listInteraction()
 
 
@@ -90,7 +113,7 @@ module.exports = {
                     Scripts.sendScriptList(interaction, 'restart');
                     interaction.message.channel.send({
                             content: '**Did not run script:**',
-                            embeds: [new MessageEmbed().setDescription(interaction.message.embeds[0]['description']).setColor('9E0000')],
+                            embeds: [new MessageEmbed().setDescription(interaction.message.embeds[0]['description']).setColor('9E0000').setFooter(`${interaction.user.username}`)],
                             components: []
                         }).catch(console.error)
                         .then(msg => {
@@ -101,33 +124,35 @@ module.exports = {
                     let fullBashCommand = interaction.message.embeds[0]['description'];
                     interaction.message.edit({
                         content: '**Running script:**',
-                        embeds: [new MessageEmbed().setDescription(`\`${fullBashCommand}\``).setColor('0D00CA')],
+                        embeds: [new MessageEmbed().setDescription(`\`${fullBashCommand}\``).setColor('0D00CA').setFooter(`${interaction.user.username}`)],
                         components: []
                     }).catch(console.error);
                     try {
-                        shell.exec(fullBashCommand, function (code, output) {
+                        shell.exec(fullBashCommand, function (exitCode, output) {
                             Scripts.sendScriptList(interaction, "restart");
+                            var color = '00841E';
                             var description = `${interaction.message.embeds[0]['description']}\n\n**Response:**\n${output}`;
-                            if (code !== 0) {
+                            if (exitCode !== 0) {
+                                color = '9E0000';
                                 description = `${interaction.message.embeds[0]['description']}\n\n**Error Response:**\n${output}`;
                             }
-                            console.log(`Ran script: \`${fullBashCommand}\``);
+                            console.log(`${interaction.user.username} ran script: \`${fullBashCommand}\``);
                             interaction.message.channel.send({
                                     content: '**Ran script:**',
-                                    embeds: [new MessageEmbed().setDescription(description).setColor('00841E')],
+                                    embeds: [new MessageEmbed().setDescription(description).setColor(color).setFooter(`${interaction.user.username}`)],
                                     components: []
                                 }).catch(console.error)
                                 .then(msg => {
                                     if (config.scripts.scriptResponseDeleteSeconds > 0) {
-                                        setTimeout(() => msg.delete().catch(err => console.log("Error deleting script response message:", err)), (config.scripts.scriptResponseDeleteSeconds * 1000));
+                                        setTimeout(() => msg.delete().catch(err => console.log(`(${interaction.user.username}) Error deleting script response message:`, err)), (config.scripts.scriptResponseDeleteSeconds * 1000));
                                     }
                                 })
                         });
                     } catch (err) {
-                        console.log(`Failed to run script: ${fullBashCommand}:`, err);
+                        console.log(`(${interaction.user.username}) Failed to run script: ${fullBashCommand}:`, err);
                         Scripts.sendScriptList(interaction, "restart");
                         interaction.message.channel.send({
-                                embeds: [new MessageEmbed().setTitle('Failed to run script:').setDescription(interaction.message.embeds[0]['description']).setColor('9E0000')],
+                                embeds: [new MessageEmbed().setTitle('Failed to run script:').setDescription(interaction.message.embeds[0]['description']).setColor('9E0000').setFooter(`${interaction.user.username}`)],
                                 components: []
                             }).catch(console.error)
                             .then(msg => {
@@ -148,7 +173,7 @@ module.exports = {
                 let verify = interactionID.replace('verifyTruncate~', '');
                 if (verify === 'no') {
                     interaction.message.edit({
-                        embeds: [new MessageEmbed().setTitle('Did not truncate:').setDescription(interaction.message.embeds[0]['description']).setColor('9E0000')],
+                        embeds: [new MessageEmbed().setTitle('Did not truncate:').setDescription(interaction.message.embeds[0]['description']).setColor('9E0000').setFooter(`${interaction.user.username}`)],
                         components: []
                     }).catch(console.error);
                     setTimeout(() => interaction.message.delete().catch(err => console.log("Error deleting verify truncate message:", err)), 10000);
@@ -176,5 +201,13 @@ module.exports = {
             } //End of run truncate
         } //End of truncate
 
+        //Devices
+        if (userPerms.includes('deviceInfoControl') || userPerms.includes('deviceInfo')) {
+            if (interactionID.startsWith('deviceInfo~')) {
+                interaction.deferUpdate();
+                let deviceID = interactionID.replace('deviceInfo~', '');
+                Devices.getDeviceInfo(interaction, deviceID);
+            }
+        } //End of devices
     }, //End of buttonInteraction()
 }

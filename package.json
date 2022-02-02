@@ -1,7 +1,7 @@
 {
   "name": "madgruber",
-  "version": "2.5.1",
-  "description": "Discord bot that does the stuffs",
+  "version": "3.1.1",
+  "description": "Discord bot that can do almost anything (except for throat rips)",
   "main": "madgruber.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -17,11 +17,15 @@
   },
   "homepage": "https://github.com/RagingRectangle/MadGruber#readme",
   "dependencies": {
+    "cron": "^1.8.2",
     "discord.js": "13.3.1",
     "file-exists": "^5.0.1",
     "fs": "0.0.1-security",
+    "moment": "^2.29.1",
     "mysql": "^2.18.1",
     "pm2": "^5.1.2",
-    "shelljs": "^0.8.4"
+    "quickchart-js": "^2.0.3",
+    "shelljs": "^0.8.4",
+    "sort-by": "^1.2.0"
   }
 }

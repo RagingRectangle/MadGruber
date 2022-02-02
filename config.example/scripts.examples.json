@@ -2,7 +2,7 @@
     "customName": "DeviceControl",
     "adminOnly": false,
     "description": "Alter PoE ports",
-    "fullFilePath": "/home/mad/devicecontrol.sh",
+    "fullFilePath": "/home/mad/relay_poe_control.sh",
     "variables": [{
             "varDescription": "Choose which PoE:",
             "varOptions": ["poe1", "poe2", "poe3", "poe4"]
@@ -20,7 +20,7 @@
     "customName": "Annoying Device",
     "adminOnly": false,
     "description": "PoE cycle 7",
-    "fullFilePath": "/home/mad/devicecontrol.sh poe1 cycle 7",
+    "fullFilePath": "/home/mad/relay_poe_control.sh poe1 cycle 7",
     "variables": []
 }, {
     "customName": "Skynet",

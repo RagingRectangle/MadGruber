@@ -3,7 +3,7 @@
 ## About
 A Discord bot used as a very basic GUI for your server along with some MAD-specific features. Examples shown below.
 
-###### Disclaimer: This bot might look completely incompetent and the process it uses at times probably makes no sense but it almost always gets the damn job done, sometimes in a blaze of glory. **MADGRUBER!!!**
+###### Disclaimer: This bot might look completely insane and the process it uses at times probably makes no sense but it almost always gets the damn job done, sometimes in a blaze of glory. **MADGRUBER!!!**
 
 Join the Discord server for any help and to keep up with updates: https://discord.gg/USxvyB9QTz
 
@@ -16,6 +16,12 @@ Join the Discord server for any help and to keep up with updates: https://discor
 - Quickly access URL bookmarks
 - Reaction role manager
 - Limit commands to only certain roles
+- Options to verify certain actions first
+- See current status of MAD devices (as buttons)
+- Click device buttons to get basic info
+- Command to check for only devices that haven't been seen lately (automated checks optional)
+- dkmur's deviceControl integration (Pause/unpause/start/quit/reboot/clear data/logcat/screenshot/power cycle)
+- dkmur's Stats integration (expanded device info/graphs for different device stats)
 
   
   
@@ -43,6 +49,13 @@ npm install
  
   
 
+## Optional Projects to Install
+- [deviceControl by dkmur](https://github.com/dkmur/deviceControl)
+- [Stats by dkmur](https://github.com/dkmur/Stats)
+
+ 
+  
+
 ## Config Setup
 - **serverName:** Custom name for your server.
 - **delaySeconds:** If used on multiple servers you can use this to make sure the bot always responds in a specific order.
@@ -58,15 +71,18 @@ Discord:
 - **scriptCommand:** Command to show the list of scripts.
 - **madQueryCommand:** Command to show MAD database queries.
 - **linksCommand:** Command to show list of bookmarks.
+- **devicesCommand:** Command to get status of all devices.
+- **noProtoCommand:** Command to see noProto devices.
 
 PM2:
 - **mads:** List of MAD PM2 processes that should be restarted after truncating quests.
 - **ignore:** List of PM2 processes/modules to ignore if you don't want buttons for them.
+- **pm2ResponseDeleteSeconds:** How long to wait until pm2 response is deleted (Set to 0 to never delete).
 
 Roles:
 - **sendRoleMessage:** Whether or not to send role added/removed messages (true/false).
 - **roleMessageDeleteSeconds:** How long to wait until role message is deleted (Set to 0 to never delete).
-- **commandPermRoles:** List of command types and the role IDs that are allowed to use them.
+- **commandPermRoles:** List of command types and the role IDs that are allowed to use them (deviceInfo: users can only see info, deviceInfoControl: users can both see and control devices).
 
 Truncate:
 - **truncateVerify:** Whether or not to verify table truncate (true/false).
@@ -78,24 +94,51 @@ Scripts:
 - **scriptResponseDeleteSeconds:** How long to wait until script response is deleted (Set to 0 to never delete).
 
 madDB:
-- Enter your basic MAD database info. Make sure your user has access if the database is not local.  Leave blank if you don't plan on using the truncate quest feature.
+- Enter your basic MAD database info. Make sure your user has access if the database is not local.  Leave blank if you don't plan on connecting to MAD.
+
+Devices:
+- **noProtoMinutes:** Limit for how long it's been since the device has been heard from.
+- **noProtoCheckMinutes:** Automate checks for unseen devices (Set to 0 to disable auto-check).
+- **noProtoChannelID:** Channel ID for where automated warning should be posted.
+- **noProtoIncludeIdle:** Include paused and idle devices in automated checks (false to ignore).
+- **checkDeleteMinutes:** How long to wait until auto check messages are deleted (Set to 0 to never delete).
+- **infoMessageDeleteSeconds:** How long to wait until device info responses are deleted (Set to 0 to never delete).
+- **statusButtonsDeleteMinutes:** How long to wait until messages with device buttons are deleted (Set to 0 to never delete).
+- **buttonLabelRemove:** List of strings to ignore when posting device buttons. Button rows can look [crappy](https://media.discordapp.net/attachments/923445551595401316/933223709265764442/MadGruber_DeviceName_Differences.png) on mobile so this can help.
+- **displayOptions:** Customize what info is displayed for devices (true/false).
+
+DeviceControl:
+- [Install info](https://github.com/dkmur/deviceControl)
+- **path:** Path to root folder.
+- **controlResponseDeleteSeconds:** How long to wait until script responses are deleted (Set to 0 to never delete).
+- **logcatDeleteSeconds:** How long to wait until logcats are deleted (Set to 0 to never delete).
+- **screenshotDeleteSeconds:** How long to wait until screenshots are deleted (Set to 0 to never delete).
+- **powerCycleType:** Set to "deviceControl" if using deviceControl to power cycle your devices. Adds cycle option to dropdown control list. (Will be adding an option for RaspberryRelay whenever I get around to updating it).
+
+Stats:
+- [Install info](https://github.com/dkmur/Stats)
+- **database:** Basic stats database info.
+- **dataPointCount:** How many individual points on graphs for each type.
+- **graphDeleteSeconds:** How long to wait until graphs are deleted (Set to 0 to never delete).
+- **deviceInfo:** Customize what is added to the device info displayed (true/false).
 
  
   
 
 ## Scripts Setup
 - Config file: */config/scripts.json*
-- Absolute paths must be used in scripts to work. Look in the scripts.example.json to get a better feel for how they work.
-- **customName:** Display name
-- **description:** Short summary of what it does
-- **fullFilePath:** The absolute path to the file
+- Absolute paths must be used in scripts to work. Look in the scripts.example.json to get an idea of how they can work.
+- **customName:** Display name in list.
+- **adminOnly:** Script level overrides to ignore users with script role (true/false).
+- **description:** Short summary shown in list.
+- **fullFilePath:** The absolute path to the file.
     - Ex: `/home/mad/devicecontrol.sh`
-    - Tip: If the same variables are always passed you can add them to the path
+    - Tip: If the same variables are always passed you can add them to the path.
     - Ex: `/home/mad/devicecontrol.sh poe4 cycle 20`
 
-- **variables:** Make sure each variable is in the correct order because that is how it will be sent with the script
-    - **varDescription:** Summary of this list of variables that will be shown.  ("Pick which device" or "Choose the port")
-    - **varOptions:** The list of options that this variable can be ("1", "2", "3", "4", "5")
+- **variables:** Make sure each variable is in the correct order because that is how it will be sent with the script.
+    - **varDescription:** Summary of this list of variables that will be shown.  ("Pick which device" or "Choose the port").
+    - **varOptions:** The list of options that this variable can be ("1", "2", "3", "4", "5").
 
  
   
@@ -105,22 +148,22 @@ madDB:
 - Add up to 25 links as buttons.
 - Emoji field is optional. 
     - Full emoji string `<:mad:475050731032936448>`
-    - Unicode form (Get correct form by escaping default emojis: `\😺`)
+    - Unicode form (Get correct form by escaping default emojis: `\😺`).
 
  
   
 
 ## Reaction Role Setup
 - Config file: */config/roles.json*
-- **messageID:** The ID of the message with the emojis users can select to add/remove roles
-- **roleID:** The ID for the role that can be added/removed
-- **emojiName:** The unicode emoji or the custom emoji name (only the name, NOT full emoji string)
+- **messageID:** The ID of the message with the emojis users can select to add/remove roles.
+- **roleID:** The ID for the role that can be added/removed.
+- **emojiName:** The unicode emoji or the custom emoji name (only the name, NOT full emoji string).
 
  
   
   
 ## Queries Setup
-- The bot is currently only able to run a simple count query to a selection of tables in the MAD database.  
+- The bot is currently only able to run a simple count query to a selection of tables in the MAD database.
 - More query options will be added later.
 
  
@@ -130,12 +173,16 @@ madDB:
 - Start the bot in a console with `node madgruber.js`
 - Can also use PM2 to run it instead with `pm2 start madgruber.js`
 - Bot will reply with the PM2 controller message when you send `<prefix><pm2Command>`
-  - Press the Reload/Start/Stop buttons and then the processes you'd like to change
-  - Press the Status button to see the current status of processes
+  - Press the Reload/Start/Stop buttons and then the processes you'd like to change.
+  - Press the Status button to see the current status of processes.
 - Bot will truncate and reload MADs when you send `<prefix><truncateCommand>`
 - Bot will reply with runnable scripts when sent `<prefix><scriptCommand>`
 - Get runnable MAD database queries with `<prefix><madQueryCommand>`
 - Get link buttons with `<prefix><linksCommand>`
+- Get status of devices as buttons with `<prefix><devicesCommand>`
+  - Press device button to get more info.
+  - If deviceControl and/or Stats is installed then dropdown lists will appear.
+- See any naughty devices with `<prefix><noProtoCommand>`
 
  
   
@@ -143,12 +190,21 @@ madDB:
 
 
 ## Examples
-![PM2](https://media.giphy.com/media/TeMTI75XDhZpZDMtLs/giphy.gif)
-
-![Truncate](https://media.giphy.com/media/xVjk0zxSVTvNcQ7CQI/giphy.gif)
-
-![Queries](https://media.giphy.com/media/qfQGzrKjv8C5IvvJX8/giphy.gif)
-
-![Scripts](https://media.giphy.com/media/Ip1imTASukmpyt0489/giphy.gif)
-
-![Links](https://media.giphy.com/media/tjpBQPIszvhOdjSXf9/giphy.gif)
+###### PM2 Controller:
+![PM2](https://media.giphy.com/media/NXURwVTS9bdRXHMt49/giphy.gif)
+###### Run Custom Scripts:
+![Scripts](https://media.giphy.com/media/KVzaguhH4o99CLZs09/giphy.gif)
+###### Truncate Tables With Option to Restart MAD:
+![Truncate](https://media.giphy.com/media/St6S6xtcMFEbOh9z18/giphy.gif)
+###### Get Basic Info About MAD Database:
+![Queries](https://media.giphy.com/media/jNplcSy5fUYyci94Fg/giphy.gif)
+###### Quick Links:
+![Links](https://media.giphy.com/media/Mz1mf6OJyL727WnkGe/giphy.gif)
+###### Device Status and Info:
+![Links](https://media.giphy.com/media/Vy9Jj0mxnWlvoCjjJX/giphy.gif)
+###### DeviceControl Options:
+![DeviceControl](https://media.giphy.com/media/Ico3HomI8b1YozLfbM/giphy.gif)
+###### Device Stats:
+![StatsOptions](https://media.giphy.com/media/MtnvGOZG5dIamf5xqn/giphy.gif)
+###### Stats Examples:
+![StatsExamples](https://media.giphy.com/media/ddaBKKWjoxyWmruBl6/giphy.gif)

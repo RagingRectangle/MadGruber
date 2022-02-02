@@ -36,8 +36,13 @@ module.exports = {
                 .setCustomId(`${config.serverName}~scriptList`)
                 .setPlaceholder('List of Scripts')
                 .addOptions(selectList))
-
         if (type === 'new') {
+            if (selectList.length == 0){
+                messageOrInteraction.channel.send({
+                    embeds: [new MessageEmbed().setDescription("Error: No scripts found in scripts.json").setColor('9E0000').setFooter(`${interaction.user.username}`)]
+                }).catch(console.error);
+                return;
+            }
             messageOrInteraction.channel.send({
                 content: 'Select a script below to run it.',
                 components: [fullList]
@@ -64,7 +69,7 @@ module.exports = {
         if (fileTest === false) {
             module.exports.sendScriptList(interaction, "restart");
             interaction.deferUpdate();
-            console.log(`Script not found: \`${tempPath[0]}\``);
+            console.log(`(${interaction.user.username}) Script not found: \`${tempPath[0]}\``);
             interaction.message.channel.send(`Script not found: \`${tempPath[0]}\``).catch(console.error);
             return;
         }
@@ -214,7 +219,7 @@ module.exports = {
                 }
                 interaction.message.edit({
                     content: title,
-                    embeds: [new MessageEmbed().setDescription(`bash ${scriptList[s]['fullFilePath']} ${variables}`).setColor('0D00CA')],
+                    embeds: [new MessageEmbed().setDescription(`bash ${scriptList[s]['fullFilePath']} ${variables}`).setColor('0D00CA').setFooter(`${interaction.user.username}`)],
                     components: [optionRow]
                 }).catch(console.error);
             }
@@ -233,23 +238,25 @@ module.exports = {
         if (fullBashCommand !== '') {
             interaction.message.edit({
                 content: '**Running script:**',
-                embeds: [new MessageEmbed().setDescription(`\`${fullBashCommand}\``).setColor('0D00CA')],
+                embeds: [new MessageEmbed().setDescription(`\`${fullBashCommand}\``).setColor('0D00CA').setFooter(`${interaction.user.username}`)],
                 components: []
             }).catch(console.error);
             try {
-                shell.exec(fullBashCommand, function (code, output) {
+                shell.exec(fullBashCommand, function (exitCode, output) {
                     module.exports.sendScriptList(interaction, "restart");
+                    var color = '00841E';
                     var description = `\`${fullBashCommand}\`\n\n**Response:**\n${output}`;
-                    if (code !== 0) {
+                    if (exitCode !== 0) {
+                        color = '9E0000';
                         description = `\`${fullBashCommand}\`\n\n**Error Response:**\n${output}`;
                     }
-                    console.log(`Ran script: \`${fullBashCommand}\``);
+                    console.log(`${interaction.user.username} ran script: \`${fullBashCommand}\``);
                     interaction.message.channel.send({
-                            embeds: [new MessageEmbed().setTitle('Ran script:').setDescription(description).setColor('00841E')],
+                            embeds: [new MessageEmbed().setTitle('Ran script:').setDescription(description).setColor(color).setFooter(`${interaction.user.username}`)],
                         }).catch(console.error)
                         .then(msg => {
                             if (config.scripts.scriptResponseDeleteSeconds > 0) {
-                                setTimeout(() => msg.delete().catch(err => console.log("Error deleting script response message:", err)), (config.scripts.scriptResponseDeleteSeconds * 1000));
+                                setTimeout(() => msg.delete().catch(err => console.log(`(${interaction.user.username}) Error deleting script response message:`, err)), (config.scripts.scriptResponseDeleteSeconds * 1000));
                             }
                         })
                 })
@@ -257,11 +264,11 @@ module.exports = {
                 console.log(`Failed to run script: ${fullBashCommand}:`, err);
                 module.exports.sendScriptList(interaction, "restart");
                 interaction.message.channel.send({
-                        embeds: [new MessageEmbed().setTitle('Failed to run script:').setDescription(fullBashCommand).setColor('9E0000')],
+                        embeds: [new MessageEmbed().setTitle('Failed to run script:').setDescription(fullBashCommand).setColor('9E0000').setFooter(`${interaction.user.username}`)],
                     }).catch(console.error)
                     .then(msg => {
                         if (config.scripts.scriptResponseDeleteSeconds > 0) {
-                            setTimeout(() => msg.delete().catch(err => console.log("Error deleting script response message:", err)), (config.scripts.scriptResponseDeleteSeconds * 1000));
+                            setTimeout(() => msg.delete().catch(err => console.log(`(${interaction.user.username}) Error deleting script response message:`, err)), (config.scripts.scriptResponseDeleteSeconds * 1000));
                         }
                     })
             }

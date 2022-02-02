@@ -11,11 +11,14 @@
         "truncateCommand": "truncate",
         "scriptCommand": "scripts",
         "madQueryCommand": "mad",
-        "linksCommand": "links"
+        "linksCommand": "links",
+        "devicesCommand": "devices",
+        "noProtoCommand": "noproto"
     },
     "pm2": {
         "mads": [""],
-        "ignore": [""]
+        "ignore": [""],
+        "pm2ResponseDeleteSeconds": 0
     },
     "roles": {
         "sendRoleMessage": true,
@@ -25,7 +28,9 @@
             "truncate": [],
             "scripts": [],
             "queries": [],
-            "links": []
+            "links": [],
+            "deviceInfo": [],
+            "deviceInfoControl": []
         }
     },
     "truncate": {
@@ -41,7 +46,68 @@
         "host": "",
         "user": "",
         "password": "",
-        "database": "",
-        "onlyRestartBeforeTime": ""
+        "database": ""
+    },
+    "devices": {
+        "noProtoMinutes": 20,
+        "noProtoCheckMinutes": 20,
+        "noProtoChannelID": "",
+        "noProtoIncludeIdle": false,
+        "checkDeleteMinutes": 20,
+        "infoMessageDeleteSeconds": 0,
+        "statusButtonsDeleteMinutes": 0,
+        "buttonLabelRemove": ["ATV"],
+        "displayOptions": {
+            "deviceID": true,
+            "instance": true,
+            "restartInfo": true,
+            "rebootInfo": true,
+            "loginInfo": true
+        }
+    },
+    "deviceControl": {
+        "path": "/home/USERNAME/deviceControl/",
+        "controlResponseDeleteSeconds": 0,
+        "logcatDeleteSeconds": 0,
+        "screenshotDeleteSeconds": 0,
+        "powerCycleType": ""
+    },
+    "stats": {
+        "database": {
+            "host": "",
+            "user": "",
+            "password": "",
+            "database": ""
+        },
+        "dataPointCount": {
+            "hourly": 72,
+            "daily": 30
+        },
+        "graphDeleteSeconds": 0,
+        "deviceInfo": {
+            "arch": false,
+            "productmodel": false,
+            "rom": true,
+            "pogo": true,
+            "rgc": true,
+            "pogodroid": true,
+            "vm_script": false,
+            "55vmapper": false,
+            "vmapper": false,
+            "magisk": false,
+            "magisk_modules": false,
+            "pogo_update": true,
+            "pd_update": true,
+            "rgc_update": true,
+            "vm_update": false,
+            "pingreboot": false,
+            "temperature": true,
+            "ip": true,
+            "ex_ip": false,
+            "MACw": false,
+            "MACe": true,
+            "hostname": true,
+            "gmail": false
+        }
     }
 }

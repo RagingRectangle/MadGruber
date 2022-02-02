@@ -51,10 +51,10 @@ module.exports = {
                 let countQuery = `SELECT COUNT(*) FROM ${table}`;
                 connection.query(countQuery, function (err, results) {
                     if (err) {
-                        console.log("Count Query Error:", err);
+                        console.log(`(${interaction.user.username}) Count Query Error:`, err);
                     } else {
                         let count = results[0]['COUNT(*)'].toLocaleString();
-                        console.log(`SELECT COUNT(*) FROM ${config.madDB.database}.${table}: ${count}`);
+                        console.log(`(${interaction.user.username}) SELECT COUNT(*) FROM ${config.madDB.database}.${table}: ${count}`);
                         interaction.channel.send(`Current ${config.madDB.database} ${countType}: ${count}`).catch(console.error);
                     }
                 }) //End of query

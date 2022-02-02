@@ -67,10 +67,10 @@ module.exports = {
             let truncateQuery = `TRUNCATE ${tables[t]}`;
             connection.query(truncateQuery, function (err, results) {
                 if (err) {
-                    console.log(`Error truncating ${config.madDB.database}.${tables[t]}:`, err);
+                    console.log(`(${interaction.user.username}) Error truncating ${config.madDB.database}.${tables[t]}:`, err);
                     bad.push(tables[t]);
                 } else {
-                    console.log(`${config.madDB.database}.${tables[t]} truncated`);
+                    console.log(`${config.madDB.database}.${tables[t]} truncated by ${interaction.user.username}`);
                     good.push(tables[t]);
                     if (tables[t] === 'trs_quest' && config.pm2.mads.length > 0) {
                         let date = new Date();
@@ -98,7 +98,7 @@ module.exports = {
             description = description.concat(`\n\nFailed:\n- ${bad.join('\n- ')}`);
         }
         interaction.message.edit({
-            embeds: [new MessageEmbed().setTitle('Truncate Results:').setDescription(description).setColor(color)],
+            embeds: [new MessageEmbed().setTitle('Truncate Results:').setDescription(description).setColor(color).setFooter(`${interaction.user.username}`)],
             components: []
         }).catch(console.error);
         if (restartMAD === true) {
@@ -139,10 +139,10 @@ module.exports = {
                     let processName = mads[m];
                     pm2.restart(processName, (err, response) => {
                         if (err) {
-                            console.error(`PM2 ${mads[m]} restart error:`, err);
+                            console.error(`(${interaction.user.username}) PM2 ${mads[m]} restart error:`, err);
                             bad.push(mads[m]);
                         } else {
-                            console.log(`${mads[m]} restarted`);
+                            console.log(`${mads[m]} restarted by ${interaction.user.username}`);
                             good.push(mads[m]);
                         }
                     }) //End of pm2.restart
@@ -153,16 +153,16 @@ module.exports = {
         await new Promise(done => setTimeout(done, 5000 * mads.length + 1000));
         pm2.disconnect();
         color = '00841E';
-        var newDescription = `${description}\n\n**MAD Restart Results:**\nSuccessful:\n- ${good.join('\n- ')}\n\n`;
+        var newDescription = `${description}\n\n**MAD Restart Results:**\nSuccessful:\n- ${good.join('\n- ')}`;
         if (good.length == 0) {
-            newDescription = description;
+            newDescription = newDescription.concat(`None!`);
         }
         if (bad.length > 0) {
             color = '9E0000';
-            newDescription = newDescription.concat(`Failed:\n- ${bad.join('\n- ')}`);
+            newDescription = newDescription.concat(`\n\nFailed:\n- ${bad.join('\n- ')}`);
         }
         interaction.message.edit({
-            embeds: [new MessageEmbed().setTitle('Truncate Results:').setDescription(newDescription).setColor(color)],
+            embeds: [new MessageEmbed().setTitle('Truncate Results:').setDescription(newDescription).setColor(color).setFooter(`${interaction.user.username}`)],
             components: []
         }).catch(console.error);
         //})
