@@ -1,7 +1,7 @@
 {
   "name": "madgruber",
-  "version": "dev3.1.0",
-  "description": "Discord bot that does the stuffs",
+  "version": "3.1.1",
+  "description": "Discord bot that can do almost anything (except for throat rips)",
   "main": "madgruber.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
