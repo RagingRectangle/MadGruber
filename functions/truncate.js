@@ -153,13 +153,13 @@ module.exports = {
         await new Promise(done => setTimeout(done, 5000 * mads.length + 1000));
         pm2.disconnect();
         color = '00841E';
-        var newDescription = `${description}\n\n**MAD Restart Results:**\nSuccessful:\n- ${good.join('\n- ')}\n\n`;
+        var newDescription = `${description}\n\n**MAD Restart Results:**\nSuccessful:\n- ${good.join('\n- ')}`;
         if (good.length == 0) {
-            newDescription = description;
+            newDescription = newDescription.concat(`None!`);
         }
         if (bad.length > 0) {
             color = '9E0000';
-            newDescription = newDescription.concat(`Failed:\n- ${bad.join('\n- ')}`);
+            newDescription = newDescription.concat(`\n\nFailed:\n- ${bad.join('\n- ')}`);
         }
         interaction.message.edit({
             embeds: [new MessageEmbed().setTitle('Truncate Results:').setDescription(newDescription).setColor(color).setFooter(`${interaction.user.username}`)],
