@@ -295,6 +295,7 @@ module.exports = {
             if (config.devices.displayOptions.rebootInfo === true) {
                 deviceInfoArray.push(`**last reboot:** ${moment(device.lastPogoReboot).from(moment())} (#${device.globalrebootcount})`);
             }
+            let cycleStatPosition = deviceInfoArray.length;
             if (config.devices.displayOptions.deviceID === true) {
                 deviceInfoArray.push(`**deviceID:** ${device.device_id}`);
             }
@@ -313,20 +314,35 @@ module.exports = {
                     if (err) {
                         console.log("Stats Info Query Error:", err);
                     } else {
-                        getStatsDeviceInfo(origin, color, deviceInfoArray, statsResults[0]);
+                        getStatsDeviceInfo(origin, color, deviceInfoArray, statsResults[0], cycleStatPosition);
                     }
                 }); //End of query
                 connectionDeviceInfo.end();
             }
         } //End of parseDeviceInfo()
 
-        async function getStatsDeviceInfo(origin, color, deviceInfoArray, statsDevice) {
+        async function getStatsDeviceInfo(origin, color, deviceInfoArray, statsDevice, cycleStatPosition) {
             for (const [key, value] of Object.entries(statsDevice)) {
                 if (config.stats.deviceInfo[key] === true) {
                     deviceInfoArray.push(`**${key}:** ${value}`);
                 }
             }
-            createStatsList(origin, color, deviceInfoArray);
+            if (config.stats.deviceInfo.cycle === true) {
+                let connectionCycleInfo = mysql.createConnection(config.stats.database);
+                let cycleQuery = `SELECT * FROM relay WHERE origin = "${origin}"`;
+                connectionCycleInfo.query(cycleQuery, function (err, cycleResults) {
+                    if (err || cycleResults.length == 0) {
+                        console.log("Cycle Stat Query Error:", err);
+                        createStatsList(origin, color, deviceInfoArray);
+                    } else {
+                        deviceInfoArray.splice(cycleStatPosition, 0, `**last cycle:** ${moment(cycleResults[0].lastCycle).from(moment())} (#${cycleResults[0].totCycle})`);
+                        createStatsList(origin, color, deviceInfoArray);
+                    }
+                }); //End of query
+                connectionCycleInfo.end();
+            } else {
+                createStatsList(origin, color, deviceInfoArray);
+            }
         } //End of getStatsDeviceInfo()
 
         async function createStatsList(origin, color, deviceInfoArray) {
@@ -383,7 +399,6 @@ module.exports = {
                     value: `${config.serverName}~deviceStats~${origin}~temperature~daily`
                 },
             ];
-
             let statsListComponent = new MessageActionRow()
                 .addComponents(
                     new MessageSelectMenu()
@@ -391,8 +406,6 @@ module.exports = {
                     .setPlaceholder(`${origin} Stats`)
                     .addOptions(statsSelectList)
                 );
-
-
             sendDeviceInfo(origin, color, deviceInfoArray, statsListComponent);
         } //End of createStatsList()
 

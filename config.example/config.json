@@ -66,7 +66,7 @@
         }
     },
     "deviceControl": {
-        "path": "/home/USERNAME/deviceControl/",
+        "path": "",
         "controlResponseDeleteSeconds": 0,
         "logcatDeleteSeconds": 0,
         "screenshotDeleteSeconds": 0,
@@ -107,7 +107,8 @@
             "MACw": false,
             "MACe": true,
             "hostname": true,
-            "gmail": false
+            "gmail": false,
+            "cycle": false
         }
     }
 }

@@ -132,9 +132,9 @@ Stats:
 - **adminOnly:** Script level overrides to ignore users with script role (true/false).
 - **description:** Short summary shown in list.
 - **fullFilePath:** The absolute path to the file.
-    - Ex: `/home/mad/devicecontrol.sh`
+    - Ex: `/home/mad/deviceControl/devicecontrol.sh`
     - Tip: If the same variables are always passed you can add them to the path.
-    - Ex: `/home/mad/devicecontrol.sh poe4 cycle 20`
+    - Ex: `/home/mad/deviceControl/devicecontrol.sh poe4 cycle 20`
 
 - **variables:** Make sure each variable is in the correct order because that is how it will be sent with the script.
     - **varDescription:** Summary of this list of variables that will be shown.  ("Pick which device" or "Choose the port").

@@ -46,6 +46,10 @@ module.exports = {
                     if (controlType === 'logcatDevice') {
                         fs.renameSync('./logcat.txt', `logcat_${origin}.txt`);
                         logFile.push(new MessageAttachment(`logcat_${origin}.txt`));
+                        try {
+                            fs.renameSync('./vm.log', `vm_${origin}.log`);
+                            logFile.push(new MessageAttachment(`vm_${origin}.log`));
+                        } catch (err) {}
                     }
                     if (controlType === 'screenshot') {
                         fs.renameSync('./screenshot.jpg', `screenshot_${origin}.jpg`);
@@ -66,6 +70,9 @@ module.exports = {
                             })
                             .then(() => {
                                 fs.rmSync(`logcat_${origin}.txt`);
+                                try {
+                                    fs.rmSync(`vm_${origin}.log`);
+                                } catch (err) {}
                             });
                     }
                     if (controlType === 'screenshot' && exitCode !== 1) {
