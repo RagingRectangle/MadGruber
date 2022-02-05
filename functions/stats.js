@@ -9,6 +9,7 @@ const {
 } = require('discord.js');
 const mysql = require('mysql');
 const QuickChart = require('quickchart-js');
+const convert = require('color-convert');
 const moment = require('moment');
 const config = require('../config/config.json');
 
@@ -77,6 +78,12 @@ module.exports = {
             rplLength = config.stats.dataPointCount.daily;
             rplStamp = 'MM-DD';
         }
+        let color1 = config.stats.colorPalette.color1.toLowerCase();
+        let background1 = `rgba(${convert.keyword.rgb(color1).join(', ')}, 0.5)`;
+        let color2 = config.stats.colorPalette.color2.toLowerCase();
+        let background2 = `rgba(${convert.keyword.rgb(color2).join(', ')}, 0.5)`;
+        let color3 = config.stats.colorPalette.color3.toLowerCase();
+        let background3 = `rgba(${convert.keyword.rgb(color3).join(', ')}, 0.5)`;
         if (statType === 'uptime') {
             let rawDataQuery = `SELECT datetime "time", 100*sum(TRPL)/sum(RPL) AS "rawData" FROM stats.stats_worker WHERE RPL = '${rpl}' GROUP BY 1 ORDER BY datetime DESC LIMIT ${rplLength}`;
             let timeProtoQuery = `SELECT datetime AS "time", 100*(sum(RPL)-sum(missingProtoMinute))/sum(RPL) AS "timeProto" FROM stats_worker WHERE RPL = '${rpl}' GROUP BY 1 ORDER BY datetime DESC LIMIT ${rplLength}`;
@@ -105,16 +112,16 @@ module.exports = {
                                     label: `Raw Data`,
                                     data: rawData,
                                     fill: true,
-                                    borderColor: 'orange',
-                                    backgroundColor: 'rgba(245, 166, 35, .3)',
+                                    borderColor: color1,
+                                    backgroundColor: background1,
                                     pointRadius: 0,
                                 },
                                 {
                                     label: `Time Proto`,
                                     data: timeProto,
                                     fill: true,
-                                    borderColor: 'green',
-                                    backgroundColor: 'rgba(100, 182, 0, .3)',
+                                    borderColor: color2,
+                                    backgroundColor: background2,
                                     pointRadius: 0,
                                 }
                             ]
@@ -163,16 +170,16 @@ module.exports = {
                                     label: `Restarts`,
                                     data: restarts,
                                     fill: true,
-                                    borderColor: "orange",
-                                    backgroundColor: 'rgba(245, 166, 35, .3)',
+                                    borderColor: color1,
+                                    backgroundColor: background1,
                                     pointRadius: 0,
                                 },
                                 {
                                     label: `Reboots`,
                                     data: reboots,
                                     fill: true,
-                                    borderColor: 'green',
-                                    backgroundColor: 'rgba(100, 182, 0, .3)',
+                                    borderColor: color2,
+                                    backgroundColor: background2,
                                     pointRadius: 0,
                                 }
                             ]
@@ -217,8 +224,8 @@ module.exports = {
                                     label: `Mons`,
                                     data: mons,
                                     fill: true,
-                                    borderColor: "orange",
-                                    backgroundColor: 'rgba(245, 166, 35, .3)',
+                                    borderColor: color1,
+                                    backgroundColor: background1,
                                     pointRadius: 0,
                                     yAxisID: 'left_mons'
                                 },
@@ -226,8 +233,8 @@ module.exports = {
                                     label: `IV`,
                                     data: iv,
                                     fill: true,
-                                    borderColor: "green",
-                                    backgroundColor: 'rgba(100, 182, 0, .3)',
+                                    borderColor: color2,
+                                    backgroundColor: background2,
                                     pointRadius: 0,
                                     yAxisID: 'right_iv'
                                 }
@@ -244,7 +251,7 @@ module.exports = {
                                         ticks: {
                                             suggestedMin: 0,
                                             suggestedMax: 1,
-                                            fontColor: 'orange',
+                                            fontColor: color1,
                                             callback: (val) => {
                                                 return val.toLocaleString();
                                             }
@@ -258,7 +265,7 @@ module.exports = {
                                         ticks: {
                                             suggestedMin: 0,
                                             suggestedMax: 100,
-                                            fontColor: 'green',
+                                            fontColor: color2,
                                             callback: (val) => {
                                                 return val + ' %'
                                             }
@@ -301,16 +308,16 @@ module.exports = {
                         label: `Teleport`,
                         data: teleport,
                         fill: true,
-                        borderColor: "green",
-                        backgroundColor: 'rgba(100, 182, 0, .3)',
+                        borderColor: color1,
+                        backgroundColor: background1,
                         pointRadius: 0,
                     }
                     let walkData = {
                         label: `Walk`,
                         data: walk,
                         fill: true,
-                        borderColor: "orange",
-                        backgroundColor: 'rgba(245, 166, 35, .3)',
+                        borderColor: color2,
+                        backgroundColor: background2,
                         pointRadius: 0,
                     }
                     //Has only teleport
@@ -390,8 +397,8 @@ module.exports = {
                                     label: `Hundos`,
                                     data: hundos,
                                     fill: true,
-                                    borderColor: "orange",
-                                    backgroundColor: 'rgba(245, 166, 35, .3)',
+                                    borderColor: color1,
+                                    backgroundColor: background1,
                                     pointRadius: 0,
                                     yAxisID: 'left'
                                 },
@@ -399,8 +406,8 @@ module.exports = {
                                     label: `Nundos`,
                                     data: nundos,
                                     fill: true,
-                                    borderColor: "green",
-                                    backgroundColor: 'rgba(100, 182, 0, .3)',
+                                    borderColor: color2,
+                                    backgroundColor: background2,
                                     pointRadius: 0,
                                     yAxisID: 'left'
                                 },
@@ -408,8 +415,8 @@ module.exports = {
                                     label: `Shinies`,
                                     data: shinies,
                                     fill: true,
-                                    borderColor: "red",
-                                    backgroundColor: 'rgba(150, 0, 0, .3)',
+                                    borderColor: color3,
+                                    backgroundColor: background3,
                                     pointRadius: 0,
                                     yAxisID: 'right'
                                 }
@@ -440,7 +447,7 @@ module.exports = {
                                         ticks: {
                                             suggestedMin: 0,
                                             suggestedMax: 1,
-                                            fontColor: 'red',
+                                            fontColor: color3,
                                             callback: (val) => {
                                                 return val.toLocaleString();
                                             }
@@ -641,16 +648,16 @@ module.exports = {
                                     label: `Restarts`,
                                     data: restarts,
                                     fill: true,
-                                    borderColor: 'orange',
-                                    backgroundColor: 'rgba(245, 166, 35, .3)',
+                                    borderColor: color1,
+                                    backgroundColor: background1,
                                     pointRadius: 0,
                                 },
                                 {
                                     label: `Reboots`,
                                     data: reboots,
                                     fill: true,
-                                    borderColor: 'green',
-                                    backgroundColor: 'rgba(100, 182, 0, .3)',
+                                    borderColor: color2,
+                                    backgroundColor: background2,
                                     pointRadius: 0,
                                 }
                             ]

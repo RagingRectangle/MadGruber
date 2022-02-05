@@ -120,6 +120,7 @@ Stats:
 - [Install info](https://github.com/dkmur/Stats)
 - **database:** Basic stats database info.
 - **dataPointCount:** How many individual points on graphs for each type.
+- **colorPalette:** Colors used for stat graphs. Accepts all common color names. (Default 1:orange, 2:green, 3:navy)
 - **graphDeleteSeconds:** How long to wait until graphs are deleted (Set to 0 to never delete).
 - **deviceInfo:** Customize what is added to the device info displayed (true/false).
 

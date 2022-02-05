@@ -85,6 +85,11 @@
             "hourly": 72,
             "daily": 30
         },
+        "colorPalette": {
+            "color1": "orange",
+            "color2": "green",
+            "color3": "navy"
+        },
         "graphDeleteSeconds": 0,
         "deviceInfo": {
             "arch": false,
