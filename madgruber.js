@@ -23,6 +23,7 @@ const Truncate = require('./functions/truncate.js');
 const Links = require('./functions/links.js');
 const Devices = require('./functions/devices.js');
 const Roles = require('./functions/roles.js');
+const Stats = require('./functions/stats.js');
 const Help = require('./functions/help.js');
 const config = require('./config/config.json');
 const roleConfig = require('./config/roles.json');
@@ -116,6 +117,12 @@ client.on('messageCreate', async (receivedMessage) => {
 	else if (config.madDB.host && config.discord.noProtoCommand && message === `${config.discord.prefix}${config.discord.noProtoCommand}`) {
 		if (userPerms.includes('admin') || userPerms.includes('deviceInfoControl') || userPerms.includes('deviceInfo')) {
 			Devices.noProtoDevices(client, receivedMessage, 'search');
+		}
+	}
+	//Stats
+	else if (config.stats.database.host && config.discord.systemStatsCommand && message === `${config.discord.prefix}${config.discord.systemStatsCommand}`) {
+		if (userPerms.includes('admin') || userPerms.includes('systemStats')) {
+			Stats.stats(client, receivedMessage);
 		}
 	}
 	//Help Menu

@@ -21,7 +21,7 @@ Join the Discord server for any help and to keep up with updates: https://discor
 - Click device buttons to get basic info
 - Command to check for only devices that haven't been seen lately (automated checks optional)
 - dkmur's deviceControl integration (Pause/unpause/start/quit/reboot/clear data/logcat/screenshot/power cycle)
-- dkmur's Stats integration (expanded device info/graphs for different device stats)
+- dkmur's Stats integration (expanded device info/graphs for different device and system stats)
 
   
   
@@ -73,6 +73,7 @@ Discord:
 - **linksCommand:** Command to show list of bookmarks.
 - **devicesCommand:** Command to get status of all devices.
 - **noProtoCommand:** Command to see noProto devices.
+- **systemStatsCommand:** Command to see system stat options (if using dkmur's Stats).
 
 PM2:
 - **mads:** List of MAD PM2 processes that should be restarted after truncating quests.
@@ -132,9 +133,9 @@ Stats:
 - **adminOnly:** Script level overrides to ignore users with script role (true/false).
 - **description:** Short summary shown in list.
 - **fullFilePath:** The absolute path to the file.
-    - Ex: `/home/mad/deviceControl/devicecontrol.sh`
+    - Ex: `/home/mad/devicecontrol.sh`
     - Tip: If the same variables are always passed you can add them to the path.
-    - Ex: `/home/mad/deviceControl/devicecontrol.sh poe4 cycle 20`
+    - Ex: `/home/mad/devicecontrol.sh poe4 cycle 20`
 
 - **variables:** Make sure each variable is in the correct order because that is how it will be sent with the script.
     - **varDescription:** Summary of this list of variables that will be shown.  ("Pick which device" or "Choose the port").
@@ -183,6 +184,7 @@ Stats:
   - Press device button to get more info.
   - If deviceControl and/or Stats is installed then dropdown lists will appear.
 - See any naughty devices with `<prefix><noProtoCommand>`
+- See system stats with `<prefix><systemStatsCommand>` (Requires dkmur's Stats)
 
  
   

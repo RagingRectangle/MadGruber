@@ -13,7 +13,8 @@
         "madQueryCommand": "mad",
         "linksCommand": "links",
         "devicesCommand": "devices",
-        "noProtoCommand": "noproto"
+        "noProtoCommand": "noproto",
+        "systemStatsCommand": "stats"
     },
     "pm2": {
         "mads": [""],
@@ -30,7 +31,8 @@
             "queries": [],
             "links": [],
             "deviceInfo": [],
-            "deviceInfoControl": []
+            "deviceInfoControl": [],
+            "systemStats": []
         }
     },
     "truncate": {

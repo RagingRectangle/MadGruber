@@ -70,6 +70,15 @@ module.exports = {
                 Stats.deviceStats(interaction, origin, statVars);
             }
         } //End of DeviceStats
+
+        //SystemStats
+        if (userPerms.includes('systemStats')) {
+            if (interactionID.startsWith('systemStats~')) {
+                interaction.deferUpdate();
+                let statDuration = interactionID.replace('systemStats~', '');
+                Stats.systemStats(interaction, statDuration, interaction.values[0].replace(`${config.serverName}~systemStats~`,''));
+            }
+        } //End of SystemStats
     }, //End of listInteraction()
 
 

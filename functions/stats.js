@@ -8,12 +8,511 @@ const {
     MessageButton
 } = require('discord.js');
 const mysql = require('mysql');
-const shell = require('shelljs');
 const QuickChart = require('quickchart-js');
 const moment = require('moment');
 const config = require('../config/config.json');
 
 module.exports = {
+    stats: async function stats(client, receivedMessage) {
+        let systemStatsList = [{
+                label: `Despawn Time Left`,
+                value: `${config.serverName}~systemStats~despawn%`
+            },
+            {
+                label: `Hundos / Nundos / Shinies`,
+                value: `${config.serverName}~systemStats~hundoNundoShiny`
+            },
+            {
+                label: `Location Handling`,
+                value: `${config.serverName}~systemStats~locationHandling`
+            },
+            {
+                label: `Mons Scanned`,
+                value: `${config.serverName}~systemStats~monsScanned`
+            },
+            {
+                label: `Restarts / Reboots`,
+                value: `${config.serverName}~systemStats~restartsReboots`
+            },
+            {
+                label: `Uptime`,
+                value: `${config.serverName}~systemStats~uptime`
+            }
+        ];
+        let componentHourly = new MessageActionRow()
+            .addComponents(
+                new MessageSelectMenu()
+                .setCustomId(`${config.serverName}~systemStats~hourly`)
+                .setPlaceholder(`Hourly ${config.serverName} Stats`)
+                .addOptions(systemStatsList)
+            );
+        let componentDaily = new MessageActionRow()
+            .addComponents(
+                new MessageSelectMenu()
+                .setCustomId(`${config.serverName}~systemStats~daily`)
+                .setPlaceholder(`Daily ${config.serverName} Stats`)
+                .addOptions(systemStatsList)
+            );
+        receivedMessage.channel.send({
+            embeds: [new MessageEmbed().setTitle(`${config.serverName} Stats`).setDescription(`Select option below for more info:`).setFooter(`${receivedMessage.author.username}`)],
+            components: [componentHourly, componentDaily]
+        }).catch(console.error);
+    }, //End of stats()
+
+    systemStats: async function systemStats(interaction, statDuration, statType) {
+        interaction.message.edit({
+            embeds: interaction.embeds,
+            components: interaction.components
+        }).catch(console.error);
+        let statsDB = config.stats.database;
+        statsDB.multipleStatements = true;
+        let connectionStats = mysql.createConnection(statsDB);
+        var rpl = 60;
+        var rplType = 'Hourly';
+        var rplLength = config.stats.dataPointCount.hourly;
+        var rplStamp = 'MM-DD HH:mm';
+        if (statDuration === 'daily') {
+            rpl = 1440;
+            rplType = 'Daily';
+            rplLength = config.stats.dataPointCount.daily;
+            rplStamp = 'MM-DD';
+        }
+        if (statType === 'uptime') {
+            let rawDataQuery = `SELECT datetime "time", 100*sum(TRPL)/sum(RPL) AS "rawData" FROM stats.stats_worker WHERE RPL = '${rpl}' GROUP BY 1 ORDER BY datetime DESC LIMIT ${rplLength}`;
+            let timeProtoQuery = `SELECT datetime AS "time", 100*(sum(RPL)-sum(missingProtoMinute))/sum(RPL) AS "timeProto" FROM stats_worker WHERE RPL = '${rpl}' GROUP BY 1 ORDER BY datetime DESC LIMIT ${rplLength}`;
+            connectionStats.query(`${rawDataQuery}; ${timeProtoQuery}`, async function (err, resultsTemp) {
+                if (err) {
+                    console.log(`Error getting uptime stats:`, err);
+                } else {
+                    let rawDataResults = resultsTemp[0].reverse();
+                    let timeProtoResults = resultsTemp[1].reverse();
+                    var labels = [];
+                    var rawData = [];
+                    var timeProto = [];
+                    rawDataResults.forEach(entry => {
+                        labels.push(moment(entry.time).format(rplStamp));
+                        rawData.push(entry.rawData);
+                    });
+                    timeProtoResults.forEach(entry => {
+                        timeProto.push(entry.timeProto);
+                    });
+                    let myChart = new QuickChart();
+                    myChart.setConfig({
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                    label: `Raw Data`,
+                                    data: rawData,
+                                    fill: true,
+                                    borderColor: 'orange',
+                                    backgroundColor: 'rgba(245, 166, 35, .3)',
+                                    pointRadius: 0,
+                                },
+                                {
+                                    label: `Time Proto`,
+                                    data: timeProto,
+                                    fill: true,
+                                    borderColor: 'green',
+                                    backgroundColor: 'rgba(100, 182, 0, .3)',
+                                    pointRadius: 0,
+                                }
+                            ]
+                        },
+                        options: {
+                            scales: {
+                                yAxes: [{
+                                    ticks: {
+                                        suggestedMin: 95,
+                                        suggestedMax: 100,
+                                        callback: (val) => {
+                                            return val + ' %'
+                                        }
+                                    }
+                                }],
+                            }
+                        }
+                    });
+                    const url = await myChart.getShortUrl();
+                    sendChart(`Uptime (${rplType})`, url);
+                }
+            });
+
+        } //End of uptime
+        else if (statType === 'restartsReboots') {
+            let restartRebootQuery = `SELECT datetime AS "time", sum(Res)/count(Worker) AS "restarts", sum(Reb)/count(Worker) AS "reboots" FROM stats_worker WHERE RPL = '${rpl}' GROUP BY 1 ORDER BY datetime DESC LIMIT ${rplLength}`;
+            connectionStats.query(restartRebootQuery, async function (err, resultsTemp) {
+                if (err) {
+                    console.log(`Error getting restart/reboot stats:`, err);
+                } else {
+                    let results = resultsTemp.reverse();
+                    var labels = [];
+                    var restarts = [];
+                    var reboots = [];
+                    results.forEach(entry => {
+                        labels.push(moment(entry.time).format(rplStamp));
+                        restarts.push(entry.restarts);
+                        reboots.push(entry.reboots);
+                    });
+                    let myChart = new QuickChart();
+                    myChart.setConfig({
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                    label: `Restarts`,
+                                    data: restarts,
+                                    fill: true,
+                                    borderColor: "orange",
+                                    backgroundColor: 'rgba(245, 166, 35, .3)',
+                                    pointRadius: 0,
+                                },
+                                {
+                                    label: `Reboots`,
+                                    data: reboots,
+                                    fill: true,
+                                    borderColor: 'green',
+                                    backgroundColor: 'rgba(100, 182, 0, .3)',
+                                    pointRadius: 0,
+                                }
+                            ]
+                        },
+                        options: {
+                            scales: {
+                                yAxes: [{
+                                    ticks: {
+                                        suggestedMin: 0,
+                                        suggestedMax: 1,
+                                    }
+                                }],
+                            }
+                        }
+                    });
+                    const url = await myChart.getShortUrl();
+                    sendChart(`Restarts/Reboots Per Device (${rplType})`, url);
+                }
+            });
+        } //End of restartsReboots
+        else if (statType === 'monsScanned') {
+            let monsQuery = `SELECT a.datetime "time", sum(Mons_all) AS "mons", 100*sum(a.MonsIV)/sum(a.Mons_all) AS "iv" FROM stats_area a WHERE a.RPL = '${rpl}' and a.Fence <> 'Unfenced' GROUP BY 1 ORDER BY datetime DESC LIMIT ${rplLength}`;
+            connectionStats.query(monsQuery, async function (err, resultsTemp) {
+                if (err) {
+                    console.log(`Error getting monsScanned stats:`, err);
+                } else {
+                    let results = resultsTemp.reverse();
+                    var labels = [];
+                    var mons = [];
+                    var iv = [];
+                    results.forEach(entry => {
+                        labels.push(moment(entry.time).format(rplStamp));
+                        mons.push(entry.mons);
+                        iv.push(entry.iv);
+                    });
+                    let myChart = new QuickChart();
+                    myChart.setConfig({
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                    label: `Mons`,
+                                    data: mons,
+                                    fill: true,
+                                    borderColor: "orange",
+                                    backgroundColor: 'rgba(245, 166, 35, .3)',
+                                    pointRadius: 0,
+                                    yAxisID: 'left_mons'
+                                },
+                                {
+                                    label: `IV`,
+                                    data: iv,
+                                    fill: true,
+                                    borderColor: "green",
+                                    backgroundColor: 'rgba(100, 182, 0, .3)',
+                                    pointRadius: 0,
+                                    yAxisID: 'right_iv'
+                                }
+                            ]
+                        },
+                        options: {
+                            "stacked": false,
+                            scales: {
+                                yAxes: [{
+                                        id: "left_mons",
+                                        type: "linear",
+                                        display: true,
+                                        position: "left",
+                                        ticks: {
+                                            suggestedMin: 0,
+                                            suggestedMax: 1,
+                                            fontColor: 'orange',
+                                            callback: (val) => {
+                                                return val.toLocaleString();
+                                            }
+                                        }
+                                    },
+                                    {
+                                        id: "right_iv",
+                                        type: "linear",
+                                        display: true,
+                                        position: "right",
+                                        ticks: {
+                                            suggestedMin: 0,
+                                            suggestedMax: 100,
+                                            fontColor: 'green',
+                                            callback: (val) => {
+                                                return val + ' %'
+                                            }
+                                        }
+                                    }
+                                ],
+                            }
+                        }
+                    });
+                    const url = await myChart.getShortUrl();
+                    sendChart(`Mons Scanned (${rplType})`, url);
+                }
+            });
+        } //End of monsScanned
+        else if (statType === 'locationHandling') {
+            let handlingQuery = `SELECT datetime "time", 100*sum(LocOk)/sum(Tloc) AS "total", 100*sum(TpOk)/sum(Tp) AS "teleport", 100*sum(WkOk)/sum(Wk) AS "walk" FROM stats_worker WHERE RPL = '${rpl}' GROUP BY 1 ORDER BY datetime DESC limit ${rplLength}`;
+            connectionStats.query(handlingQuery, async function (err, resultsTemp) {
+                if (err) {
+                    console.log(`Error getting handling stats:`, err);
+                } else {
+                    let results = resultsTemp.reverse();
+                    var labels = [];
+                    var teleport = [];
+                    var nullTeleport = true;
+                    var walk = [];
+                    var nullWalk = true;
+                    results.forEach(entry => {
+                        labels.push(moment(entry.time).format(rplStamp));
+                        teleport.push(entry.teleport);
+                        walk.push(entry.walk);
+                        if (entry.teleport !== null) {
+                            nullTeleport = false;
+                        }
+                        if (entry.walk !== null) {
+                            nullWalk = false;
+                        }
+                    });
+                    var datasets = [];
+                    let teleportData = {
+                        label: `Teleport`,
+                        data: teleport,
+                        fill: true,
+                        borderColor: "green",
+                        backgroundColor: 'rgba(100, 182, 0, .3)',
+                        pointRadius: 0,
+                    }
+                    let walkData = {
+                        label: `Walk`,
+                        data: walk,
+                        fill: true,
+                        borderColor: "orange",
+                        backgroundColor: 'rgba(245, 166, 35, .3)',
+                        pointRadius: 0,
+                    }
+                    //Has only teleport
+                    if (nullTeleport === false && nullWalk === true) {
+                        teleportData.borderColor = QuickChart.getGradientFillHelper('vertical', ["#00A650", "#FDB813", "#FF000B"]);
+                        teleportData.fill = false;
+                        datasets.push(teleportData);
+                    }
+                    //Has only walk
+                    else if (nullTeleport === true && nullWalk === false) {
+                        walkData.borderColor = QuickChart.getGradientFillHelper('vertical', ["#00A650", "#FDB813", "#FF000B"]);
+                        walkData.fill = false;
+                        datasets.push(walkData);
+                    }
+                    //Has both teleport and walk data
+                    else {
+                        datasets.push(teleportData);
+                        datasets.push(walkData);
+                    }
+                    let myChart = new QuickChart();
+                    myChart.setConfig({
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: datasets
+                        },
+                        options: {
+                            scales: {
+                                yAxes: [{
+                                    ticks: {
+                                        suggestedMin: 97,
+                                        suggestedMax: 100,
+                                        callback: (val) => {
+                                            return val + ' %'
+                                        }
+                                    }
+                                }],
+                            }
+                        }
+                    });
+                    const url = await myChart.getShortUrl();
+                    sendChart(`Location Handling (${rplType})`, url);
+                }
+            })
+        } //End of locationHandling
+        else if (statType === 'hundoNundoShiny') {
+            let hundoQuery = `SELECT datetime 'time', sum(a.iv100) as 'hundo' FROM stats_area a WHERE a.RPL = ${rpl} GROUP BY a.datetime DESC limit ${rplLength}`;
+            let nundoQuery = `SELECT datetime 'time', sum(a.iv0) as 'nundo' FROM stats_area a WHERE a.RPL = ${rpl} GROUP BY a.datetime DESC limit ${rplLength}`;
+            let shinyQuery = `SELECT a.datetime 'time', sum(b.shiny) as 'count', 100*sum(b.shiny)/sum(a.Mons_all) as 'percent' FROM stats_area a, stats_worker b, Area c WHERE a.RPL = '${rpl}' and a.datetime = b.datetime and a.RPL = b.RPL and c.area = a.area and c.origin = b.worker GROUP BY a.datetime DESC LIMIT ${rplLength}`;
+            connectionStats.query(`${hundoQuery}; ${nundoQuery}; ${shinyQuery}`, async function (err, resultsTemp) {
+                if (err) {
+                    console.log(`Error getting hundo/nundo/shiny stats:`, err);
+                } else {
+                    let hundoResults = resultsTemp[0].reverse();
+                    let nundoResults = resultsTemp[1].reverse();
+                    var shinyResults = resultsTemp[2].reverse();
+                    var labels = [];
+                    var hundos = [];
+                    var nundos = [];
+                    var shinies = [];
+                    hundoResults.forEach(entry => {
+                        labels.push(moment(entry.time).format(rplStamp));
+                        hundos.push(entry.hundo);
+                    });
+                    nundoResults.forEach(entry => {
+                        nundos.push(entry.nundo);
+                    });
+                    shinyResults.forEach(entry => {
+                        shinies.push(entry.count);
+                    });
+                    let myChart = new QuickChart();
+                    myChart.setConfig({
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                    label: `Hundos`,
+                                    data: hundos,
+                                    fill: true,
+                                    borderColor: "orange",
+                                    backgroundColor: 'rgba(245, 166, 35, .3)',
+                                    pointRadius: 0,
+                                    yAxisID: 'left'
+                                },
+                                {
+                                    label: `Nundos`,
+                                    data: nundos,
+                                    fill: true,
+                                    borderColor: "green",
+                                    backgroundColor: 'rgba(100, 182, 0, .3)',
+                                    pointRadius: 0,
+                                    yAxisID: 'left'
+                                },
+                                {
+                                    label: `Shinies`,
+                                    data: shinies,
+                                    fill: true,
+                                    borderColor: "red",
+                                    backgroundColor: 'rgba(150, 0, 0, .3)',
+                                    pointRadius: 0,
+                                    yAxisID: 'right'
+                                }
+                            ]
+                        },
+                        options: {
+                            "stacked": false,
+                            scales: {
+                                yAxes: [{
+                                        id: "left",
+                                        type: "linear",
+                                        display: true,
+                                        position: "left",
+                                        ticks: {
+                                            suggestedMin: 0,
+                                            suggestedMax: 1,
+                                            fontColor: 'black',
+                                            callback: (val) => {
+                                                return val.toLocaleString();
+                                            }
+                                        }
+                                    },
+                                    {
+                                        id: "right",
+                                        type: "linear",
+                                        display: true,
+                                        position: "right",
+                                        ticks: {
+                                            suggestedMin: 0,
+                                            suggestedMax: 1,
+                                            fontColor: 'red',
+                                            callback: (val) => {
+                                                return val.toLocaleString();
+                                            }
+                                        }
+                                    }
+                                ],
+                            }
+                        }
+                    });
+                    const url = await myChart.getShortUrl();
+                    sendChart(`Hundos / Nundos / Shinies (${rplType})`, url);
+                }
+            })
+        } //End of hundoNundoShiny
+        else if (statType === 'despawn%') {
+            let despawnQuery = `SELECT a.datetime "time", 100*sum(a.MinutesLeft)/((sum(a.Spawndef15) * 60)+(sum(a.SpawndefNot15) * 30)) AS "despawnTime" FROM stats_area a WHERE a.RPL = '${rpl}' and a.Fence <> 'Unfenced' GROUP BY 1 ORDER BY a.datetime DESC limit ${rplLength}`;
+            connectionStats.query(despawnQuery, async function (err, resultsTemp) {
+                if (err) {
+                    console.log(`Error getting despawn%:`, err);
+                } else {
+                    let results = resultsTemp.reverse();
+                    var labels = [];
+                    var despawnTime = [];
+                    results.forEach(entry => {
+                        labels.push(moment(entry.time).format(rplStamp));
+                        despawnTime.push(entry.despawnTime);
+                    });
+                    let myChart = new QuickChart();
+                    myChart.setConfig({
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: `% Left`,
+                                data: despawnTime,
+                                fill: false,
+                                borderColor: QuickChart.getGradientFillHelper('vertical', ["#00A650", "#FDB813", "#FF000B"]),
+                                pointRadius: 0,
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                yAxes: [{
+                                    ticks: {
+                                        suggestedMin: 50,
+                                        suggestedMax: 50,
+                                        callback: (val) => {
+                                            return val + ' %'
+                                        }
+                                    }
+                                }],
+                            }
+                        }
+                    });
+                    const url = await myChart.getShortUrl();
+                    sendChart(`Despawn Time Left (${rplType})`, url);
+                }
+            });
+        } //End of despawn%
+        connectionStats.end();
+        async function sendChart(title, url) {
+            interaction.message.channel.send({
+                    embeds: [new MessageEmbed().setTitle(title).setImage(url).setFooter(`${interaction.user.username}`)],
+                }).catch(console.error)
+                .then(async msg => {
+                    if (config.stats.graphDeleteSeconds > 0) {
+                        setTimeout(() => msg.delete().catch(err => console.log(`(${interaction.user.username}) Error deleting screenshot:`, err)), (config.stats.graphDeleteSeconds * 1000));
+                    }
+                })
+        } //End of sendChart()
+    }, //End of systemStats()
+
     deviceStats: async function deviceStats(interaction, origin, statVars) {
         interaction.message.edit({
             embeds: interaction.embeds,
@@ -79,7 +578,7 @@ module.exports = {
                         labels.push(moment(entry.Datetime).format(rplStamp));
                         monsScanned.push(entry.Tmon);
                         ivScanned.push(entry.IVmon)
-                    }); //End of forEach(entry)
+                    });
                     let myChart = new QuickChart();
                     myChart.setConfig({
                         type: 'line',
@@ -100,6 +599,19 @@ module.exports = {
                                 }
                             ]
                         },
+                        options: {
+                            scales: {
+                                yAxes: [{
+                                    ticks: {
+                                        suggestedMin: 0,
+                                        suggestedMax: 100,
+                                        callback: (val) => {
+                                            return val.toLocaleString();
+                                        }
+                                    }
+                                }],
+                            }
+                        }
                     });
                     const url = await myChart.getShortUrl();
                     sendChart(`${origin} Mons Scanned (${rplType})`, url);
@@ -119,7 +631,7 @@ module.exports = {
                         labels.push(moment(entry.Datetime).format(rplStamp));
                         restarts.push(entry.Res);
                         reboots.push(entry.Reb);
-                    }); //End of forEach(entry)
+                    });
                     let myChart = new QuickChart();
                     myChart.setConfig({
                         type: 'line',
@@ -130,7 +642,7 @@ module.exports = {
                                     data: restarts,
                                     fill: true,
                                     borderColor: 'orange',
-                                    backgroundColor: 'rgba(245, 166, 35, .5)',
+                                    backgroundColor: 'rgba(245, 166, 35, .3)',
                                     pointRadius: 0,
                                 },
                                 {
@@ -138,11 +650,24 @@ module.exports = {
                                     data: reboots,
                                     fill: true,
                                     borderColor: 'green',
-                                    backgroundColor: 'rgba(100, 182, 0, .5)',
+                                    backgroundColor: 'rgba(100, 182, 0, .3)',
                                     pointRadius: 0,
                                 }
                             ]
                         },
+                        options: {
+                            scales: {
+                                yAxes: [{
+                                    ticks: {
+                                        suggestedMin: 0,
+                                        suggestedMax: 1,
+                                        callback: (val) => {
+                                            return val.toLocaleString();
+                                        }
+                                    }
+                                }],
+                            }
+                        }
                     });
                     const url = await myChart.getShortUrl();
                     sendChart(`${origin} Restarts/Reboots (${rplType})`, url);
@@ -162,7 +687,7 @@ module.exports = {
                         labels.push(moment(entry.Datetime).format(rplStamp));
                         missingMinutes.push(entry.missingProtoMinute);
                         successRate.push((1 - entry.missingProtoMinute / rpl) * 100);
-                    }); //End of forEach(entry)
+                    });
                     let myChart = new QuickChart();
                     myChart.setConfig({
                         type: 'line',
@@ -182,6 +707,9 @@ module.exports = {
                                     ticks: {
                                         suggestedMin: 97,
                                         suggestedMax: 100,
+                                        callback: (val) => {
+                                            return val + ' %'
+                                        }
                                     }
                                 }],
                             }
@@ -207,7 +735,7 @@ module.exports = {
                         labels.push(moment(entry.Datetime).format(rplStamp));
                         locationsTotal.push(entry.Tloc);
                         locationsBad.push(entry.LocNok);
-                    }); //End of forEach(entry)
+                    });
                     let myChart = new QuickChart();
                     myChart.setConfig({
                         type: 'line',
@@ -227,6 +755,19 @@ module.exports = {
                                     pointRadius: 0,
                                 }
                             ]
+                        },
+                        options: {
+                            scales: {
+                                yAxes: [{
+                                    ticks: {
+                                        suggestedMin: 97,
+                                        suggestedMax: 100,
+                                        callback: (val) => {
+                                            return val.toLocaleString();
+                                        }
+                                    }
+                                }],
+                            }
                         }
                     });
                     const url = await myChart.getShortUrl();
@@ -245,7 +786,7 @@ module.exports = {
                     results.forEach(entry => {
                         labels.push(moment(entry.Datetime).format(rplStamp));
                         locationSuccess.push((entry.LocOk / entry.Tloc) * 100);
-                    }); //End of forEach(entry)
+                    });
                     let myChart = new QuickChart();
                     myChart.setConfig({
                         type: 'line',
@@ -265,6 +806,9 @@ module.exports = {
                                     ticks: {
                                         suggestedMin: 97,
                                         suggestedMax: 100,
+                                        callback: (val) => {
+                                            return val + ' %'
+                                        }
                                     }
                                 }],
                             }
@@ -286,7 +830,7 @@ module.exports = {
                     results.forEach(entry => {
                         labels.push(moment(entry.Datetime).format(rplStamp));
                         locationTime.push(entry.TpSt / entry.TpOk);
-                    }); //End of forEach(entry)
+                    });
                     let myChart = new QuickChart();
                     myChart.setConfig({
                         type: 'line',
