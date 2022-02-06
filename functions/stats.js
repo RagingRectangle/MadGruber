@@ -65,6 +65,7 @@ module.exports = {
             embeds: interaction.embeds,
             components: interaction.components
         }).catch(console.error);
+        console.log(`${interaction.user.username} looked up system stats: ${statDuration} ${statType}`);
         let statsDB = config.stats.database;
         statsDB.multipleStatements = true;
         let connectionStats = mysql.createConnection(statsDB);
