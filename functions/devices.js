@@ -185,11 +185,12 @@ module.exports = {
                 buttonArray.sort(sortBy('name'));
                 //Split by instance
                 instanceList.forEach(async instance => {
-                    var content = `**${instance} No Proto Devices:**`;
                     var instanceButtons = [];
+                    var noProtoCount = 0;
                     buttonArray.forEach(buttonObj => {
                         if (instance === buttonObj.instance) {
                             instanceButtons.push(buttonObj.button);
+                            noProtoCount++;
                         }
                     }) //End of forEach(buttonObj)
                     let messagesNeeded = Math.ceil(instanceButtons.length / 25);
@@ -208,8 +209,8 @@ module.exports = {
                             } //End of r loop
                             messageComponents.push(buttonRow);
                         } //End of n loop
+                        let content = `**${instance}: ${noProtoCount} No Proto Devices:**`;
                         if (type === 'search') {
-                            console.log("search")
                             receivedMessage.channel.send({
                                     content: content,
                                     components: messageComponents
@@ -240,7 +241,7 @@ module.exports = {
                         let tempButtons = instanceButtons.slice(25);
                         instanceButtons = tempButtons;
                     } //End of message m loop
-                }) //End of forEach(instance)
+                }); //End of forEach(instance)
                 if (instanceList.length == 0 && type == "search") {
                     receivedMessage.channel.send("No problems detected!")
                         .catch(console.error)
