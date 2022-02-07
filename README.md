@@ -184,6 +184,7 @@ Stats:
 - Get status of devices as buttons with `<prefix><devicesCommand>`
   - Press device button to get more info.
   - If deviceControl and/or Stats is installed then dropdown lists will appear.
+- Get info about specific device with `<prefix><device_name/origin>`
 - See any naughty devices with `<prefix><noProtoCommand>`
 - See system stats with `<prefix><systemStatsCommand>` (Requires dkmur's Stats)
 

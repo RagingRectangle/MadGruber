@@ -256,7 +256,17 @@ module.exports = {
         connectionMAD.end();
     }, //End of noProtoDevices()
 
-    getDeviceInfo: async function getDeviceInfo(interaction, deviceID) {
+    getDeviceInfo: async function getDeviceInfo(type, typeData, deviceID) {
+        var channel, user;
+        if (type === "interaction") {
+            channel = typeData.message.channel;
+            user = typeData.user.username;
+        } else if (type === "search") {
+            channel = typeData.channel;
+            user = typeData.author.username;
+        } else {
+            return;
+        }
         let dbInfo = require('../MAD_Database_Info.json');
         let connectionMAD = mysql.createConnection(config.madDB);
         let deviceQuery = `SELECT * FROM trs_status WHERE device_id = "${deviceID}"`;
@@ -272,7 +282,7 @@ module.exports = {
             let timeDiffLastSeen = Math.abs(Date.now() - Date.parse(device.lastProtoDateTime));
             let hoursSinceLastSeen = timeDiffLastSeen / (1000 * 3600);
             let minutesSinceLastSeen = (hoursSinceLastSeen * 60).toFixed(2);
-            var paused = deviceID = instance = restartInfo = rebootInfo = loginInfo = '';
+            var paused = '';
             let origin = dbInfo.devices[device.device_id]['name'];
             var deviceInfoArray = [];
             //Running well
@@ -328,7 +338,7 @@ module.exports = {
                     deviceInfoArray.push(`**${key}:** ${value}`);
                 }
             }
-            if (config.stats.deviceInfo.cycle === true) {
+            if (config.stats.deviceInfo.cycle === true && config.deviceControl.powerCycleType.toLowerCase() === "devicecontrol") {
                 let connectionCycleInfo = mysql.createConnection(config.stats.database);
                 let cycleQuery = `SELECT * FROM relay WHERE origin = "${origin}"`;
                 connectionCycleInfo.query(cycleQuery, function (err, cycleResults) {
@@ -466,8 +476,9 @@ module.exports = {
             if (statsListComponent !== '') {
                 deviceComponents.push(statsListComponent);
             }
-            interaction.message.channel.send({
-                    embeds: [new MessageEmbed().setTitle(`${origin} Info:`).setDescription(`- ${deviceInfoArray.join('\n- ')}`).setColor(color).setFooter(`${interaction.user.username}`)],
+            console.log(`${user} looked for ${origin} device info.`);
+            channel.send({
+                    embeds: [new MessageEmbed().setTitle(`${origin} Info:`).setDescription(`- ${deviceInfoArray.join('\n- ')}`).setColor(color).setFooter(`${user}`)],
                     components: deviceComponents
                 }).catch(console.error)
                 .then(msg => {

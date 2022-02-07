@@ -215,7 +215,7 @@ module.exports = {
             if (interactionID.startsWith('deviceInfo~')) {
                 interaction.deferUpdate();
                 let deviceID = interactionID.replace('deviceInfo~', '');
-                Devices.getDeviceInfo(interaction, deviceID);
+                Devices.getDeviceInfo("interaction", interaction, deviceID);
             }
         } //End of devices
     }, //End of buttonInteraction()

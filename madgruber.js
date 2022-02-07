@@ -107,7 +107,7 @@ client.on('messageCreate', async (receivedMessage) => {
 			Links.links(receivedMessage);
 		}
 	}
-	//Device Info
+	//Device Info All
 	else if (config.madDB.host && config.discord.devicesCommand && message === `${config.discord.prefix}${config.discord.devicesCommand}`) {
 		if (userPerms.includes('admin') || userPerms.includes('deviceInfoControl') || userPerms.includes('deviceInfo')) {
 			Devices.deviceStatus(receivedMessage);
@@ -128,6 +128,16 @@ client.on('messageCreate', async (receivedMessage) => {
 	//Help Menu
 	else if (config.discord.helpCommand && receivedMessage.channel.type !== "DM" && message === `${config.discord.prefix}${config.discord.helpCommand}`) {
 		Help.helpMenu(client, receivedMessage);
+	} else {
+		//Specific Device Info
+		if (userPerms.includes('admin') || userPerms.includes('deviceInfoControl') || userPerms.includes('deviceInfo')) {
+			let dbInfo = require('./MAD_Database_Info.json');
+			for (const [key, value] of Object.entries(dbInfo.devices)) {
+				if (receivedMessage.content.toLowerCase() === `${config.discord.prefix}${value.name.toLowerCase()}`) {
+					Devices.getDeviceInfo("search", receivedMessage, key);
+				}
+			}
+		}
 	}
 }); //End of client.on(message)
 
