@@ -62,7 +62,7 @@ module.exports = {
 
         //DeviceStats
         if (userPerms.includes('deviceInfoControl') || userPerms.includes('deviceInfo')) {
-            if (interactionID === 'deviceStats') {
+            if (interactionID.startsWith('deviceStats~')) {
                 interaction.deferUpdate();
                 let statVariables = interaction.values[0].replace(`${config.serverName}~deviceStats~`, '').split('~');
                 let origin = statVariables[0];
@@ -76,7 +76,7 @@ module.exports = {
             if (interactionID.startsWith('systemStats~')) {
                 interaction.deferUpdate();
                 let statDuration = interactionID.replace('systemStats~', '');
-                Stats.systemStats(interaction, statDuration, interaction.values[0].replace(`${config.serverName}~systemStats~`,''));
+                Stats.systemStats(interaction, statDuration, interaction.values[0].replace(`${config.serverName}~systemStats~`, ''));
             }
         } //End of SystemStats
     }, //End of listInteraction()

@@ -357,11 +357,7 @@ module.exports = {
         } //End of getStatsDeviceInfo()
 
         async function createStatsList(origin, color, deviceInfoArray) {
-            let statsSelectList = [{
-                    label: `Locations Handled (daily)`,
-                    value: `${config.serverName}~deviceStats~${origin}~locationsHandled~daily`
-                },
-                {
+            let statsSelectListHourly = [{
                     label: `Locations Handled (hourly)`,
                     value: `${config.serverName}~deviceStats~${origin}~locationsHandled~hourly`
                 },
@@ -370,36 +366,41 @@ module.exports = {
                     value: `${config.serverName}~deviceStats~${origin}~locationsSuccess~hourly`
                 },
                 {
-                    label: `Location Success (daily)`,
-                    value: `${config.serverName}~deviceStats~${origin}~locationsSuccess~daily`
-                },
-                {
                     label: `Locations Time (hourly)`,
                     value: `${config.serverName}~deviceStats~${origin}~locationsTime~hourly`
-                },
-                {
-                    label: `Locations Time (daily)`,
-                    value: `${config.serverName}~deviceStats~${origin}~locationsTime~daily`
                 },
                 {
                     label: `Mons Scanned (hourly)`,
                     value: `${config.serverName}~deviceStats~${origin}~monsScanned~hourly`
                 },
                 {
-                    label: `Mons Scanned (daily)`,
-                    value: `${config.serverName}~deviceStats~${origin}~monsScanned~daily`
-                },
-                {
                     label: `Proto Success Rate (hourly)`,
                     value: `${config.serverName}~deviceStats~${origin}~protoSuccess~hourly`
                 },
                 {
-                    label: `Proto Success Rate (daily)`,
-                    value: `${config.serverName}~deviceStats~${origin}~protoSuccess~daily`
-                },
-                {
                     label: `Restarts/Reboots (hourly)`,
                     value: `${config.serverName}~deviceStats~${origin}~restartReboot~hourly`
+                },
+            ]
+            let statsSelectListDaily = [{
+                    label: `Locations Handled (daily)`,
+                    value: `${config.serverName}~deviceStats~${origin}~locationsHandled~daily`
+                },
+                {
+                    label: `Location Success (daily)`,
+                    value: `${config.serverName}~deviceStats~${origin}~locationsSuccess~daily`
+                },
+                {
+                    label: `Locations Time (daily)`,
+                    value: `${config.serverName}~deviceStats~${origin}~locationsTime~daily`
+                },
+                {
+                    label: `Mons Scanned (daily)`,
+                    value: `${config.serverName}~deviceStats~${origin}~monsScanned~daily`
+                },
+                {
+                    label: `Proto Success Rate (daily)`,
+                    value: `${config.serverName}~deviceStats~${origin}~protoSuccess~daily`
                 },
                 {
                     label: `Restarts/Reboots (daily)`,
@@ -410,17 +411,25 @@ module.exports = {
                     value: `${config.serverName}~deviceStats~${origin}~temperature~daily`
                 },
             ];
-            let statsListComponent = new MessageActionRow()
+            let statsComponentHourly = new MessageActionRow()
                 .addComponents(
                     new MessageSelectMenu()
-                    .setCustomId(`${config.serverName}~deviceStats`)
-                    .setPlaceholder(`${origin} Stats`)
-                    .addOptions(statsSelectList)
+                    .setCustomId(`${config.serverName}~deviceStats~hourly`)
+                    .setPlaceholder(`${origin} Hourly Stats`)
+                    .addOptions(statsSelectListHourly)
                 );
-            sendDeviceInfo(origin, color, deviceInfoArray, statsListComponent);
+            let statsComponentDaily = new MessageActionRow()
+                .addComponents(
+                    new MessageSelectMenu()
+                    .setCustomId(`${config.serverName}~deviceStats~daily`)
+                    .setPlaceholder(`${origin} Daily Stats`)
+                    .addOptions(statsSelectListDaily)
+                )
+            let statsListArray = [statsComponentHourly, statsComponentDaily];
+            sendDeviceInfo(origin, color, deviceInfoArray, statsListArray);
         } //End of createStatsList()
 
-        async function sendDeviceInfo(origin, color, deviceInfoArray, statsListComponent) {
+        async function sendDeviceInfo(origin, color, deviceInfoArray, statsListArray) {
             var deviceComponents = [];
             if (config.deviceControl.path) {
                 let controlSelectList = [{
@@ -473,8 +482,9 @@ module.exports = {
                     );
                 deviceComponents.push(controlListComponent);
             } //End of deviceControl
-            if (statsListComponent !== '') {
-                deviceComponents.push(statsListComponent);
+            if (statsListArray !== '') {
+                deviceComponents.push(statsListArray[0], statsListArray[1]);
+                //deviceComponents.push(statsListArray[1]);
             }
             console.log(`${user} looked for ${origin} device info.`);
             channel.send({
