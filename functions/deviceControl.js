@@ -44,16 +44,30 @@ module.exports = {
                         }
                     }
                     if (controlType === 'logcatDevice') {
-                        fs.renameSync('./logcat.txt', `logcat_${origin}.txt`);
-                        logFile.push(new MessageAttachment(`logcat_${origin}.txt`));
+                        try {
+                            fs.renameSync('./logcat.txt', `logcat_${origin}.txt`);
+                            logFile.push(new MessageAttachment(`logcat_${origin}.txt`));
+                        } catch (err) {
+                            console.log(`Error renaming logcat.txt to "logcat_${origin}.txt":`, err)
+                        }
                         try {
                             fs.renameSync('./vm.log', `vm_${origin}.log`);
                             logFile.push(new MessageAttachment(`vm_${origin}.log`));
+                        } catch (err) {
+                            //vm.log does not exist
+                        }
+                        try {
+                            fs.renameSync('./vmapper.log', `vmapper_${origin}.log`);
+                            logFile.push(new MessageAttachment(`vmapper_${origin}.log`));
                         } catch (err) {}
                     }
                     if (controlType === 'screenshot') {
-                        fs.renameSync('./screenshot.jpg', `screenshot_${origin}.jpg`);
-                        logFile.push(new MessageAttachment(`screenshot_${origin}.jpg`));
+                        try {
+                            fs.renameSync('./screenshot.jpg', `screenshot_${origin}.jpg`);
+                            logFile.push(new MessageAttachment(`screenshot_${origin}.jpg`));
+                        } catch (err) {
+                            console.log(`Error renaming screenshot.jpg to "screenshot_${origin}.jpg":`, err);
+                        }
                     }
                     msg.edit({
                         content: '**Ran deviceControl script:**',
@@ -69,9 +83,14 @@ module.exports = {
                                 }
                             })
                             .then(() => {
-                                fs.rmSync(`logcat_${origin}.txt`);
+                                try {
+                                    fs.rmSync(`logcat_${origin}.txt`);
+                                } catch (err) {}
                                 try {
                                     fs.rmSync(`vm_${origin}.log`);
+                                } catch (err) {}
+                                try {
+                                    fs.rmSync(`vmapper_${origin}.log`);
                                 } catch (err) {}
                             });
                     }
