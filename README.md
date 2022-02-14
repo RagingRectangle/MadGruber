@@ -114,6 +114,7 @@ DeviceControl:
 - **path:** Path to root folder.
 - **controlResponseDeleteSeconds:** How long to wait until script responses are deleted (Set to 0 to never delete).
 - **logcatDeleteSeconds:** How long to wait until logcats are deleted (Set to 0 to never delete).
+- **reverseLogcat:** Reverse logcat output so the most recent entry is on top (true/false).
 - **screenshotDeleteSeconds:** How long to wait until screenshots are deleted (Set to 0 to never delete).
 - **powerCycleType:** Set to "deviceControl" if using deviceControl to power cycle your devices. Adds cycle option to dropdown control list. (Will be adding an option for RaspberryRelay whenever I get around to updating it).
 

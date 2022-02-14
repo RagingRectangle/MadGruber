@@ -11,6 +11,7 @@ const {
 const fs = require('fs');
 const mysql = require('mysql');
 const shell = require('shelljs');
+const lineReader = require('reverse-line-reader');
 const config = require('../config/config.json');
 
 module.exports = {
@@ -46,18 +47,41 @@ module.exports = {
                     if (controlType === 'logcatDevice') {
                         try {
                             fs.renameSync('./logcat.txt', `logcat_${origin}.txt`);
+                            if (config.deviceControl.reverseLogcat === true) {
+                                var reverseLog = [];
+                                await lineReader.eachLine(`logcat_${origin}.txt`, function (line, last) {
+                                    reverseLog.push(line);
+                                    fs.writeFileSync(`logcat_${origin}.txt`, reverseLog.join('\n'));
+                                });
+                            }
                             logFile.push(new MessageAttachment(`logcat_${origin}.txt`));
                         } catch (err) {
                             console.log(`Error renaming logcat.txt to "logcat_${origin}.txt":`, err)
                         }
                         try {
                             fs.renameSync('./vm.log', `vm_${origin}.log`);
+                            if (config.deviceControl.reverseLogcat === true) {
+                                var reverseLog = [];
+                                await lineReader.eachLine(`vm_${origin}.log`, function (line, last) {
+                                    reverseLog.push(line);
+                                    if (last === true) {
+                                        fs.writeFileSync(`vm_${origin}.log`, reverseLog.join('\n'));
+                                    }
+                                });
+                            }
                             logFile.push(new MessageAttachment(`vm_${origin}.log`));
-                        } catch (err) {
-                            //vm.log does not exist
-                        }
+                        } catch (err) {}
                         try {
                             fs.renameSync('./vmapper.log', `vmapper_${origin}.log`);
+                            if (config.deviceControl.reverseLogcat === true) {
+                                var reverseLog = [];
+                                await lineReader.eachLine(`vmapper_${origin}.log`, function (line, last) {
+                                    reverseLog.push(line);
+                                    if (last === true) {
+                                        fs.writeFileSync(`vmapper_${origin}.log`, reverseLog.join('\n'));
+                                    }
+                                });
+                            }
                             logFile.push(new MessageAttachment(`vmapper_${origin}.log`));
                         } catch (err) {}
                     }
@@ -74,25 +98,22 @@ module.exports = {
                         embeds: [new MessageEmbed().setDescription(description).setColor(color).setFooter(`${interaction.user.username}`)],
                     }).catch(console.error);
                     if (controlType === 'logcatDevice' && exitCode !== 1) {
-                        interaction.message.channel.send({
-                                files: logFile
-                            }).catch(console.error)
-                            .then(logcatMsg => {
-                                if (config.deviceControl.logcatDeleteSeconds > 0) {
-                                    setTimeout(() => logcatMsg.delete().catch(err => console.log(`(${interaction.user.username}) Error deleting logcat message:`, err)), (config.deviceControl.logcatDeleteSeconds * 1000));
-                                }
-                            })
-                            .then(() => {
-                                try {
-                                    fs.rmSync(`logcat_${origin}.txt`);
-                                } catch (err) {}
-                                try {
-                                    fs.rmSync(`vm_${origin}.log`);
-                                } catch (err) {}
-                                try {
-                                    fs.rmSync(`vmapper_${origin}.log`);
-                                } catch (err) {}
-                            });
+                        logFile.forEach(async file => {
+                            console.log(file)
+                            interaction.message.channel.send({
+                                    files: [file]
+                                }).catch(console.error)
+                                .then(logcatMsg => {
+                                    if (config.deviceControl.logcatDeleteSeconds > 0) {
+                                        setTimeout(() => logcatMsg.delete().catch(err => console.log(`(${interaction.user.username}) Error deleting logcat message:`, err)), (config.deviceControl.logcatDeleteSeconds * 1000));
+                                    }
+                                })
+                                .then(() => {
+                                    try {
+                                        fs.rmSync(file.attachment);
+                                    } catch (err) {}
+                                })
+                        })
                     }
                     if (controlType === 'screenshot' && exitCode !== 1) {
                         interaction.message.channel.send({
