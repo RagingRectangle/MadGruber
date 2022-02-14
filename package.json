@@ -27,6 +27,7 @@
     "pm2": "^5.1.2",
     "quickchart-js": "^2.0.3",
     "request": "^2.88.2",
+    "reverse-line-reader": "^0.2.6",
     "shelljs": "^0.8.4",
     "sort-by": "^1.2.0"
   }
