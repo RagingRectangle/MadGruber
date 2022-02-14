@@ -74,6 +74,7 @@ Discord:
 - **devicesCommand:** Command to get status of all devices.
 - **noProtoCommand:** Command to see noProto devices.
 - **systemStatsCommand:** Command to see system stat options (if using dkmur's Stats).
+- **pogoDroidCommand:** Command to get links to available PogoDroid versions (admin only).
 
 PM2:
 - **mads:** List of MAD PM2 processes that should be restarted after truncating quests.

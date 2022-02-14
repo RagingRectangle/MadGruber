@@ -14,7 +14,8 @@
         "linksCommand": "links",
         "devicesCommand": "devices",
         "noProtoCommand": "noproto",
-        "systemStatsCommand": "stats"
+        "systemStatsCommand": "stats",
+        "pogoDroidCommand": "pogodroid"
     },
     "pm2": {
         "mads": [""],

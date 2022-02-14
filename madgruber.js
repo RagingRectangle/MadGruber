@@ -24,6 +24,7 @@ const Links = require('./functions/links.js');
 const Devices = require('./functions/devices.js');
 const Roles = require('./functions/roles.js');
 const Stats = require('./functions/stats.js');
+const PogoDroid = require('./functions/pogoDroid.js');
 const Help = require('./functions/help.js');
 const config = require('./config/config.json');
 const roleConfig = require('./config/roles.json');
@@ -124,6 +125,10 @@ client.on('messageCreate', async (receivedMessage) => {
 		if (userPerms.includes('admin') || userPerms.includes('systemStats')) {
 			Stats.stats(client, receivedMessage);
 		}
+	}
+	//PogoDroid Versions
+	else if (config.discord.pogoDroidCommand && message === `${config.discord.prefix}${config.discord.pogoDroidCommand}` && userPerms.includes('admin')) {
+		PogoDroid.pogoDroid(receivedMessage);
 	}
 	//Help Menu
 	else if (config.discord.helpCommand && receivedMessage.channel.type !== "DM" && message === `${config.discord.prefix}${config.discord.helpCommand}`) {

@@ -1,6 +1,6 @@
 {
   "name": "madgruber",
-  "version": "3.8.0",
+  "version": "3.9.0",
   "description": "Discord bot that can do almost anything (except for throat rips)",
   "main": "madgruber.js",
   "scripts": {
@@ -26,6 +26,7 @@
     "mysql": "^2.18.1",
     "pm2": "^5.1.2",
     "quickchart-js": "^2.0.3",
+    "request": "^2.88.2",
     "shelljs": "^0.8.4",
     "sort-by": "^1.2.0"
   }
