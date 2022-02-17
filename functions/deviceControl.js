@@ -52,9 +52,11 @@ module.exports = {
                             fs.renameSync('./logcat.txt', `logcat_${origin}.txt`);
                             if (config.deviceControl.reverseLogcat === true) {
                                 var reverseLog = [];
-                                await lineReader.eachLine(`logcat_${origin}.txt`, function (line, last) {
+                                await lineReader.eachLine(`logcat_${origin}.txt`, async function (line, last) {
                                     reverseLog.push(line);
-                                    fs.writeFileSync(`logcat_${origin}.txt`, reverseLog.join('\n'));
+                                    if (last === true) {
+                                        fs.writeFileSync(`logcat_${origin}.txt`, reverseLog.join('\n'));
+                                    }
                                 });
                             }
                             logFile.push(new MessageAttachment(`logcat_${origin}.txt`));
@@ -65,7 +67,7 @@ module.exports = {
                             fs.renameSync('./vm.log', `vm_${origin}.log`);
                             if (config.deviceControl.reverseLogcat === true) {
                                 var reverseLog = [];
-                                await lineReader.eachLine(`vm_${origin}.log`, function (line, last) {
+                                await lineReader.eachLine(`vm_${origin}.log`, async function (line, last) {
                                     reverseLog.push(line);
                                     if (last === true) {
                                         fs.writeFileSync(`vm_${origin}.log`, reverseLog.join('\n'));
@@ -78,7 +80,7 @@ module.exports = {
                             fs.renameSync('./vmapper.log', `vmapper_${origin}.log`);
                             if (config.deviceControl.reverseLogcat === true) {
                                 var reverseLog = [];
-                                await lineReader.eachLine(`vmapper_${origin}.log`, function (line, last) {
+                                await lineReader.eachLine(`vmapper_${origin}.log`, async function (line, last) {
                                     reverseLog.push(line);
                                     if (last === true) {
                                         fs.writeFileSync(`vmapper_${origin}.log`, reverseLog.join('\n'));
@@ -102,7 +104,6 @@ module.exports = {
                     }).catch(console.error);
                     if (controlType === 'logcatDevice' && exitCode !== 1) {
                         logFile.forEach(async file => {
-                            console.log(file)
                             interaction.message.channel.send({
                                     files: [file]
                                 }).catch(console.error)
