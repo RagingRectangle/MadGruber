@@ -538,6 +538,12 @@ module.exports = {
             rplLength = config.stats.dataPointCount.daily;
             rplStamp = 'MM-DD';
         }
+        let color1 = config.stats.colorPalette.color1.toLowerCase();
+        let background1 = `rgba(${convert.keyword.rgb(color1).join(', ')}, 0.5)`;
+        let color2 = config.stats.colorPalette.color2.toLowerCase();
+        let background2 = `rgba(${convert.keyword.rgb(color2).join(', ')}, 0.5)`;
+        let color3 = config.stats.colorPalette.color3.toLowerCase();
+        let background3 = `rgba(${convert.keyword.rgb(color3).join(', ')}, 0.5)`;
         console.log(`${interaction.user.username} ran stats for ${rplType.toLowerCase()} ${statType} on ${origin}`);
         let statQuery = `SELECT * FROM stats_worker WHERE Worker = "${origin}" AND RPL = ${rpl} ORDER BY Datetime DESC LIMIT ${rplLength}`;
         let connection = mysql.createConnection(config.stats.database);
@@ -596,13 +602,14 @@ module.exports = {
                                     label: `Total`,
                                     data: monsScanned,
                                     fill: false,
-                                    borderColor: QuickChart.getGradientFillHelper('vertical', ["#00A650", "#FDB813", "#FF000B"]),
+                                    borderColor: color1,
                                     pointRadius: 0,
                                 },
                                 {
                                     label: `IV`,
                                     data: ivScanned,
                                     fill: false,
+                                    borderColor: color2,
                                     pointRadius: 0,
                                 }
                             ]

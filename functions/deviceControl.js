@@ -19,6 +19,9 @@ module.exports = {
         let controlVariables = interaction.values[0].replace(`${config.serverName}~deviceControl~`, '').split('~');
         let origin = controlVariables[0];
         let controlType = controlVariables[1];
+        if (interaction.values[0].startsWith('raspberryRelay~') && config.deviceControl.powerCycleType.toLowerCase().replace(' ', '').replace('raspberryrelay', 'raspberry')) {
+            return;
+        }
         let dcPath = config.deviceControl.path.replace('deviceControl/', 'deviceControl');
         let bashControlCommand = (`bash ${dcPath}/devicecontrol.sh ${origin} ${controlType}`).replace('//', '/');
         interaction.message.edit({

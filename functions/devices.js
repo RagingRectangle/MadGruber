@@ -333,11 +333,14 @@ module.exports = {
         } //End of parseDeviceInfo()
 
         async function getStatsDeviceInfo(origin, color, deviceInfoArray, statsDevice, cycleStatPosition) {
-            for (const [key, value] of Object.entries(statsDevice)) {
-                if (config.stats.deviceInfo[key] === true) {
-                    deviceInfoArray.push(`**${key}:** ${value}`);
+            try {
+                for (const [key, value] of Object.entries(statsDevice)) {
+                    if (config.stats.deviceInfo[key] === true) {
+                        deviceInfoArray.push(`**${key}:** ${value}`);
+                    }
                 }
             }
+            catch(err){}
             if (config.stats.deviceInfo.cycle === true && config.deviceControl.powerCycleType.toLowerCase() === "devicecontrol") {
                 let connectionCycleInfo = mysql.createConnection(config.stats.database);
                 let cycleQuery = `SELECT * FROM relay WHERE origin = "${origin}"`;
@@ -465,13 +468,16 @@ module.exports = {
                         value: `${config.serverName}~deviceControl~${origin}~screenshot`
                     }
                 ]
-                if (config.deviceControl.powerCycleType.toLowerCase() === 'devicecontrol') {
+                if (config.deviceControl.powerCycleType.toLowerCase().replace(' ','') === 'devicecontrol') {
                     controlSelectList.push({
                         label: `Power cycle ${origin}`,
                         value: `${config.serverName}~deviceControl~${origin}~cycle`
                     })
-                } else if (config.deviceControl.powerCycleType.toLowerCase() === 'raspberry') {
-                    //Add raspberryRelay stuff here
+                } else if (config.deviceControl.powerCycleType.toLowerCase().replace(' ','').replace('raspberryrelay','raspberry') === 'raspberry') {
+                    controlSelectList.push({
+                        label: `Power cycle ${origin}`,
+                        value: `raspberryRelay~${origin}`
+                    })
                 }
                 let controlListComponent = new MessageActionRow()
                     .addComponents(
