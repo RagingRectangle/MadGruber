@@ -1,6 +1,6 @@
 {
   "name": "madgruber",
-  "version": "3.11.1",
+  "version": "3.12.0",
   "description": "Discord bot that can do almost anything (except for throat rips)",
   "main": "madgruber.js",
   "scripts": {

@@ -20,6 +20,7 @@ Join the Discord server for any help and to keep up with updates: https://discor
 - See current status of MAD devices (as buttons)
 - Click device buttons to get basic info
 - Command to check for only devices that haven't been seen lately (automated checks optional)
+- RaspberryRelay integration to automatically power cycle noProto devices
 - dkmur's deviceControl integration (Pause/unpause/start/quit/reboot/clear data/logcat/screenshot/power cycle)
 - dkmur's Stats integration (expanded device info/graphs for different device and system stats)
 
@@ -50,6 +51,7 @@ npm install
   
 
 ## Optional Projects to Install
+- [RaspberryRelay](https://github.com/RagingRectangle/RaspberryRelay)
 - [deviceControl by dkmur](https://github.com/dkmur/deviceControl)
 - [Stats by dkmur](https://github.com/dkmur/Stats)
 
@@ -116,7 +118,7 @@ DeviceControl:
 - **logcatDeleteSeconds:** How long to wait until logcats are deleted (Set to 0 to never delete).
 - **reverseLogcat:** Reverse logcat output so the most recent entry is on top (true/false).
 - **screenshotDeleteSeconds:** How long to wait until screenshots are deleted (Set to 0 to never delete).
-- **powerCycleType:** Set to "deviceControl" if using deviceControl to power cycle your devices. Adds cycle option to dropdown control list. (Will be adding an option for RaspberryRelay whenever I get around to updating it).
+- **powerCycleType:** Set to "deviceControl" if using deviceControl to power cycle your devices. Set to "raspberry" if using RaspberryRelay.
 
 Stats:
 - [Install info](https://github.com/dkmur/Stats)
