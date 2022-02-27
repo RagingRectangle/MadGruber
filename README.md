@@ -20,6 +20,7 @@ Join the Discord server for any help and to keep up with updates: https://discor
 - See current status of MAD devices (as buttons)
 - Click device buttons to get basic info
 - Command to check for only devices that haven't been seen lately (automated checks optional)
+- Get links to recent PogoDroid versions
 - RaspberryRelay integration to automatically power cycle noProto devices
 - dkmur's deviceControl integration (Pause/unpause/start/quit/reboot/clear data/logcat/screenshot/power cycle)
 - dkmur's Stats integration (expanded device info/graphs for different device and system stats)
@@ -77,6 +78,7 @@ Discord:
 - **noProtoCommand:** Command to see noProto devices.
 - **systemStatsCommand:** Command to see system stat options (if using dkmur's Stats).
 - **pogoDroidCommand:** Command to get links to available PogoDroid versions (admin only).
+- **sendWorkerCommand:** Command send closest worker to a location. `!sendworker lat,lon` (if using dkmur's deviceControl).
 
 PM2:
 - **mads:** List of MAD PM2 processes that should be restarted after truncating quests.

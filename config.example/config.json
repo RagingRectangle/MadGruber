@@ -15,7 +15,8 @@
         "devicesCommand": "devices",
         "noProtoCommand": "noproto",
         "systemStatsCommand": "stats",
-        "pogoDroidCommand": "pogodroid"
+        "pogoDroidCommand": "pogodroid",
+        "sendWorkerCommand": "sendworker"
     },
     "pm2": {
         "mads": [""],

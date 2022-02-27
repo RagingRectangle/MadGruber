@@ -22,8 +22,8 @@ module.exports = {
         if (interaction.values[0].startsWith('raspberryRelay~') && config.deviceControl.powerCycleType.toLowerCase().replace(' ', '').replace('raspberryrelay', 'raspberry')) {
             return;
         }
-        let dcPath = config.deviceControl.path.replace('deviceControl/', 'deviceControl');
-        let bashControlCommand = (`bash ${dcPath}/devicecontrol.sh ${origin} ${controlType}`).replace('//', '/');
+        let dcPath = (`${config.deviceControl.path}/devicecontrol.sh`).replace('//','/');
+        let bashControlCommand = (`bash ${dcPath} ${origin} ${controlType}`).replace('//', '/');
         interaction.message.edit({
             embeds: interaction.embeds,
             components: interaction.components
@@ -162,5 +162,36 @@ module.exports = {
                 }
             }
         } //End of changeIdleStatus()
-    } //End of deviceControl()
+    }, //End of deviceControl()
+
+
+    sendWorker: async function sendWorker(client, receivedMessage) {
+        console.log("start sendWorker");
+        let coords = receivedMessage.content.toLowerCase().replace(`${config.discord.prefix}${config.discord.sendWorkerCommand.toLowerCase()} `, '').replace(', ', '').replace('- ', '-');
+        let dcPath = (`${config.deviceControl.path}/devicecontrol.sh`).replace('//','/');
+        let sendWorkerBash = `bash ${dcPath} origin sendWorker ${coords}`;
+        receivedMessage.channel.send({
+                embeds: [new MessageEmbed().setDescription(`Sending closest worker...`).setColor('0D00CA').setFooter(`${receivedMessage.author.username}`)]
+            }).catch(console.error)
+            .then(async msg => {
+                shell.exec(sendWorkerBash, async function (exitCode, output) {
+                    let splitOutput = output.split('  ');
+                    let response = splitOutput[1];
+                    if (exitCode !== 0) {
+                        console.log(`${receivedMessage.author.username} failed to send worker to: ${coords}`);
+                        msg.edit({
+                            embeds: [new MessageEmbed().setDescription(`Error sending worker:\n\n${output}`).setColor('9E0000').setFooter(`${receivedMessage.author.username}`)],
+                        }).catch(console.error);
+                    } else {
+                        console.log(`(${receivedMessage.author.username}) ${response}`);
+                        msg.edit({
+                            embeds: [new MessageEmbed().setDescription(response.replace(coords,`[${coords}](https://www.google.com/maps/search/?api=1&query=${coords})`)).setColor('00841E').setFooter(`${receivedMessage.author.username}`)],
+                        }).catch(console.error);
+                    }
+                    if (config.deviceControl.controlResponseDeleteSeconds > 0) {
+                        setTimeout(() => msg.delete().catch(err => console.log(`(${receivedMessage.author.username}) Error deleting sendWorker message:`, err)), (config.deviceControl.controlResponseDeleteSeconds * 1000));
+                    }
+                }) //End of shell
+            });
+    } //End of sendWorker()
 }

@@ -22,6 +22,7 @@ const Pm2Buttons = require('./functions/pm2.js');
 const Truncate = require('./functions/truncate.js');
 const Links = require('./functions/links.js');
 const Devices = require('./functions/devices.js');
+const DeviceControl = require('./functions/deviceControl.js');
 const Roles = require('./functions/roles.js');
 const Stats = require('./functions/stats.js');
 const PogoDroid = require('./functions/pogoDroid.js');
@@ -118,6 +119,12 @@ client.on('messageCreate', async (receivedMessage) => {
 	else if (config.madDB.host && config.discord.noProtoCommand && message === `${config.discord.prefix}${config.discord.noProtoCommand}`) {
 		if (userPerms.includes('admin') || userPerms.includes('deviceInfoControl') || userPerms.includes('deviceInfo')) {
 			Devices.noProtoDevices(client, receivedMessage, 'search');
+		}
+	}
+	//Send Worker
+	else if (config.stats.database.host && config.deviceControl.path && config.discord.sendWorkerCommand && message.startsWith(`${config.discord.prefix}${config.discord.sendWorkerCommand} `)) {
+		if (userPerms.includes('admin') || userPerms.includes('deviceInfoControl')) {
+			DeviceControl.sendWorker(client, receivedMessage);
 		}
 	}
 	//Stats
