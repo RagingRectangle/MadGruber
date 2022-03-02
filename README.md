@@ -107,6 +107,8 @@ Devices:
 - **noProtoCheckMinutes:** Automate checks for unseen devices (Set to 0 to disable auto-check).
 - **noProtoChannelID:** Channel ID for where automated warning should be posted.
 - **noProtoIncludeIdle:** Include paused and idle devices in automated checks (false to ignore).
+- **noProtoIgnoreDevices:** Array of devices to be ignored during noProto checks.
+- **useNoProtoJson:**  Use noProto.json to split which channels noProto device alerts are sent to (true/false).  If 'noProtoChannelID' is set then that will be the default channel for any devices not listed in noProto.json.
 - **checkDeleteMinutes:** How long to wait until auto check messages are deleted (Set to 0 to never delete).
 - **infoMessageDeleteSeconds:** How long to wait until device info responses are deleted (Set to 0 to never delete).
 - **statusButtonsDeleteMinutes:** How long to wait until messages with device buttons are deleted (Set to 0 to never delete).
