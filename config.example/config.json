@@ -57,6 +57,8 @@
         "noProtoCheckMinutes": 20,
         "noProtoChannelID": "",
         "noProtoIncludeIdle": false,
+        "noProtoIgnoreDevices": [""],
+        "useNoProtoJson": false,
         "checkDeleteMinutes": 20,
         "infoMessageDeleteSeconds": 0,
         "statusButtonsDeleteMinutes": 0,

@@ -11,6 +11,7 @@ const fs = require('fs');
 const mysql = require('mysql');
 const moment = require('moment');
 const config = require('../config/config.json');
+const noProtoJson = require('../config/noProto.json');
 
 module.exports = {
     deviceStatus: async function deviceStatus(receivedMessage) {
@@ -117,8 +118,9 @@ module.exports = {
     }, //End of deviceStatus()
 
     noProtoDevices: async function noProtoDevices(client, receivedMessage, type) {
-        if (type === 'cron' && !config.devices.noProtoChannelID) {
+        if (type === 'cron' && !config.devices.noProtoChannelID && config.devices.useNoProtoJson !== true) {
             console.log("Error: 'noProtoChannelID' not set in config.json");
+            return;
         }
         let dbInfo = require('../MAD_Database_Info.json');
         if (type === 'search') {
@@ -183,65 +185,139 @@ module.exports = {
                 }); //End of forEach(device)
                 instanceList = Array.from(new Set(instanceList));
                 buttonArray.sort(sortBy('name'));
-                //Split by instance
-                instanceList.forEach(async instance => {
-                    var instanceButtons = [];
-                    var noProtoCount = 0;
-                    buttonArray.forEach(buttonObj => {
-                        if (instance === buttonObj.instance) {
-                            instanceButtons.push(buttonObj.button);
-                            noProtoCount++;
-                        }
-                    }) //End of forEach(buttonObj)
-                    let messagesNeeded = Math.ceil(instanceButtons.length / 25);
-                    for (var m = 0; m < messagesNeeded; m++) {
-                        let buttonsNeeded = Math.min(25, instanceButtons.length);
-                        let rowsNeeded = Math.ceil(buttonsNeeded / 5);
-                        var buttonCount = 0;
-                        var messageComponents = [];
-                        for (var n = 0; n < rowsNeeded && n < 5; n++) {
-                            var buttonRow = new MessageActionRow();
-                            for (var r = 0; r < 5; r++) {
-                                if (buttonCount < buttonsNeeded) {
-                                    buttonRow.addComponents(instanceButtons[buttonCount]);
-                                    buttonCount++;
-                                }
-                            } //End of r loop
-                            messageComponents.push(buttonRow);
-                        } //End of n loop
-                        let content = `**${instance}: ${noProtoCount} No Proto Devices:**`;
-                        if (type === 'search') {
-                            receivedMessage.channel.send({
-                                    content: content,
-                                    components: messageComponents
-                                }).catch(console.error)
-                                .then(msg => {
-                                    if (config.devices.statusButtonsDeleteMinutes > 0) {
-                                        setTimeout(() => msg.delete().catch(err => console.log(`Error deleting noProto status message:`, err)), (config.devices.statusButtonsDeleteMinutes * 1000 * 60));
-                                    }
-                                })
-                        } //End of search
-                        else if (type === 'cron') {
+                if (config.devices.useNoProtoJson === true && type === 'cron') {
+                    splitByNoProtoJson(buttonArray);
+                } else {
+                    splitByInstance(instanceList, buttonArray);
+                }
+                var completedDevices = [];
+                async function splitByNoProtoJson(buttonArray) {
+                    noProtoJson.forEach(async item => {
+                        if (item.channelID) {
                             try {
-                                let postChannel = await client.channels.fetch(config.devices.noProtoChannelID);
-                                postChannel.send({
+                                let noProtoChannel = await client.channels.fetch(item.channelID);
+                                var channelButtons = [];
+                                for (var b = 0; b < buttonArray.length; b++) {
+                                    if (item.deviceNames.includes(buttonArray[b]['name'])) {
+                                        channelButtons.push(buttonArray[b]['button']);
+                                        completedDevices.push(buttonArray[b]['name']);
+                                    }
+                                }
+                                if (channelButtons.length > 0) {
+                                    createComponents(noProtoChannel, channelButtons);
+                                }
+                            } catch (err) {
+                                console.log("Failed to fetch noProto channel:", err);
+                            }
+                        }
+                    });
+                    if (config.devices.noProtoChannelID) {
+                        try {
+                            let noProtoChannel = await client.channels.fetch(config.devices.noProtoChannelID);
+                            var channelButtons = [];
+                            buttonArray.forEach(button => {
+                                if (completedDevices.includes(button['name']) || config.devices.noProtoIgnoreDevices.includes(button['name'])) {
+                                    //Skip button
+                                } else {
+                                    channelButtons.push(button['button']);
+                                }
+                            });
+                            if (channelButtons.length > 0) {
+                                createComponents(noProtoChannel, channelButtons);
+                            }
+                        } catch (err) {
+                            console.log("Failed to fetch default noProto channel:", err);
+                        }
+                    }
+                    async function createComponents(noProtoChannel, channelButtons) {
+                        let messagesNeeded = Math.ceil(channelButtons.length / 25);
+                        for (var m = 0; m < messagesNeeded; m++) {
+                            let buttonsNeeded = Math.min(25, channelButtons.length);
+                            let rowsNeeded = Math.ceil(buttonsNeeded / 5);
+                            var buttonCount = 0;
+                            var messageComponents = [];
+                            for (var n = 0; n < rowsNeeded && n < 5; n++) {
+                                var buttonRow = new MessageActionRow();
+                                for (var r = 0; r < 5; r++) {
+                                    if (buttonCount < buttonsNeeded) {
+                                        buttonRow.addComponents(channelButtons[buttonCount]);
+                                        buttonCount++;
+                                    }
+                                } //End of r loop
+                                messageComponents.push(buttonRow);
+                            } //End of n loop
+                            let content = `**${channelButtons.length} No Proto Devices:**`;
+                            sendCronMessage(noProtoChannel, content, messageComponents);
+                        } //End of m loop
+                    } //End of createComponents()
+                } //End of splitByNoProtoJson()
+
+                async function splitByInstance(instanceList, buttonArray) {
+                    instanceList.forEach(async instance => {
+                        var instanceButtons = [];
+                        var noProtoCount = 0;
+                        buttonArray.forEach(buttonObj => {
+                            if (instance === buttonObj.instance && !config.devices.noProtoIgnoreDevices.includes(buttonObj['name'])) {
+                                instanceButtons.push(buttonObj.button);
+                                noProtoCount++;
+                            }
+                        }) //End of forEach(buttonObj)
+                        let messagesNeeded = Math.ceil(instanceButtons.length / 25);
+                        for (var m = 0; m < messagesNeeded; m++) {
+                            let buttonsNeeded = Math.min(25, instanceButtons.length);
+                            let rowsNeeded = Math.ceil(buttonsNeeded / 5);
+                            var buttonCount = 0;
+                            var messageComponents = [];
+                            for (var n = 0; n < rowsNeeded && n < 5; n++) {
+                                var buttonRow = new MessageActionRow();
+                                for (var r = 0; r < 5; r++) {
+                                    if (buttonCount < buttonsNeeded) {
+                                        buttonRow.addComponents(instanceButtons[buttonCount]);
+                                        buttonCount++;
+                                    }
+                                } //End of r loop
+                                messageComponents.push(buttonRow);
+                            } //End of n loop
+                            let content = `**${instance}: ${noProtoCount} No Proto Devices:**`;
+                            if (type === 'search') {
+                                receivedMessage.channel.send({
                                         content: content,
                                         components: messageComponents
                                     }).catch(console.error)
                                     .then(msg => {
-                                        if (config.devices.checkDeleteMinutes > 0) {
-                                            setTimeout(() => msg.delete().catch(err => console.log(`Error deleting noProto check message:`, err)), (config.devices.checkDeleteMinutes * 1000 * 60));
+                                        if (config.devices.statusButtonsDeleteMinutes > 0) {
+                                            setTimeout(() => msg.delete().catch(err => console.log(`Error deleting noProto status message:`, err)), (config.devices.statusButtonsDeleteMinutes * 1000 * 60));
                                         }
                                     })
-                            } catch (err) {
-                                console.log("Failed to fetch noProto post channel:", err);
+                            } //End of search
+                            else if (type === 'cron') {
+                                try {
+                                    let postChannel = await client.channels.fetch(config.devices.noProtoChannelID);
+                                    sendCronMessage(postChannel, content, messageComponents);
+                                } catch (err) {
+                                    console.log("Failed to fetch noProto post channel:", err);
+                                }
+                            } //End of cron
+                            content = '‎';
+                            let tempButtons = instanceButtons.slice(25);
+                            instanceButtons = tempButtons;
+                        } //End of message m loop
+                    }); //End of forEach(instance)
+                } //End of splitByInstance()
+
+                async function sendCronMessage(postChannel, content, messageComponents) {
+                    postChannel.send({
+                            content: content,
+                            components: messageComponents
+                        }).catch(console.error)
+                        .then(msg => {
+                            if (config.devices.checkDeleteMinutes > 0) {
+                                setTimeout(() => msg.delete().catch(err => console.log(`Error deleting noProto check message:`, err)), (config.devices.checkDeleteMinutes *
+                                    1000 * 60));
                             }
-                        } //End of cron
-                        content = '‎';
-                        let tempButtons = instanceButtons.slice(25);
-                        instanceButtons = tempButtons;
-                    } //End of message m loop
-                }); //End of forEach(instance)
+                        })
+                } //End of sendCronMessage()
+
                 if (instanceList.length == 0 && type == "search") {
                     receivedMessage.channel.send("No problems detected!")
                         .catch(console.error)
@@ -253,6 +329,7 @@ module.exports = {
                 }
             }
         }); //End of query
+
         connectionMAD.end();
     }, //End of noProtoDevices()
 
@@ -339,8 +416,7 @@ module.exports = {
                         deviceInfoArray.push(`**${key}:** ${value}`);
                     }
                 }
-            }
-            catch(err){}
+            } catch (err) {}
             if (config.stats.deviceInfo.cycle === true && config.deviceControl.powerCycleType.toLowerCase() === "devicecontrol") {
                 let connectionCycleInfo = mysql.createConnection(config.stats.database);
                 let cycleQuery = `SELECT * FROM relay WHERE origin = "${origin}"`;
@@ -468,12 +544,12 @@ module.exports = {
                         value: `${config.serverName}~deviceControl~${origin}~screenshot`
                     }
                 ]
-                if (config.deviceControl.powerCycleType.toLowerCase().replace(' ','') === 'devicecontrol') {
+                if (config.deviceControl.powerCycleType.toLowerCase().replace(' ', '') === 'devicecontrol') {
                     controlSelectList.push({
                         label: `Power cycle ${origin}`,
                         value: `${config.serverName}~deviceControl~${origin}~cycle`
                     })
-                } else if (config.deviceControl.powerCycleType.toLowerCase().replace(' ','').replace('raspberryrelay','raspberry') === 'raspberry') {
+                } else if (config.deviceControl.powerCycleType.toLowerCase().replace(' ', '').replace('raspberryrelay', 'raspberry') === 'raspberry') {
                     controlSelectList.push({
                         label: `Power cycle ${origin}`,
                         value: `raspberryRelay~${origin}`
@@ -490,7 +566,6 @@ module.exports = {
             } //End of deviceControl
             if (statsListArray !== '') {
                 deviceComponents.push(statsListArray[0], statsListArray[1]);
-                //deviceComponents.push(statsListArray[1]);
             }
             console.log(`${user} looked for ${origin} device info.`);
             channel.send({
