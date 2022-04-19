@@ -29,7 +29,7 @@ module.exports = {
                     if (buttonStyle === undefined) {
                         buttonStyle = process['pm2_env']['status']
                     }
-                    buttonStyle = buttonStyle.replace('online', 'SUCCESS').replace('stopping', 'DANGER').replace('stopped', 'DANGER').replace('launching', 'SUCCESS').replace('errored', 'DANGER').replace('one-launch-status', 'DANGER').replace('waiting restart','SECONDARY');
+                    buttonStyle = buttonStyle.replace('online', 'SUCCESS').replace('stopping', 'DANGER').replace('stopped', 'DANGER').replace('launching', 'SUCCESS').replace('errored', 'DANGER').replace('one-launch-status', 'DANGER').replace('waiting restart', 'SECONDARY');
                     let buttonLabel = process['name'];
                     let buttonID = `${config.serverName}~process~restart~${buttonLabel}`;
                     let button = new MessageButton().setCustomId(buttonID).setLabel(buttonLabel).setStyle(buttonStyle);
@@ -85,7 +85,7 @@ module.exports = {
             for (var r = 0; r < newButtons.length - 1; r++) {
                 let row = newButtons[r]['components'];
                 for (var b in row) {
-                    row[b]['style'] = 1;
+                    row[b].setStyle('PRIMARY');
                     row[b]['custom_id'] = `${config.serverName}~process~restart~${row[b]['label']}`;
                 } //End of b loop
             } //End of r loop
@@ -100,7 +100,7 @@ module.exports = {
             for (var r = 0; r < newButtons.length - 1; r++) {
                 let row = newButtons[r]['components'];
                 for (var b in row) {
-                    row[b]['style'] = 3;
+                    row[b].setStyle('SUCCESS');
                     row[b]['custom_id'] = `${config.serverName}~process~start~${row[b]['label']}`;
                 } //End of b loop
             } //End of r loop
@@ -115,7 +115,7 @@ module.exports = {
             for (var r = 0; r < newButtons.length - 1; r++) {
                 let row = newButtons[r]['components'];
                 for (var b in row) {
-                    row[b]['style'] = 4;
+                    row[b].setStyle('DANGER');
                     row[b]['custom_id'] = `${config.serverName}~process~stop~${row[b]['label']}`;
                 } //End of b loop
             } //End of r loop
@@ -138,7 +138,9 @@ module.exports = {
                         if (err) {
                             console.log(`${interaction.user.username} failed to restart ${processName} PM2 process.`, err);
                             interaction.message.channel.send({
-                                    embeds: [new MessageEmbed().setDescription(`Failed to restart ${processName} process.`).setColor('9E0000').setFooter(`${interaction.user.username}`)],
+                                    embeds: [new MessageEmbed().setDescription(`Failed to restart ${processName} process.`).setColor('9E0000').setFooter({
+                                        name: `${interaction.user.username}`
+                                    })],
                                 }).catch(console.error)
                                 .then(msg => {
                                     if (config.pm2.pm2ResponseDeleteSeconds > 0) {
@@ -148,7 +150,9 @@ module.exports = {
                         } else {
                             console.log(`${processName} restarted by ${interaction.user.username}`);
                             interaction.message.channel.send({
-                                    embeds: [new MessageEmbed().setDescription(`PM2 process restarted: ${processName}`).setColor('00841E').setFooter(`${interaction.user.username}`)],
+                                    embeds: [new MessageEmbed().setDescription(`PM2 process restarted: ${processName}`).setColor('00841E').setFooter({
+                                        name: `${interaction.user.username}`
+                                    })],
                                 }).catch(console.error)
                                 .then(msg => {
                                     if (config.pm2.pm2ResponseDeleteSeconds > 0) {
@@ -163,7 +167,9 @@ module.exports = {
                         if (err) {
                             console.log(`${interaction.user.username} failed to start ${processName} PM2 process.`, err);
                             interaction.message.channel.send({
-                                    embeds: [new MessageEmbed().setDescription(`Failed to start ${processName} process.`).setColor('9E0000').setFooter(`${interaction.user.username}`)],
+                                    embeds: [new MessageEmbed().setDescription(`Failed to start ${processName} process.`).setColor('9E0000').setFooter({
+                                        name: `${interaction.user.username}`
+                                    })],
                                 }).catch(console.error)
                                 .then(msg => {
                                     if (config.pm2.pm2ResponseDeleteSeconds > 0) {
@@ -173,7 +179,9 @@ module.exports = {
                         } else {
                             console.log(`${processName} started by ${interaction.user.username}`);
                             interaction.message.channel.send({
-                                    embeds: [new MessageEmbed().setDescription(`PM2 process started: ${processName}`).setColor('00841E').setFooter(`${interaction.user.username}`)],
+                                    embeds: [new MessageEmbed().setDescription(`PM2 process started: ${processName}`).setColor('00841E').setFooter({
+                                        name: `${interaction.user.username}`
+                                    })],
                                 }).catch(console.error)
                                 .then(msg => {
                                     if (config.pm2.pm2ResponseDeleteSeconds > 0) {
@@ -188,7 +196,9 @@ module.exports = {
                         if (err) {
                             console.log(`${interaction.user.username} failed to stop ${processName} PM2 process.`, err);
                             interaction.message.channel.send({
-                                    embeds: [new MessageEmbed().setDescription(`Failed to stop ${processName} PM2 process.`).setColor('9E0000').setFooter(`${interaction.user.username}`)],
+                                    embeds: [new MessageEmbed().setDescription(`Failed to stop ${processName} PM2 process.`).setColor('9E0000').setFooter({
+                                        name: `${interaction.user.username}`
+                                    })],
                                 }).catch(console.error)
                                 .then(msg => {
                                     if (config.pm2.pm2ResponseDeleteSeconds > 0) {
@@ -198,7 +208,9 @@ module.exports = {
                         } else {
                             console.log(`${processName} stopped by ${interaction.user.username}`);
                             interaction.message.channel.send({
-                                    embeds: [new MessageEmbed().setDescription(`PM2 process stopped: ${processName}`).setColor('00841E').setFooter(`${interaction.user.username}`)],
+                                    embeds: [new MessageEmbed().setDescription(`PM2 process stopped: ${processName}`).setColor('00841E').setFooter({
+                                        name: `${interaction.user.username}`
+                                    })],
                                 }).catch(console.error)
                                 .then(msg => {
                                     if (config.pm2.pm2ResponseDeleteSeconds > 0) {

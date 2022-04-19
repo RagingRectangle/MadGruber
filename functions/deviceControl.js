@@ -30,7 +30,7 @@ module.exports = {
         }).catch(console.error);
         interaction.message.channel.send({
                 content: '**Running deviceControl script:**',
-                embeds: [new MessageEmbed().setDescription(`\`${bashControlCommand}\``).setColor('0D00CA').setFooter(`${interaction.user.username}`)]
+                embeds: [new MessageEmbed().setDescription(`\`${bashControlCommand}\``).setColor('0D00CA').setFooter({text: `${interaction.user.username}`})]
             }).catch(console.error)
             .then(async msg => {
                 let logFile = [];
@@ -100,7 +100,7 @@ module.exports = {
                     }
                     msg.edit({
                         content: '**Ran deviceControl script:**',
-                        embeds: [new MessageEmbed().setDescription(description).setColor(color).setFooter(`${interaction.user.username}`)],
+                        embeds: [new MessageEmbed().setDescription(description).setColor(color).setFooter({text: `${interaction.user.username}`})],
                     }).catch(console.error);
                     if (controlType === 'logcatDevice' && exitCode !== 1) {
                         logFile.forEach(async file => {
@@ -171,7 +171,7 @@ module.exports = {
         let dcPath = (`${config.deviceControl.path}/devicecontrol.sh`).replace('//','/');
         let sendWorkerBash = `bash ${dcPath} origin sendWorker ${coords}`;
         receivedMessage.channel.send({
-                embeds: [new MessageEmbed().setDescription(`Sending closest worker...`).setColor('0D00CA').setFooter(`${receivedMessage.author.username}`)]
+                embeds: [new MessageEmbed().setDescription(`Sending closest worker...`).setColor('0D00CA').setFooter({text: `${receivedMessage.author.username}`})]
             }).catch(console.error)
             .then(async msg => {
                 shell.exec(sendWorkerBash, async function (exitCode, output) {
@@ -180,12 +180,12 @@ module.exports = {
                     if (exitCode !== 0) {
                         console.log(`${receivedMessage.author.username} failed to send worker to: ${coords}`);
                         msg.edit({
-                            embeds: [new MessageEmbed().setDescription(`Error sending worker:\n\n${output}`).setColor('9E0000').setFooter(`${receivedMessage.author.username}`)],
+                            embeds: [new MessageEmbed().setDescription(`Error sending worker:\n\n${output}`).setColor('9E0000').setFooter({text: `${receivedMessage.author.username}`})],
                         }).catch(console.error);
                     } else {
                         console.log(`(${receivedMessage.author.username}) ${response}`);
                         msg.edit({
-                            embeds: [new MessageEmbed().setDescription(response.replace(coords,`[${coords}](https://www.google.com/maps/search/?api=1&query=${coords})`)).setColor('00841E').setFooter(`${receivedMessage.author.username}`)],
+                            embeds: [new MessageEmbed().setDescription(response.replace(coords,`[${coords}](https://www.google.com/maps/search/?api=1&query=${coords})`)).setColor('00841E').setFooter({text: `${receivedMessage.author.username}`})],
                         }).catch(console.error);
                     }
                     if (config.deviceControl.controlResponseDeleteSeconds > 0) {

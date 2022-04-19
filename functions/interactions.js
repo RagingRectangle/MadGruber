@@ -122,7 +122,7 @@ module.exports = {
                     Scripts.sendScriptList(interaction, 'restart');
                     interaction.message.channel.send({
                             content: '**Did not run script:**',
-                            embeds: [new MessageEmbed().setDescription(interaction.message.embeds[0]['description']).setColor('9E0000').setFooter(`${interaction.user.username}`)],
+                            embeds: [new MessageEmbed().setDescription(interaction.message.embeds[0]['description']).setColor('9E0000').setFooter({text: `${interaction.user.username}`})],
                             components: []
                         }).catch(console.error)
                         .then(msg => {
@@ -133,7 +133,7 @@ module.exports = {
                     let fullBashCommand = interaction.message.embeds[0]['description'];
                     interaction.message.edit({
                         content: '**Running script:**',
-                        embeds: [new MessageEmbed().setDescription(`\`${fullBashCommand}\``).setColor('0D00CA').setFooter(`${interaction.user.username}`)],
+                        embeds: [new MessageEmbed().setDescription(`\`${fullBashCommand}\``).setColor('0D00CA').setFooter({text: `${interaction.user.username}`})],
                         components: []
                     }).catch(console.error);
                     try {
@@ -148,7 +148,7 @@ module.exports = {
                             console.log(`${interaction.user.username} ran script: \`${fullBashCommand}\``);
                             interaction.message.channel.send({
                                     content: '**Ran script:**',
-                                    embeds: [new MessageEmbed().setDescription(description).setColor(color).setFooter(`${interaction.user.username}`)],
+                                    embeds: [new MessageEmbed().setDescription(description).setColor(color).setFooter({text: `${interaction.user.username}`})],
                                     components: []
                                 }).catch(console.error)
                                 .then(msg => {
@@ -161,7 +161,7 @@ module.exports = {
                         console.log(`(${interaction.user.username}) Failed to run script: ${fullBashCommand}:`, err);
                         Scripts.sendScriptList(interaction, "restart");
                         interaction.message.channel.send({
-                                embeds: [new MessageEmbed().setTitle('Failed to run script:').setDescription(interaction.message.embeds[0]['description']).setColor('9E0000').setFooter(`${interaction.user.username}`)],
+                                embeds: [new MessageEmbed().setTitle('Failed to run script:').setDescription(interaction.message.embeds[0]['description']).setColor('9E0000').setFooter({text: `${interaction.user.username}`})],
                                 components: []
                             }).catch(console.error)
                             .then(msg => {
@@ -182,7 +182,7 @@ module.exports = {
                 let verify = interactionID.replace('verifyTruncate~', '');
                 if (verify === 'no') {
                     interaction.message.edit({
-                        embeds: [new MessageEmbed().setTitle('Did not truncate:').setDescription(interaction.message.embeds[0]['description']).setColor('9E0000').setFooter(`${interaction.user.username}`)],
+                        embeds: [new MessageEmbed().setTitle('Did not truncate:').setDescription(interaction.message.embeds[0]['description']).setColor('9E0000').setFooter({text: `${interaction.user.username}`})],
                         components: []
                     }).catch(console.error);
                     setTimeout(() => interaction.message.delete().catch(err => console.log("Error deleting verify truncate message:", err)), 10000);

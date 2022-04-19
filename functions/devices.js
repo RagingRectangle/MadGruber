@@ -569,7 +569,7 @@ module.exports = {
             }
             console.log(`${user} looked for ${origin} device info.`);
             channel.send({
-                    embeds: [new MessageEmbed().setTitle(`${origin} Info:`).setDescription(`- ${deviceInfoArray.join('\n- ')}`).setColor(color).setFooter(`${user}`)],
+                    embeds: [new MessageEmbed().setTitle(`${origin} Info:`).setDescription(`- ${deviceInfoArray.join('\n- ')}`).setColor(color).setFooter({text: `${user}`})],
                     components: deviceComponents
                 }).catch(console.error)
                 .then(msg => {

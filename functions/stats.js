@@ -55,7 +55,7 @@ module.exports = {
                 .addOptions(systemStatsList)
             );
         receivedMessage.channel.send({
-            embeds: [new MessageEmbed().setTitle(`${config.serverName} Stats`).setDescription(`Select option below for more info:`).setFooter(`${receivedMessage.author.username}`)],
+            embeds: [new MessageEmbed().setTitle(`${config.serverName} Stats`).setDescription(`Select option below for more info:`).setFooter({text: `${receivedMessage.author.username}`})],
             components: [componentHourly, componentDaily]
         }).catch(console.error);
     }, //End of stats()
@@ -511,7 +511,7 @@ module.exports = {
         connectionStats.end();
         async function sendChart(title, url) {
             interaction.message.channel.send({
-                    embeds: [new MessageEmbed().setTitle(title).setImage(url).setFooter(`${interaction.user.username}`)],
+                    embeds: [new MessageEmbed().setTitle(title).setImage(url).setFooter({text: `${interaction.user.username}`})],
                 }).catch(console.error)
                 .then(async msg => {
                     if (config.stats.graphDeleteSeconds > 0) {
@@ -732,7 +732,7 @@ module.exports = {
                     });
                     const url = await myChart.getShortUrl();
                     interaction.message.channel.send({
-                        embeds: [new MessageEmbed().setTitle(`${origin} Proto Success Rate (${rplType})`).setImage(url).setFooter(`${interaction.user.username}`)],
+                        embeds: [new MessageEmbed().setTitle(`${origin} Proto Success Rate (${rplType})`).setImage(url).setFooter({text: `${interaction.user.username}`})],
                     }).catch(console.error);
                 }
             })
@@ -879,7 +879,7 @@ module.exports = {
 
         async function sendChart(title, url) {
             interaction.message.channel.send({
-                    embeds: [new MessageEmbed().setTitle(title).setImage(url).setFooter(`${interaction.user.username}`)],
+                    embeds: [new MessageEmbed().setTitle(title).setImage(url).setFooter({text: `${interaction.user.username}`})],
                 }).catch(console.error)
                 .then(async msg => {
                     if (config.stats.graphDeleteSeconds > 0) {
