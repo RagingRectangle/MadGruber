@@ -12,6 +12,7 @@ const fileExists = require('file-exists');
 const config = require('../config/config.json');
 const scriptList = require('../config/scripts.json');
 const shell = require('shelljs');
+const ansiParser = require("ansi-parser");
 
 module.exports = {
     sendScriptList: async function sendScriptList(messageOrInteraction, type) {
@@ -245,12 +246,13 @@ module.exports = {
                 shell.exec(fullBashCommand, function (exitCode, output) {
                     module.exports.sendScriptList(interaction, "restart");
                     var color = '00841E';
-                    var description = `\`${fullBashCommand}\`\n\n**Response:**\n${output}`;
+                    var description = `\`${fullBashCommand}\`\n\n**Response:**\n${ansiParser.removeAnsi(output).replaceAll('c','')}`;
                     if (exitCode !== 0) {
                         color = '9E0000';
-                        description = `\`${fullBashCommand}\`\n\n**Error Response:**\n${output}`;
+                        description = `\`${fullBashCommand}\`\n\n**Error Response:**\n${ansiParser.removeAnsi(output).replaceAll('c','')}`;
                     }
                     console.log(`${interaction.user.username} ran script: \`${fullBashCommand}\``);
+
                     interaction.message.channel.send({
                             embeds: [new MessageEmbed().setTitle('Ran script:').setDescription(description).setColor(color).setFooter({text: `${interaction.user.username}`})],
                         }).catch(console.error)

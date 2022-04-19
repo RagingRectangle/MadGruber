@@ -11,6 +11,7 @@ const {
 const fs = require('fs');
 const pm2 = require('pm2');
 const shell = require('shelljs');
+const ansiParser = require("ansi-parser");
 const Pm2Buttons = require('./pm2.js');
 const Truncate = require('./truncate.js');
 const Scripts = require('./scripts.js');
@@ -140,10 +141,10 @@ module.exports = {
                         shell.exec(fullBashCommand, function (exitCode, output) {
                             Scripts.sendScriptList(interaction, "restart");
                             var color = '00841E';
-                            var description = `${interaction.message.embeds[0]['description']}\n\n**Response:**\n${output}`;
+                            var description = `${interaction.message.embeds[0]['description']}\n\n**Response:**\n${ansiParser.removeAnsi(output).replaceAll('c','')}`;
                             if (exitCode !== 0) {
                                 color = '9E0000';
-                                description = `${interaction.message.embeds[0]['description']}\n\n**Error Response:**\n${output}`;
+                                description = `${interaction.message.embeds[0]['description']}\n\n**Error Response:**\n${ansiParser.removeAnsi(output).replaceAll('c','')}`;
                             }
                             console.log(`${interaction.user.username} ran script: \`${fullBashCommand}\``);
                             interaction.message.channel.send({

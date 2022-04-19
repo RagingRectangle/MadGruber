@@ -1,6 +1,6 @@
 {
   "name": "madgruber",
-  "version": "3.15.0",
+  "version": "3.16.0",
   "description": "Discord bot that can do almost anything (except for throat rips)",
   "main": "madgruber.js",
   "scripts": {
@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/RagingRectangle/MadGruber#readme",
   "dependencies": {
+    "ansi-parser": "^3.2.10",
     "color-convert": "^2.0.1",
     "cron": "^1.8.2",
     "discord.js": "13.6.0",
