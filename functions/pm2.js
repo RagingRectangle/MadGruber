@@ -139,7 +139,7 @@ module.exports = {
                             console.log(`${interaction.user.username} failed to restart ${processName} PM2 process.`, err);
                             interaction.message.channel.send({
                                     embeds: [new MessageEmbed().setDescription(`Failed to restart ${processName} process.`).setColor('9E0000').setFooter({
-                                        name: `${interaction.user.username}`
+                                        text: `${interaction.user.username}`
                                     })],
                                 }).catch(console.error)
                                 .then(msg => {
@@ -151,7 +151,7 @@ module.exports = {
                             console.log(`${processName} restarted by ${interaction.user.username}`);
                             interaction.message.channel.send({
                                     embeds: [new MessageEmbed().setDescription(`PM2 process restarted: ${processName}`).setColor('00841E').setFooter({
-                                        name: `${interaction.user.username}`
+                                        text: `${interaction.user.username}`
                                     })],
                                 }).catch(console.error)
                                 .then(msg => {
@@ -168,7 +168,7 @@ module.exports = {
                             console.log(`${interaction.user.username} failed to start ${processName} PM2 process.`, err);
                             interaction.message.channel.send({
                                     embeds: [new MessageEmbed().setDescription(`Failed to start ${processName} process.`).setColor('9E0000').setFooter({
-                                        name: `${interaction.user.username}`
+                                        text: `${interaction.user.username}`
                                     })],
                                 }).catch(console.error)
                                 .then(msg => {
@@ -180,7 +180,7 @@ module.exports = {
                             console.log(`${processName} started by ${interaction.user.username}`);
                             interaction.message.channel.send({
                                     embeds: [new MessageEmbed().setDescription(`PM2 process started: ${processName}`).setColor('00841E').setFooter({
-                                        name: `${interaction.user.username}`
+                                        text: `${interaction.user.username}`
                                     })],
                                 }).catch(console.error)
                                 .then(msg => {
@@ -197,7 +197,7 @@ module.exports = {
                             console.log(`${interaction.user.username} failed to stop ${processName} PM2 process.`, err);
                             interaction.message.channel.send({
                                     embeds: [new MessageEmbed().setDescription(`Failed to stop ${processName} PM2 process.`).setColor('9E0000').setFooter({
-                                        name: `${interaction.user.username}`
+                                        text: `${interaction.user.username}`
                                     })],
                                 }).catch(console.error)
                                 .then(msg => {
@@ -209,7 +209,7 @@ module.exports = {
                             console.log(`${processName} stopped by ${interaction.user.username}`);
                             interaction.message.channel.send({
                                     embeds: [new MessageEmbed().setDescription(`PM2 process stopped: ${processName}`).setColor('00841E').setFooter({
-                                        name: `${interaction.user.username}`
+                                        text: `${interaction.user.username}`
                                     })],
                                 }).catch(console.error)
                                 .then(msg => {
