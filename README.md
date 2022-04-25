@@ -20,8 +20,9 @@ Join the Discord server for any help and to keep up with updates: https://discor
 - See current status of MAD devices (as buttons)
 - Click device buttons to get basic info
 - Command to check for only devices that haven't been seen lately (automated checks optional)
+- RaspberryRelay integration to automatically power cycle noProto devices
 - dkmur's deviceControl integration (Pause/unpause/start/quit/reboot/clear data/logcat/screenshot/power cycle)
-- dkmur's Stats integration (expanded device info/graphs for different device stats)
+- dkmur's Stats integration (expanded device info/graphs for different device and system stats)
 
   
   
@@ -50,6 +51,7 @@ npm install
   
 
 ## Optional Projects to Install
+- [RaspberryRelay](https://github.com/RagingRectangle/RaspberryRelay)
 - [deviceControl by dkmur](https://github.com/dkmur/deviceControl)
 - [Stats by dkmur](https://github.com/dkmur/Stats)
 
@@ -73,6 +75,8 @@ Discord:
 - **linksCommand:** Command to show list of bookmarks.
 - **devicesCommand:** Command to get status of all devices.
 - **noProtoCommand:** Command to see noProto devices.
+- **systemStatsCommand:** Command to see system stat options (if using dkmur's Stats).
+- **sendWorkerCommand:** Command send closest worker to a location. `!sendworker lat,lon` (if using dkmur's deviceControl).
 
 PM2:
 - **mads:** List of MAD PM2 processes that should be restarted after truncating quests.
@@ -101,6 +105,8 @@ Devices:
 - **noProtoCheckMinutes:** Automate checks for unseen devices (Set to 0 to disable auto-check).
 - **noProtoChannelID:** Channel ID for where automated warning should be posted.
 - **noProtoIncludeIdle:** Include paused and idle devices in automated checks (false to ignore).
+- **noProtoIgnoreDevices:** Array of devices to be ignored during noProto checks.
+- **useNoProtoJson:**  Use noProto.json to split which channels noProto device alerts are sent to (true/false).  If 'noProtoChannelID' is set then that will be the default channel for any devices not listed in noProto.json.
 - **checkDeleteMinutes:** How long to wait until auto check messages are deleted (Set to 0 to never delete).
 - **infoMessageDeleteSeconds:** How long to wait until device info responses are deleted (Set to 0 to never delete).
 - **statusButtonsDeleteMinutes:** How long to wait until messages with device buttons are deleted (Set to 0 to never delete).
@@ -112,13 +118,15 @@ DeviceControl:
 - **path:** Path to root folder.
 - **controlResponseDeleteSeconds:** How long to wait until script responses are deleted (Set to 0 to never delete).
 - **logcatDeleteSeconds:** How long to wait until logcats are deleted (Set to 0 to never delete).
+- **reverseLogcat:** Reverse logcat output so the most recent entry is on top (true/false).
 - **screenshotDeleteSeconds:** How long to wait until screenshots are deleted (Set to 0 to never delete).
-- **powerCycleType:** Set to "deviceControl" if using deviceControl to power cycle your devices. Adds cycle option to dropdown control list. (Will be adding an option for RaspberryRelay whenever I get around to updating it).
+- **powerCycleType:** Set to "deviceControl" if using deviceControl to power cycle your devices. Set to "raspberry" if using RaspberryRelay.
 
 Stats:
 - [Install info](https://github.com/dkmur/Stats)
 - **database:** Basic stats database info.
 - **dataPointCount:** How many individual points on graphs for each type.
+- **colorPalette:** Colors used for stat graphs. Accepts all common color names. (Default 1:orange, 2:green, 3:navy)
 - **graphDeleteSeconds:** How long to wait until graphs are deleted (Set to 0 to never delete).
 - **deviceInfo:** Customize what is added to the device info displayed (true/false).
 
@@ -182,7 +190,9 @@ Stats:
 - Get status of devices as buttons with `<prefix><devicesCommand>`
   - Press device button to get more info.
   - If deviceControl and/or Stats is installed then dropdown lists will appear.
+- Get info about specific device with `<prefix><device_name/origin>`
 - See any naughty devices with `<prefix><noProtoCommand>`
+- See system stats with `<prefix><systemStatsCommand>` (Requires dkmur's Stats)
 
  
   

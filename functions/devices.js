@@ -11,6 +11,7 @@ const fs = require('fs');
 const mysql = require('mysql');
 const moment = require('moment');
 const config = require('../config/config.json');
+const noProtoJson = require('../config/noProto.json');
 
 module.exports = {
     deviceStatus: async function deviceStatus(receivedMessage) {
@@ -117,8 +118,9 @@ module.exports = {
     }, //End of deviceStatus()
 
     noProtoDevices: async function noProtoDevices(client, receivedMessage, type) {
-        if (type === 'cron' && !config.devices.noProtoChannelID) {
+        if (type === 'cron' && !config.devices.noProtoChannelID && config.devices.useNoProtoJson !== true) {
             console.log("Error: 'noProtoChannelID' not set in config.json");
+            return;
         }
         let dbInfo = require('../MAD_Database_Info.json');
         if (type === 'search') {
@@ -183,64 +185,139 @@ module.exports = {
                 }); //End of forEach(device)
                 instanceList = Array.from(new Set(instanceList));
                 buttonArray.sort(sortBy('name'));
-                //Split by instance
-                instanceList.forEach(async instance => {
-                    var content = `**${instance} No Proto Devices:**`;
-                    var instanceButtons = [];
-                    buttonArray.forEach(buttonObj => {
-                        if (instance === buttonObj.instance) {
-                            instanceButtons.push(buttonObj.button);
-                        }
-                    }) //End of forEach(buttonObj)
-                    let messagesNeeded = Math.ceil(instanceButtons.length / 25);
-                    for (var m = 0; m < messagesNeeded; m++) {
-                        let buttonsNeeded = Math.min(25, instanceButtons.length);
-                        let rowsNeeded = Math.ceil(buttonsNeeded / 5);
-                        var buttonCount = 0;
-                        var messageComponents = [];
-                        for (var n = 0; n < rowsNeeded && n < 5; n++) {
-                            var buttonRow = new MessageActionRow();
-                            for (var r = 0; r < 5; r++) {
-                                if (buttonCount < buttonsNeeded) {
-                                    buttonRow.addComponents(instanceButtons[buttonCount]);
-                                    buttonCount++;
-                                }
-                            } //End of r loop
-                            messageComponents.push(buttonRow);
-                        } //End of n loop
-                        if (type === 'search') {
-                            console.log("search")
-                            receivedMessage.channel.send({
-                                    content: content,
-                                    components: messageComponents
-                                }).catch(console.error)
-                                .then(msg => {
-                                    if (config.devices.statusButtonsDeleteMinutes > 0) {
-                                        setTimeout(() => msg.delete().catch(err => console.log(`Error deleting noProto status message:`, err)), (config.devices.statusButtonsDeleteMinutes * 1000 * 60));
-                                    }
-                                })
-                        } //End of search
-                        else if (type === 'cron') {
+                if (config.devices.useNoProtoJson === true && type === 'cron') {
+                    splitByNoProtoJson(buttonArray);
+                } else {
+                    splitByInstance(instanceList, buttonArray);
+                }
+                var completedDevices = [];
+                async function splitByNoProtoJson(buttonArray) {
+                    noProtoJson.forEach(async item => {
+                        if (item.channelID) {
                             try {
-                                let postChannel = await client.channels.fetch(config.devices.noProtoChannelID);
-                                postChannel.send({
+                                let noProtoChannel = await client.channels.fetch(item.channelID);
+                                var channelButtons = [];
+                                for (var b = 0; b < buttonArray.length; b++) {
+                                    if (item.deviceNames.includes(buttonArray[b]['name'])) {
+                                        channelButtons.push(buttonArray[b]['button']);
+                                        completedDevices.push(buttonArray[b]['name']);
+                                    }
+                                }
+                                if (channelButtons.length > 0) {
+                                    createComponents(noProtoChannel, channelButtons);
+                                }
+                            } catch (err) {
+                                console.log("Failed to fetch noProto channel:", err);
+                            }
+                        }
+                    });
+                    if (config.devices.noProtoChannelID) {
+                        try {
+                            let noProtoChannel = await client.channels.fetch(config.devices.noProtoChannelID);
+                            var channelButtons = [];
+                            buttonArray.forEach(button => {
+                                if (completedDevices.includes(button['name']) || config.devices.noProtoIgnoreDevices.includes(button['name'])) {
+                                    //Skip button
+                                } else {
+                                    channelButtons.push(button['button']);
+                                }
+                            });
+                            if (channelButtons.length > 0) {
+                                createComponents(noProtoChannel, channelButtons);
+                            }
+                        } catch (err) {
+                            console.log("Failed to fetch default noProto channel:", err);
+                        }
+                    }
+                    async function createComponents(noProtoChannel, channelButtons) {
+                        let messagesNeeded = Math.ceil(channelButtons.length / 25);
+                        for (var m = 0; m < messagesNeeded; m++) {
+                            let buttonsNeeded = Math.min(25, channelButtons.length);
+                            let rowsNeeded = Math.ceil(buttonsNeeded / 5);
+                            var buttonCount = 0;
+                            var messageComponents = [];
+                            for (var n = 0; n < rowsNeeded && n < 5; n++) {
+                                var buttonRow = new MessageActionRow();
+                                for (var r = 0; r < 5; r++) {
+                                    if (buttonCount < buttonsNeeded) {
+                                        buttonRow.addComponents(channelButtons[buttonCount]);
+                                        buttonCount++;
+                                    }
+                                } //End of r loop
+                                messageComponents.push(buttonRow);
+                            } //End of n loop
+                            let content = `**${channelButtons.length} No Proto Devices:**`;
+                            sendCronMessage(noProtoChannel, content, messageComponents);
+                        } //End of m loop
+                    } //End of createComponents()
+                } //End of splitByNoProtoJson()
+
+                async function splitByInstance(instanceList, buttonArray) {
+                    instanceList.forEach(async instance => {
+                        var instanceButtons = [];
+                        var noProtoCount = 0;
+                        buttonArray.forEach(buttonObj => {
+                            if (instance === buttonObj.instance && !config.devices.noProtoIgnoreDevices.includes(buttonObj['name'])) {
+                                instanceButtons.push(buttonObj.button);
+                                noProtoCount++;
+                            }
+                        }) //End of forEach(buttonObj)
+                        let messagesNeeded = Math.ceil(instanceButtons.length / 25);
+                        for (var m = 0; m < messagesNeeded; m++) {
+                            let buttonsNeeded = Math.min(25, instanceButtons.length);
+                            let rowsNeeded = Math.ceil(buttonsNeeded / 5);
+                            var buttonCount = 0;
+                            var messageComponents = [];
+                            for (var n = 0; n < rowsNeeded && n < 5; n++) {
+                                var buttonRow = new MessageActionRow();
+                                for (var r = 0; r < 5; r++) {
+                                    if (buttonCount < buttonsNeeded) {
+                                        buttonRow.addComponents(instanceButtons[buttonCount]);
+                                        buttonCount++;
+                                    }
+                                } //End of r loop
+                                messageComponents.push(buttonRow);
+                            } //End of n loop
+                            let content = `**${instance}: ${noProtoCount} No Proto Devices:**`;
+                            if (type === 'search') {
+                                receivedMessage.channel.send({
                                         content: content,
                                         components: messageComponents
                                     }).catch(console.error)
                                     .then(msg => {
-                                        if (config.devices.checkDeleteMinutes > 0) {
-                                            setTimeout(() => msg.delete().catch(err => console.log(`Error deleting noProto check message:`, err)), (config.devices.checkDeleteMinutes * 1000 * 60));
+                                        if (config.devices.statusButtonsDeleteMinutes > 0) {
+                                            setTimeout(() => msg.delete().catch(err => console.log(`Error deleting noProto status message:`, err)), (config.devices.statusButtonsDeleteMinutes * 1000 * 60));
                                         }
                                     })
-                            } catch (err) {
-                                console.log("Failed to fetch noProto post channel:", err);
+                            } //End of search
+                            else if (type === 'cron') {
+                                try {
+                                    let postChannel = await client.channels.fetch(config.devices.noProtoChannelID);
+                                    sendCronMessage(postChannel, content, messageComponents);
+                                } catch (err) {
+                                    console.log("Failed to fetch noProto post channel:", err);
+                                }
+                            } //End of cron
+                            content = '‎';
+                            let tempButtons = instanceButtons.slice(25);
+                            instanceButtons = tempButtons;
+                        } //End of message m loop
+                    }); //End of forEach(instance)
+                } //End of splitByInstance()
+
+                async function sendCronMessage(postChannel, content, messageComponents) {
+                    postChannel.send({
+                            content: content,
+                            components: messageComponents
+                        }).catch(console.error)
+                        .then(msg => {
+                            if (config.devices.checkDeleteMinutes > 0) {
+                                setTimeout(() => msg.delete().catch(err => console.log(`Error deleting noProto check message:`, err)), (config.devices.checkDeleteMinutes *
+                                    1000 * 60));
                             }
-                        } //End of cron
-                        content = '‎';
-                        let tempButtons = instanceButtons.slice(25);
-                        instanceButtons = tempButtons;
-                    } //End of message m loop
-                }) //End of forEach(instance)
+                        })
+                } //End of sendCronMessage()
+
                 if (instanceList.length == 0 && type == "search") {
                     receivedMessage.channel.send("No problems detected!")
                         .catch(console.error)
@@ -252,10 +329,21 @@ module.exports = {
                 }
             }
         }); //End of query
+
         connectionMAD.end();
     }, //End of noProtoDevices()
 
-    getDeviceInfo: async function getDeviceInfo(interaction, deviceID) {
+    getDeviceInfo: async function getDeviceInfo(type, typeData, deviceID) {
+        var channel, user;
+        if (type === "interaction") {
+            channel = typeData.message.channel;
+            user = typeData.user.username;
+        } else if (type === "search") {
+            channel = typeData.channel;
+            user = typeData.author.username;
+        } else {
+            return;
+        }
         let dbInfo = require('../MAD_Database_Info.json');
         let connectionMAD = mysql.createConnection(config.madDB);
         let deviceQuery = `SELECT * FROM trs_status WHERE device_id = "${deviceID}"`;
@@ -271,7 +359,7 @@ module.exports = {
             let timeDiffLastSeen = Math.abs(Date.now() - Date.parse(device.lastProtoDateTime));
             let hoursSinceLastSeen = timeDiffLastSeen / (1000 * 3600);
             let minutesSinceLastSeen = (hoursSinceLastSeen * 60).toFixed(2);
-            var paused = deviceID = instance = restartInfo = rebootInfo = loginInfo = '';
+            var paused = '';
             let origin = dbInfo.devices[device.device_id]['name'];
             var deviceInfoArray = [];
             //Running well
@@ -295,6 +383,7 @@ module.exports = {
             if (config.devices.displayOptions.rebootInfo === true) {
                 deviceInfoArray.push(`**last reboot:** ${moment(device.lastPogoReboot).from(moment())} (#${device.globalrebootcount})`);
             }
+            let cycleStatPosition = deviceInfoArray.length;
             if (config.devices.displayOptions.deviceID === true) {
                 deviceInfoArray.push(`**deviceID:** ${device.device_id}`);
             }
@@ -313,28 +402,41 @@ module.exports = {
                     if (err) {
                         console.log("Stats Info Query Error:", err);
                     } else {
-                        getStatsDeviceInfo(origin, color, deviceInfoArray, statsResults[0]);
+                        getStatsDeviceInfo(origin, color, deviceInfoArray, statsResults[0], cycleStatPosition);
                     }
                 }); //End of query
                 connectionDeviceInfo.end();
             }
         } //End of parseDeviceInfo()
 
-        async function getStatsDeviceInfo(origin, color, deviceInfoArray, statsDevice) {
-            for (const [key, value] of Object.entries(statsDevice)) {
-                if (config.stats.deviceInfo[key] === true) {
-                    deviceInfoArray.push(`**${key}:** ${value}`);
+        async function getStatsDeviceInfo(origin, color, deviceInfoArray, statsDevice, cycleStatPosition) {
+            try {
+                for (const [key, value] of Object.entries(statsDevice)) {
+                    if (config.stats.deviceInfo[key] === true) {
+                        deviceInfoArray.push(`**${key}:** ${value}`);
+                    }
                 }
+            } catch (err) {}
+            if (config.stats.deviceInfo.cycle === true && config.deviceControl.powerCycleType.toLowerCase() === "devicecontrol") {
+                let connectionCycleInfo = mysql.createConnection(config.stats.database);
+                let cycleQuery = `SELECT * FROM relay WHERE origin = "${origin}"`;
+                connectionCycleInfo.query(cycleQuery, function (err, cycleResults) {
+                    if (err || cycleResults.length == 0) {
+                        console.log("Cycle Stat Query Error:", err);
+                        createStatsList(origin, color, deviceInfoArray);
+                    } else {
+                        deviceInfoArray.splice(cycleStatPosition, 0, `**last cycle:** ${moment(cycleResults[0].lastCycle).from(moment())} (#${cycleResults[0].totCycle})`);
+                        createStatsList(origin, color, deviceInfoArray);
+                    }
+                }); //End of query
+                connectionCycleInfo.end();
+            } else {
+                createStatsList(origin, color, deviceInfoArray);
             }
-            createStatsList(origin, color, deviceInfoArray);
         } //End of getStatsDeviceInfo()
 
         async function createStatsList(origin, color, deviceInfoArray) {
-            let statsSelectList = [{
-                    label: `Locations Handled (daily)`,
-                    value: `${config.serverName}~deviceStats~${origin}~locationsHandled~daily`
-                },
-                {
+            let statsSelectListHourly = [{
                     label: `Locations Handled (hourly)`,
                     value: `${config.serverName}~deviceStats~${origin}~locationsHandled~hourly`
                 },
@@ -343,36 +445,41 @@ module.exports = {
                     value: `${config.serverName}~deviceStats~${origin}~locationsSuccess~hourly`
                 },
                 {
-                    label: `Location Success (daily)`,
-                    value: `${config.serverName}~deviceStats~${origin}~locationsSuccess~daily`
-                },
-                {
                     label: `Locations Time (hourly)`,
                     value: `${config.serverName}~deviceStats~${origin}~locationsTime~hourly`
-                },
-                {
-                    label: `Locations Time (daily)`,
-                    value: `${config.serverName}~deviceStats~${origin}~locationsTime~daily`
                 },
                 {
                     label: `Mons Scanned (hourly)`,
                     value: `${config.serverName}~deviceStats~${origin}~monsScanned~hourly`
                 },
                 {
-                    label: `Mons Scanned (daily)`,
-                    value: `${config.serverName}~deviceStats~${origin}~monsScanned~daily`
-                },
-                {
                     label: `Proto Success Rate (hourly)`,
                     value: `${config.serverName}~deviceStats~${origin}~protoSuccess~hourly`
                 },
                 {
-                    label: `Proto Success Rate (daily)`,
-                    value: `${config.serverName}~deviceStats~${origin}~protoSuccess~daily`
-                },
-                {
                     label: `Restarts/Reboots (hourly)`,
                     value: `${config.serverName}~deviceStats~${origin}~restartReboot~hourly`
+                },
+            ]
+            let statsSelectListDaily = [{
+                    label: `Locations Handled (daily)`,
+                    value: `${config.serverName}~deviceStats~${origin}~locationsHandled~daily`
+                },
+                {
+                    label: `Location Success (daily)`,
+                    value: `${config.serverName}~deviceStats~${origin}~locationsSuccess~daily`
+                },
+                {
+                    label: `Locations Time (daily)`,
+                    value: `${config.serverName}~deviceStats~${origin}~locationsTime~daily`
+                },
+                {
+                    label: `Mons Scanned (daily)`,
+                    value: `${config.serverName}~deviceStats~${origin}~monsScanned~daily`
+                },
+                {
+                    label: `Proto Success Rate (daily)`,
+                    value: `${config.serverName}~deviceStats~${origin}~protoSuccess~daily`
                 },
                 {
                     label: `Restarts/Reboots (daily)`,
@@ -383,20 +490,25 @@ module.exports = {
                     value: `${config.serverName}~deviceStats~${origin}~temperature~daily`
                 },
             ];
-
-            let statsListComponent = new MessageActionRow()
+            let statsComponentHourly = new MessageActionRow()
                 .addComponents(
                     new MessageSelectMenu()
-                    .setCustomId(`${config.serverName}~deviceStats`)
-                    .setPlaceholder(`${origin} Stats`)
-                    .addOptions(statsSelectList)
+                    .setCustomId(`${config.serverName}~deviceStats~hourly`)
+                    .setPlaceholder(`${origin} Hourly Stats`)
+                    .addOptions(statsSelectListHourly)
                 );
-
-
-            sendDeviceInfo(origin, color, deviceInfoArray, statsListComponent);
+            let statsComponentDaily = new MessageActionRow()
+                .addComponents(
+                    new MessageSelectMenu()
+                    .setCustomId(`${config.serverName}~deviceStats~daily`)
+                    .setPlaceholder(`${origin} Daily Stats`)
+                    .addOptions(statsSelectListDaily)
+                )
+            let statsListArray = [statsComponentHourly, statsComponentDaily];
+            sendDeviceInfo(origin, color, deviceInfoArray, statsListArray);
         } //End of createStatsList()
 
-        async function sendDeviceInfo(origin, color, deviceInfoArray, statsListComponent) {
+        async function sendDeviceInfo(origin, color, deviceInfoArray, statsListArray) {
             var deviceComponents = [];
             if (config.deviceControl.path) {
                 let controlSelectList = [{
@@ -432,13 +544,16 @@ module.exports = {
                         value: `${config.serverName}~deviceControl~${origin}~screenshot`
                     }
                 ]
-                if (config.deviceControl.powerCycleType.toLowerCase() === 'devicecontrol') {
+                if (config.deviceControl.powerCycleType.toLowerCase().replace(' ', '') === 'devicecontrol') {
                     controlSelectList.push({
                         label: `Power cycle ${origin}`,
                         value: `${config.serverName}~deviceControl~${origin}~cycle`
                     })
-                } else if (config.deviceControl.powerCycleType.toLowerCase() === 'raspberry') {
-                    //Add raspberryRelay stuff here
+                } else if (config.deviceControl.powerCycleType.toLowerCase().replace(' ', '').replace('raspberryrelay', 'raspberry') === 'raspberry') {
+                    controlSelectList.push({
+                        label: `Power cycle ${origin}`,
+                        value: `raspberryRelay~${origin}`
+                    })
                 }
                 let controlListComponent = new MessageActionRow()
                     .addComponents(
@@ -449,11 +564,12 @@ module.exports = {
                     );
                 deviceComponents.push(controlListComponent);
             } //End of deviceControl
-            if (statsListComponent !== '') {
-                deviceComponents.push(statsListComponent);
+            if (statsListArray !== '') {
+                deviceComponents.push(statsListArray[0], statsListArray[1]);
             }
-            interaction.message.channel.send({
-                    embeds: [new MessageEmbed().setTitle(`${origin} Info:`).setDescription(`- ${deviceInfoArray.join('\n- ')}`).setColor(color).setFooter(`${interaction.user.username}`)],
+            console.log(`${user} looked for ${origin} device info.`);
+            channel.send({
+                    embeds: [new MessageEmbed().setTitle(`${origin} Info:`).setDescription(`- ${deviceInfoArray.join('\n- ')}`).setColor(color).setFooter({text: `${user}`})],
                     components: deviceComponents
                 }).catch(console.error)
                 .then(msg => {

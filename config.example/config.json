@@ -13,7 +13,9 @@
         "madQueryCommand": "mad",
         "linksCommand": "links",
         "devicesCommand": "devices",
-        "noProtoCommand": "noproto"
+        "noProtoCommand": "noproto",
+        "systemStatsCommand": "stats",
+        "sendWorkerCommand": "sendworker"
     },
     "pm2": {
         "mads": [""],
@@ -30,7 +32,8 @@
             "queries": [],
             "links": [],
             "deviceInfo": [],
-            "deviceInfoControl": []
+            "deviceInfoControl": [],
+            "systemStats": []
         }
     },
     "truncate": {
@@ -53,6 +56,8 @@
         "noProtoCheckMinutes": 20,
         "noProtoChannelID": "",
         "noProtoIncludeIdle": false,
+        "noProtoIgnoreDevices": [""],
+        "useNoProtoJson": false,
         "checkDeleteMinutes": 20,
         "infoMessageDeleteSeconds": 0,
         "statusButtonsDeleteMinutes": 0,
@@ -66,9 +71,10 @@
         }
     },
     "deviceControl": {
-        "path": "/home/USERNAME/deviceControl/",
+        "path": "",
         "controlResponseDeleteSeconds": 0,
         "logcatDeleteSeconds": 0,
+        "reverseLogcat": false,
         "screenshotDeleteSeconds": 0,
         "powerCycleType": ""
     },
@@ -82,6 +88,11 @@
         "dataPointCount": {
             "hourly": 72,
             "daily": 30
+        },
+        "colorPalette": {
+            "color1": "orange",
+            "color2": "green",
+            "color3": "navy"
         },
         "graphDeleteSeconds": 0,
         "deviceInfo": {
@@ -107,7 +118,8 @@
             "MACw": false,
             "MACe": true,
             "hostname": true,
-            "gmail": false
+            "gmail": false,
+            "cycle": false
         }
     }
 }

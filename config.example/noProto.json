@@ -1,0 +1,10 @@
+[
+    {
+        "channelID": "",
+        "deviceNames": ["ATV01", "ATV02"]
+    },
+    {
+        "channelID": "",
+        "deviceNames": ["ATV03", "ATV04"]
+    }
+]

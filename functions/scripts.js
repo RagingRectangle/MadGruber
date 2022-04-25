@@ -12,6 +12,7 @@ const fileExists = require('file-exists');
 const config = require('../config/config.json');
 const scriptList = require('../config/scripts.json');
 const shell = require('shelljs');
+const ansiParser = require("ansi-parser");
 
 module.exports = {
     sendScriptList: async function sendScriptList(messageOrInteraction, type) {
@@ -39,7 +40,7 @@ module.exports = {
         if (type === 'new') {
             if (selectList.length == 0){
                 messageOrInteraction.channel.send({
-                    embeds: [new MessageEmbed().setDescription("Error: No scripts found in scripts.json").setColor('9E0000').setFooter(`${interaction.user.username}`)]
+                    embeds: [new MessageEmbed().setDescription("Error: No scripts found in scripts.json").setColor('9E0000')]
                 }).catch(console.error);
                 return;
             }
@@ -219,7 +220,7 @@ module.exports = {
                 }
                 interaction.message.edit({
                     content: title,
-                    embeds: [new MessageEmbed().setDescription(`bash ${scriptList[s]['fullFilePath']} ${variables}`).setColor('0D00CA').setFooter(`${interaction.user.username}`)],
+                    embeds: [new MessageEmbed().setDescription(`bash ${scriptList[s]['fullFilePath']} ${variables}`).setColor('0D00CA').setFooter({text: `${interaction.user.username}`})],
                     components: [optionRow]
                 }).catch(console.error);
             }
@@ -238,21 +239,22 @@ module.exports = {
         if (fullBashCommand !== '') {
             interaction.message.edit({
                 content: '**Running script:**',
-                embeds: [new MessageEmbed().setDescription(`\`${fullBashCommand}\``).setColor('0D00CA').setFooter(`${interaction.user.username}`)],
+                embeds: [new MessageEmbed().setDescription(`\`${fullBashCommand}\``).setColor('0D00CA').setFooter({text: `${interaction.user.username}`})],
                 components: []
             }).catch(console.error);
             try {
                 shell.exec(fullBashCommand, function (exitCode, output) {
                     module.exports.sendScriptList(interaction, "restart");
                     var color = '00841E';
-                    var description = `\`${fullBashCommand}\`\n\n**Response:**\n${output}`;
+                    var description = `\`${fullBashCommand}\`\n\n**Response:**\n${ansiParser.removeAnsi(output).replaceAll('c','')}`;
                     if (exitCode !== 0) {
                         color = '9E0000';
-                        description = `\`${fullBashCommand}\`\n\n**Error Response:**\n${output}`;
+                        description = `\`${fullBashCommand}\`\n\n**Error Response:**\n${ansiParser.removeAnsi(output).replaceAll('c','')}`;
                     }
                     console.log(`${interaction.user.username} ran script: \`${fullBashCommand}\``);
+
                     interaction.message.channel.send({
-                            embeds: [new MessageEmbed().setTitle('Ran script:').setDescription(description).setColor(color).setFooter(`${interaction.user.username}`)],
+                            embeds: [new MessageEmbed().setTitle('Ran script:').setDescription(description).setColor(color).setFooter({text: `${interaction.user.username}`})],
                         }).catch(console.error)
                         .then(msg => {
                             if (config.scripts.scriptResponseDeleteSeconds > 0) {
@@ -264,7 +266,7 @@ module.exports = {
                 console.log(`Failed to run script: ${fullBashCommand}:`, err);
                 module.exports.sendScriptList(interaction, "restart");
                 interaction.message.channel.send({
-                        embeds: [new MessageEmbed().setTitle('Failed to run script:').setDescription(fullBashCommand).setColor('9E0000').setFooter(`${interaction.user.username}`)],
+                        embeds: [new MessageEmbed().setTitle('Failed to run script:').setDescription(fullBashCommand).setColor('9E0000').setFooter({text: `${interaction.user.username}`})],
                     }).catch(console.error)
                     .then(msg => {
                         if (config.scripts.scriptResponseDeleteSeconds > 0) {

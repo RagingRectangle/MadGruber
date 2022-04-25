@@ -30,7 +30,7 @@ module.exports = {
         let buttonsNeeded = buttonList.length;
         var buttonCount = 0;
         var messageComponents = [];
-        for (var n = 0; n < rowsNeeded && n < 4; n++) {
+        for (var n = 0; n < rowsNeeded && n < 5; n++) {
             var buttonRow = new MessageActionRow()
             for (var r = 0; r < 5; r++) {
                 if (buttonCount < buttonsNeeded) {

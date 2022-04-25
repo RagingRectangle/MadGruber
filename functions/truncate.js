@@ -98,7 +98,7 @@ module.exports = {
             description = description.concat(`\n\nFailed:\n- ${bad.join('\n- ')}`);
         }
         interaction.message.edit({
-            embeds: [new MessageEmbed().setTitle('Truncate Results:').setDescription(description).setColor(color).setFooter(`${interaction.user.username}`)],
+            embeds: [new MessageEmbed().setTitle('Truncate Results:').setDescription(description).setColor(color).setFooter({text: `${interaction.user.username}`})],
             components: []
         }).catch(console.error);
         if (restartMAD === true) {
@@ -162,7 +162,7 @@ module.exports = {
             newDescription = newDescription.concat(`\n\nFailed:\n- ${bad.join('\n- ')}`);
         }
         interaction.message.edit({
-            embeds: [new MessageEmbed().setTitle('Truncate Results:').setDescription(newDescription).setColor(color).setFooter(`${interaction.user.username}`)],
+            embeds: [new MessageEmbed().setTitle('Truncate Results:').setDescription(newDescription).setColor(color).setFooter({text: `${interaction.user.username}`})],
             components: []
         }).catch(console.error);
         //})
