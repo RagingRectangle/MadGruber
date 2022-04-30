@@ -1,6 +1,6 @@
 {
   "name": "madgruber",
-  "version": "3.17.1",
+  "version": "4.0.0",
   "description": "Discord bot for controlling MAD, PM2 processes, and whatever else this idiot comes up with to add.",
   "main": "madgruber.js",
   "scripts": {
@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/RagingRectangle/MadGruber#readme",
   "dependencies": {
+    "@discordjs/builders": "0.13.0",
     "ansi-parser": "^3.2.10",
     "color-convert": "^2.0.1",
     "cron": "^1.8.2",

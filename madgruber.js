@@ -8,12 +8,12 @@ const {
 	MessageButton
 } = require('discord.js');
 const client = new Client({
-	intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.DIRECT_MESSAGES],
+	intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.DIRECT_MESSAGES, Intents.FLAGS.GUILD_SCHEDULED_EVENTS],
 	partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
 });
 const fs = require('fs');
 const pm2 = require('pm2');
-const CronJob = require('./node_modules/cron/lib/cron.js').CronJob;
+const CronJob = require('cron').CronJob;
 const GenerateMadInfo = require('./functions/generateMadInfo.js');
 const Scripts = require('./functions/scripts.js');
 const Queries = require('./functions/queries.js');
@@ -25,6 +25,7 @@ const Devices = require('./functions/devices.js');
 const DeviceControl = require('./functions/deviceControl.js');
 const Roles = require('./functions/roles.js');
 const Stats = require('./functions/stats.js');
+const Events = require('./functions/events.js');
 const Help = require('./functions/help.js');
 const config = require('./config/config.json');
 const roleConfig = require('./config/roles.json');
@@ -33,10 +34,10 @@ roleConfig.forEach(role => {
 	if (role.messageID) {
 		roleMessages.push(role.messageID);
 	}
-})
+});
 
 
-client.on('ready', () => {
+client.on('ready', async () => {
 	console.log("MadGruber Bot Logged In");
 	//Generate database info
 	if (config.madDB.host) {
@@ -44,11 +45,17 @@ client.on('ready', () => {
 	}
 	//No Proto Checker
 	if (config.madDB.host && config.devices.noProtoCheckMinutes > 0 && config.devices.noProtoChannelID !== "") {
-		var CronJob = require('cron').CronJob;
-		var job = new CronJob(`*/${config.devices.noProtoCheckMinutes} * * * *`, function () {
+		let noProtoJob = new CronJob(`*/${config.devices.noProtoCheckMinutes} * * * *`, function () {
 			Devices.noProtoDevices(client, '', 'cron');
 		}, null, true, null);
-		job.start();
+		noProtoJob.start();
+	}
+	//Automated Quest Reroll
+	if (config.madDB.host && config.truncate.eventAutomation === true && config.truncate.eventGuildID && config.truncate.eventAutomation === true) {
+		let questJob = new CronJob(`14-59/15 * * * *`, function () {
+			Events.checkEvents(client);
+		}, null, true, null);
+		questJob.start();
 	}
 });
 
@@ -130,6 +137,12 @@ client.on('messageCreate', async (receivedMessage) => {
 	else if (config.stats.database.host && config.discord.systemStatsCommand && message === `${config.discord.prefix}${config.discord.systemStatsCommand}`) {
 		if (userPerms.includes('admin') || userPerms.includes('systemStats')) {
 			Stats.stats(client, receivedMessage);
+		}
+	}
+	//Events
+	else if (config.madDB.host && config.discord.eventsCommand && message === `${config.discord.prefix}${config.discord.eventsCommand}`) {
+		if (config.truncate.eventAutomation === true && config.truncate.eventGuildID) {
+			Events.listEvents(client, receivedMessage);
 		}
 	}
 	//Help Menu

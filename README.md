@@ -11,6 +11,7 @@ Join the Discord server for any help and to keep up with updates: https://discor
 **Current Features:**
 - PM2 controller (start/stop/restart + current status)
 - Truncate MAD quests and auto reload MAD processes
+- Automated quest rescanning
 - MAD DB counter (more queries later)
 - Run custom scripts with optional variables
 - Quickly access URL bookmarks
@@ -21,7 +22,7 @@ Join the Discord server for any help and to keep up with updates: https://discor
 - Click device buttons to get basic info
 - Command to check for only devices that haven't been seen lately (automated checks optional)
 - RaspberryRelay integration to automatically power cycle noProto devices
-- dkmur's deviceControl integration (Pause/unpause/start/quit/reboot/clear data/logcat/screenshot/power cycle)
+- dkmur's deviceControl integration (Pause/unpause/start/quit/reboot/clear data/logcat/screenshot/power cycle/send worker)
 - dkmur's Stats integration (expanded device info/graphs for different device and system stats)
 
   
@@ -67,16 +68,17 @@ Discord:
 - **prefix:** Used in front of Discord commands.
 - **adminIDs:** List of Discord user IDs that can execute all commands.  Can also run stuff in DMs.
 - **channelIDs:** List of channel IDs that the bot will respond in. Will also respond to DMs if they are admins.
-- **helpCommand:** Command to show correct syntax and what perms the user has.
-- **pm2Command:** Command to show the PM2 controller.
-- **truncateCommand:** Command to truncate quests and restart MAD instances.
-- **scriptCommand:** Command to show the list of scripts.
-- **madQueryCommand:** Command to show MAD database queries.
-- **linksCommand:** Command to show list of bookmarks.
-- **devicesCommand:** Command to get status of all devices.
-- **noProtoCommand:** Command to see noProto devices.
-- **systemStatsCommand:** Command to see system stat options (if using dkmur's Stats).
-- **sendWorkerCommand:** Command send closest worker to a location. `!sendworker lat,lon` (if using dkmur's deviceControl).
+- **helpCommand:** Show correct syntax and what perms the user has.
+- **pm2Command:** Show the PM2 controller.
+- **truncateCommand:** Truncate quests and restart MAD instances.
+- **scriptCommand:** Show the list of scripts.
+- **madQueryCommand:** Show MAD database queries.
+- **linksCommand:** Show list of bookmarks.
+- **devicesCommand:** Get status of all devices.
+- **noProtoCommand:** Get noProto devices.
+- **systemStatsCommand:** See system stat options (if using dkmur's Stats).
+- **sendWorkerCommand:** Send closest worker to a location. `!sendworker lat,lon` (if using dkmur's deviceControl).
+- **eventsCommand:** View list of quest reroll events if enabled.
 
 PM2:
 - **mads:** List of MAD PM2 processes that should be restarted after truncating quests.
@@ -92,6 +94,11 @@ Truncate:
 - **truncateVerify:** Whether or not to verify table truncate (true/false).
 - **truncateOptions:** List of tables to list as options to truncate.  Can truncate multiple tables at once by combining them with '+'. Example: *["trs_quest", "pokemon", "trs_quest+pokemon"]*
 - **onlyRestartBeforeTime:** Set this to limit when the bot will reload MAD instance (0-23).  If set to 0 it will always reload MADs.  If an event ends at 20:00 and you don't need to reload MAD because you won't rescan quests then enter "20".
+- **eventAutomation:** Whether or not to use Discord events to automate quest truncating (true/false).
+- **eventGuildID:** ID of the guild where events are located.
+- **eventDescriptionTrigger:** The trigger word/s that must be in the event description to automate truncating.
+- **eventAlertChannelID:** ID of the channel where automated alert will be posted. Footer will show whether or not quest truncated and MAD restarted successfully.
+- **eventAlertDeleteSeconds:** How long to wait until event alert is deleted (Set to 0 to never delete).
 
 Scripts:
 - **scriptVerify:** Whether or not to verify running script (true/false).
@@ -177,6 +184,20 @@ Stats:
  
   
 
+## Automated Quest Reroll Setup
+- Truncate quests and restart MAD (if needed) automatically using Discord's event feature.
+- If there are multiple events that start/stop at the same time everything will only be done once.
+- If you're OCD like myself and don't like seeing the event icon on the server image, create a throwaway guild and use that.
+- How to create events:
+  1: Open guild menu and select 'Create Event'
+  2: Select 'Somewhere Else' and enter anything for location such as 'PoGo' (will not be used)
+  3: Enter a name for the event
+  4: Select the start and end times when quests will reroll
+  5: Enter the `eventDescriptionTrigger` into the description along with any other info you'd like to include
+
+ 
+  
+
 ## Usage
 - Start the bot in a console with `node madgruber.js`
 - Can also use PM2 to run it instead with `pm2 start madgruber.js`
@@ -193,7 +214,8 @@ Stats:
 - Get info about specific device with `<prefix><device_name/origin>`
 - See any naughty devices with `<prefix><noProtoCommand>`
 - See system stats with `<prefix><systemStatsCommand>` (Requires dkmur's Stats)
-
+- Send worker to location with `<prefix><sendWorkerCommand> <lat>,<lon>` (Requires dkmur's Stats)
+- Get list of events that will reroll quests with `<prefix><eventsCommand>`
  
   
   

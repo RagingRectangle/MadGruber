@@ -15,7 +15,8 @@
         "devicesCommand": "devices",
         "noProtoCommand": "noproto",
         "systemStatsCommand": "stats",
-        "sendWorkerCommand": "sendworker"
+        "sendWorkerCommand": "sendworker",
+        "eventsCommand": "events"
     },
     "pm2": {
         "mads": [""],
@@ -39,7 +40,12 @@
     "truncate": {
         "truncateVerify": true,
         "truncateOptions": ["trs_quest", "pokemon", "trs_quest+pokemon"],
-        "onlyRestartBeforeTime": 0
+        "onlyRestartBeforeTime": 0,
+        "eventAutomation": false,
+        "eventGuildID": "",
+        "eventDescriptionTrigger": "quest reroll",
+        "eventAlertChannelID": "",
+        "eventAlertDeleteSeconds": 0
     },
     "scripts": {
         "scriptVerify": true,
