@@ -43,7 +43,7 @@ client.on('ready', () => {
 		GenerateMadInfo.generate();
 	}
 	//No Proto Checker
-	if (config.madDB.host && config.devices.noProtoCheckMinutes > 0 && config.devices.noProtoChannelID !== "") {
+	if (config.madDB.host && config.devices.noProtoCheckMinutes > 0) {
 		var CronJob = require('cron').CronJob;
 		var job = new CronJob(`*/${config.devices.noProtoCheckMinutes} * * * *`, function () {
 			Devices.noProtoDevices(client, '', 'cron');
