@@ -198,10 +198,14 @@ module.exports = {
                         let noProtoChannel = await client.channels.fetch(item.channelID);
                         var channelButtons = [];
                         for (var b = 0; b < buttonArray.length; b++) {
-                           if (item.deviceNames.includes(buttonArray[b]['name'])) {
-                              channelButtons.push(buttonArray[b]['button']);
-                              completedDevices.push(buttonArray[b]['name']);
-                           }
+                           for (var n = 0; n < item.deviceNames.length; n++) {
+                              for (var r = 0; r < config.devices.buttonLabelRemove.length; r++) {
+                                  if (item.deviceNames[n].replace(config.devices.buttonLabelRemove[r], '') === buttonArray[b]['name']) {
+                                      channelButtons.push(buttonArray[b]['button']);
+                                      completedDevices.push(buttonArray[b]['name']);
+                                  }
+                              } //End of r loop
+                          } //End of n loop
                         }
                         if (channelButtons.length > 0) {
                            createComponents(noProtoChannel, channelButtons);

@@ -1,6 +1,6 @@
 {
   "name": "madgruber",
-  "version": "4.0.0",
+  "version": "4.0.2",
   "description": "Discord bot for controlling MAD, PM2 processes, and whatever else this idiot comes up with to add.",
   "main": "madgruber.js",
   "scripts": {
