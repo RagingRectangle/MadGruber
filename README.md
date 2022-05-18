@@ -17,6 +17,7 @@ Join the Discord server for any help and to keep up with updates: https://discor
 - Quickly access URL bookmarks
 - Reaction role manager
 - Limit commands to only certain roles
+- Optional slash commands available
 - Options to verify certain actions first
 - See current status of MAD devices (as buttons)
 - Click device buttons to get basic info
@@ -68,6 +69,10 @@ Discord:
 - **prefix:** Used in front of Discord commands.
 - **adminIDs:** List of Discord user IDs that can execute all commands.  Can also run stuff in DMs.
 - **channelIDs:** List of channel IDs that the bot will respond in. Will also respond to DMs if they are admins.
+- **useSlashCommands:** Whether or not to register slash commands in guilds (true/false).
+    - Currently available: `helpCommand`, `pm2Command`, `truncateCommand`, `madQueryCommand`, `linksCommand`, `devicesCommand`, `noProtoCommand`, `eventsCommand`, `systemStatsCommand`, `sendWorkerCommand`, `grepCommand`
+    - [Bot must have applications.commands scope](https://discordjs.guide/preparations/adding-your-bot-to-servers.html#creating-and-using-your-invite-link)
+- **slashGuildIDs:** List of guild IDs where commands should be registered.
 - **helpCommand:** Show correct syntax and what perms the user has.
 - **pm2Command:** Show the PM2 controller.
 - **truncateCommand:** Truncate quests and restart MAD instances.
@@ -79,6 +84,7 @@ Discord:
 - **systemStatsCommand:** See system stat options (if using dkmur's Stats).
 - **sendWorkerCommand:** Send closest worker to a location. `!sendworker lat,lon` (if using dkmur's deviceControl).
 - **eventsCommand:** View list of quest reroll events if enabled.
+- **grepCommand:** Search uploaded file for string and return the lines where it's included (Only slash command).
 
 PM2:
 - **mads:** List of MAD PM2 processes that should be restarted after truncating quests.
@@ -216,7 +222,7 @@ Stats:
 - See system stats with `<prefix><systemStatsCommand>` (Requires dkmur's Stats)
 - Send worker to location with `<prefix><sendWorkerCommand> <lat>,<lon>` (Requires dkmur's Stats)
 - Get list of events that will reroll quests with `<prefix><eventsCommand>`
- 
+
   
   
 

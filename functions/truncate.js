@@ -12,16 +12,16 @@ const pm2 = require('pm2');
 const config = require('../config/config.json');
 
 module.exports = {
-   sendTruncateMessage: async function sendTruncateMessage(receivedMessage) {
+   sendTruncateMessage: async function sendTruncateMessage(channel) {
       let truncateTableList = config.truncate.truncateOptions;
       var buttonList = [];
       if (truncateTableList.length === 0) {
-         receivedMessage.channel.send('No tables are set in config.').catch(console.error);
+         channel.send('No tables are set in config.').catch(console.error);
          return;
       }
       if (truncateTableList.length > 24) {
          console.log("ERROR: Max number of truncate options is 24");
-         receivedMessage.channel.send("ERROR: Max number of truncate options is 24").catch(console.error);
+         channel.send("ERROR: Max number of truncate options is 24").catch(console.error);
          return;
       }
       for (var t in truncateTableList) {
@@ -46,17 +46,16 @@ module.exports = {
          } //End of r loop
          messageComponents.push(buttonRow);
       } //End of n loop
-      receivedMessage.channel.send({
+      channel.send({
          content: `**Truncate Table:**`,
          components: messageComponents
       }).catch(console.error);
    }, //End of sendTruncateMessage()
 
-
-   truncateTables: async function truncateTables(interaction, interactionID, tables) {
+   truncateTables: async function truncateTables(msg, user, tables) {
       let connection = mysql.createConnection(config.madDB);
       connection.connect();
-      interaction.message.edit({
+      msg.edit({
          embeds: [new MessageEmbed().setTitle('Truncate Results:').setDescription('**Truncating...**')],
          components: []
       }).catch(console.error);
@@ -67,10 +66,10 @@ module.exports = {
          let truncateQuery = `TRUNCATE ${tables[t]}`;
          connection.query(truncateQuery, function (err, results) {
             if (err) {
-               console.log(`(${interaction.user.username}) Error truncating ${config.madDB.database}.${tables[t]}:`, err);
+               console.log(`(${user.username}) Error truncating ${config.madDB.database}.${tables[t]}:`, err);
                bad.push(tables[t]);
             } else {
-               console.log(`${config.madDB.database}.${tables[t]} truncated by ${interaction.user.username}`);
+               console.log(`${config.madDB.database}.${tables[t]} truncated by ${user.username}`);
                good.push(tables[t]);
                if (tables[t] === 'trs_quest' && config.pm2.mads.length > 0) {
                   let date = new Date();
@@ -97,36 +96,36 @@ module.exports = {
          color = '9E0000';
          description = description.concat(`\n\nFailed:\n- ${bad.join('\n- ')}`);
       }
-      interaction.message.edit({
+      msg.edit({
          embeds: [new MessageEmbed().setTitle('Truncate Results:').setDescription(description).setColor(color).setFooter({
-            text: `${interaction.user.username}`
+            text: `${user.username}`
          })],
          components: []
       }).catch(console.error);
       if (restartMAD === true) {
-         module.exports.restartMADs(interaction, description, color);
+         module.exports.restartMADs(msg, user, description, color);
       }
    }, //End of truncateTables()
 
 
-   verifyTruncate: async function verifyTruncate(interaction, interactionID, tables) {
+   verifyTruncate: async function verifyTruncate(channel, user, tables) {
       let optionRow = new MessageActionRow().addComponents(
          new MessageButton().setCustomId(`${config.serverName}~verifyTruncate~yes`).setLabel(`Yes`).setStyle("SUCCESS"),
          new MessageButton().setCustomId(`${config.serverName}~verifyTruncate~no`).setLabel(`No`).setStyle("DANGER")
-      )
+      );
       var title = 'Truncate the following table?';
       if (tables.length > 1) {
          title = 'Truncate the following tables?';
       }
-      interaction.message.channel.send({
+      channel.send({
          embeds: [new MessageEmbed().setTitle(title).setDescription(tables.join('\n')).setColor('0D00CA')],
          components: [optionRow]
       }).catch(console.error);
    }, //End of verifyTruncate()
 
 
-   restartMADs: async function restartMADs(interaction, description, color) {
-      interaction.message.edit({
+   restartMADs: async function restartMADs(msg, user, description, color) {
+      msg.edit({
          embeds: [new MessageEmbed().setTitle('Truncate Results:').setDescription(`${description}\n\n**Restarting MADs...**`).setColor(color)],
          components: []
       }).catch(console.error);
@@ -141,10 +140,10 @@ module.exports = {
                let processName = mads[m];
                pm2.restart(processName, (err, response) => {
                   if (err) {
-                     console.error(`(${interaction.user.username}) PM2 ${mads[m]} restart error:`, err);
+                     console.error(`(${user.username}) PM2 ${mads[m]} restart error:`, err);
                      bad.push(mads[m]);
                   } else {
-                     console.log(`${mads[m]} restarted by ${interaction.user.username}`);
+                     console.log(`${mads[m]} restarted by ${user.username}`);
                      good.push(mads[m]);
                   }
                }) //End of pm2.restart
@@ -163,9 +162,9 @@ module.exports = {
          color = '9E0000';
          newDescription = newDescription.concat(`\n\nFailed:\n- ${bad.join('\n- ')}`);
       }
-      interaction.message.edit({
+      msg.edit({
          embeds: [new MessageEmbed().setTitle('Truncate Results:').setDescription(newDescription).setColor(color).setFooter({
-            text: `${interaction.user.username}`
+            text: `${user.username}`
          })],
          components: []
       }).catch(console.error);

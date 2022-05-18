@@ -1,6 +1,7 @@
 const {
 	Client,
 	Intents,
+	Collection,
 	MessageEmbed,
 	Permissions,
 	MessageActionRow,
@@ -15,6 +16,7 @@ const fs = require('fs');
 const pm2 = require('pm2');
 const CronJob = require('cron').CronJob;
 const GenerateMadInfo = require('./functions/generateMadInfo.js');
+const SlashRegistry = require('./functions/slashRegistry.js');
 const Scripts = require('./functions/scripts.js');
 const Queries = require('./functions/queries.js');
 const Interactions = require('./functions/interactions.js');
@@ -46,7 +48,7 @@ client.on('ready', async () => {
 	//No Proto Checker
 	if (config.madDB.host && config.devices.noProtoCheckMinutes > 0) {
 		let noProtoJob = new CronJob(`*/${config.devices.noProtoCheckMinutes} * * * *`, function () {
-			Devices.noProtoDevices(client, '', 'cron');
+			Devices.noProtoDevices(client, '', '', 'cron');
 		}, null, true, null);
 		noProtoJob.start();
 	}
@@ -56,6 +58,10 @@ client.on('ready', async () => {
 			Events.checkEvents(client);
 		}, null, true, null);
 		questJob.start();
+	}
+	//Register Slash Commands
+	if (config.discord.useSlashCommands === true && config.discord.slashGuildIDs.length > 0) {
+		SlashRegistry.registerCommands(client);
 	}
 });
 
@@ -94,7 +100,7 @@ client.on('messageCreate', async (receivedMessage) => {
 	else if (config.madDB.host && config.discord.truncateCommand && message === `${config.discord.prefix}${config.discord.truncateCommand}`) {
 		await new Promise(done => setTimeout(done, 1000 * config.delaySeconds));
 		if (userPerms.includes('admin') || userPerms.includes('truncate')) {
-			Truncate.sendTruncateMessage(receivedMessage);
+			Truncate.sendTruncateMessage(receivedMessage.channel);
 		}
 	}
 	//Run Scripts
@@ -106,55 +112,55 @@ client.on('messageCreate', async (receivedMessage) => {
 	//Run Queries
 	else if (config.madDB.host && config.discord.madQueryCommand && message === `${config.discord.prefix}${config.discord.madQueryCommand}`) {
 		if (userPerms.includes('admin') || userPerms.includes('queries')) {
-			Queries.queries(receivedMessage);
+			Queries.queries(receivedMessage.channel);
 		}
 	}
 	//Send Links
 	else if (config.discord.linksCommand && message === `${config.discord.prefix}${config.discord.linksCommand}`) {
 		if (userPerms.includes('admin') || userPerms.includes('links')) {
-			Links.links(receivedMessage);
+			Links.links(client, receivedMessage.channel);
 		}
 	}
 	//Device Info All
 	else if (config.madDB.host && config.discord.devicesCommand && message === `${config.discord.prefix}${config.discord.devicesCommand}`) {
 		if (userPerms.includes('admin') || userPerms.includes('deviceInfoControl') || userPerms.includes('deviceInfo')) {
-			Devices.deviceStatus(receivedMessage);
+			Devices.deviceStatus(receivedMessage.channel, receivedMessage.author);
 		}
 	}
 	//No Proto Devices
 	else if (config.madDB.host && config.discord.noProtoCommand && message === `${config.discord.prefix}${config.discord.noProtoCommand}`) {
 		if (userPerms.includes('admin') || userPerms.includes('deviceInfoControl') || userPerms.includes('deviceInfo')) {
-			Devices.noProtoDevices(client, receivedMessage, 'search');
+			Devices.noProtoDevices(client, receivedMessage.channel, receivedMessage.author, 'search');
 		}
 	}
 	//Send Worker
 	else if (config.stats.database.host && config.deviceControl.path && config.discord.sendWorkerCommand && message.startsWith(`${config.discord.prefix}${config.discord.sendWorkerCommand} `)) {
 		if (userPerms.includes('admin') || userPerms.includes('deviceInfoControl')) {
-			DeviceControl.sendWorker(client, receivedMessage);
+			DeviceControl.sendWorker(client, receivedMessage.channel, receivedMessage.author, receivedMessage.content);
 		}
 	}
 	//Stats
 	else if (config.stats.database.host && config.discord.systemStatsCommand && message === `${config.discord.prefix}${config.discord.systemStatsCommand}`) {
 		if (userPerms.includes('admin') || userPerms.includes('systemStats')) {
-			Stats.stats(client, receivedMessage);
+			Stats.stats(client, receivedMessage.channel, receivedMessage.author);
 		}
 	}
 	//Events
 	else if (config.madDB.host && config.discord.eventsCommand && message === `${config.discord.prefix}${config.discord.eventsCommand}`) {
 		if (config.truncate.eventAutomation === true && config.truncate.eventGuildID) {
-			Events.listEvents(client, receivedMessage);
+			Events.listEvents(client, receivedMessage.channel);
 		}
 	}
 	//Help Menu
 	else if (config.discord.helpCommand && receivedMessage.channel.type !== "DM" && message === `${config.discord.prefix}${config.discord.helpCommand}`) {
-		Help.helpMenu(client, receivedMessage);
-	} else {
-		//Specific Device Info
+		Help.helpMenu(client, receivedMessage.channel, receivedMessage.guild, receivedMessage.author);
+	} //Specific Device Info
+	else {
 		if (userPerms.includes('admin') || userPerms.includes('deviceInfoControl') || userPerms.includes('deviceInfo')) {
 			let dbInfo = require('./MAD_Database_Info.json');
 			for (const [key, value] of Object.entries(dbInfo.devices)) {
 				if (receivedMessage.content.toLowerCase() === `${config.discord.prefix}${value.name.toLowerCase()}`) {
-					Devices.getDeviceInfo("search", receivedMessage, key);
+					Devices.getDeviceInfo(receivedMessage.channel, receivedMessage.author, key);
 				}
 			}
 		}
@@ -163,6 +169,9 @@ client.on('messageCreate', async (receivedMessage) => {
 
 
 client.on('interactionCreate', async interaction => {
+	if (interaction.type === 'APPLICATION_COMMAND') {
+		return;
+	}
 	let user = interaction.member;
 	var channelType = "GUILD_TEXT";
 	if (interaction.message.guildId === null) {
@@ -224,6 +233,41 @@ client.on('messageReactionRemove', async (reaction, user) => {
 		Roles.roles(reaction, user, "remove");
 	}
 }); //End of messageReactionRemove
+
+
+//Slash commands
+client.on('interactionCreate', async interaction => {
+	if (!interaction.isCommand()) return;
+	let user = interaction.user;
+	if (user.bot == true) {
+		return;
+	}
+	const command = client.commands.get(interaction.commandName);
+	if (!command) {
+		return;
+	}
+
+	//Not in channel list
+	if (!config.discord.channelIDs.includes(interaction.channelId)) {
+		interaction.reply(`Slash commands not allowed in channel *${interaction.channelId}*`);
+		return;
+	}
+
+	try {
+		let slashReturn = await command.execute(client, interaction);
+		try {
+			if (slashReturn === 'delete') {
+				interaction.deleteReply().catch(err);
+			}
+		} catch (err) {}
+	} catch (error) {
+		console.error(error);
+		await interaction.reply({
+			content: 'There was an error while executing this command!',
+			ephemeral: true
+		}).catch(console.error);
+	}
+});
 
 client.on("error", (e) => console.error(e));
 client.on("warn", (e) => console.warn(e));

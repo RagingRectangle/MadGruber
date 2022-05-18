@@ -14,13 +14,13 @@ const moment = require('moment');
 const config = require('../config/config.json');
 
 module.exports = {
-   stats: async function stats(client, receivedMessage) {
+   stats: async function stats(client, channel, user) {
       let systemStatsList = [{
             label: `Despawn Time Left`,
             value: `${config.serverName}~systemStats~despawn%`
          },
          {
-            label: `Hundos / Nundos / Shinies`,
+            label: `Hundos + Nundos + Shinies`,
             value: `${config.serverName}~systemStats~hundoNundoShiny`
          },
          {
@@ -32,7 +32,7 @@ module.exports = {
             value: `${config.serverName}~systemStats~monsScanned`
          },
          {
-            label: `Restarts / Reboots`,
+            label: `Restarts + Reboots`,
             value: `${config.serverName}~systemStats~restartsReboots`
          },
          {
@@ -54,20 +54,16 @@ module.exports = {
             .setPlaceholder(`Daily ${config.serverName} Stats`)
             .addOptions(systemStatsList)
          );
-      receivedMessage.channel.send({
+      channel.send({
          embeds: [new MessageEmbed().setTitle(`${config.serverName} Stats`).setDescription(`Select option below for more info:`).setFooter({
-            text: `${receivedMessage.author.username}`
+            text: `${user.username}`
          })],
          components: [componentHourly, componentDaily]
       }).catch(console.error);
    }, //End of stats()
 
-   systemStats: async function systemStats(interaction, statDuration, statType) {
-      interaction.message.edit({
-         embeds: interaction.embeds,
-         components: interaction.components
-      }).catch(console.error);
-      console.log(`${interaction.user.username} looked up system stats: ${statDuration} ${statType}`);
+   systemStats: async function systemStats(channel, user, statDuration, statType) {
+      console.log(`${user.username} looked up system stats: ${statDuration} ${statType}`);
       let statsDB = config.stats.database;
       statsDB.multipleStatements = true;
       let connectionStats = mysql.createConnection(statsDB);
@@ -512,14 +508,14 @@ module.exports = {
       } //End of despawn%
       connectionStats.end();
       async function sendChart(title, url) {
-         interaction.message.channel.send({
+         channel.send({
                embeds: [new MessageEmbed().setTitle(title).setImage(url).setFooter({
-                  text: `${interaction.user.username}`
+                  text: `${user.username}`
                })],
             }).catch(console.error)
             .then(async msg => {
                if (config.stats.graphDeleteSeconds > 0) {
-                  setTimeout(() => msg.delete().catch(err => console.log(`(${interaction.user.username}) Error deleting screenshot:`, err)), (config.stats.graphDeleteSeconds * 1000));
+                  setTimeout(() => msg.delete().catch(err => console.log(`(${user.username}) Error deleting screenshot:`, err)), (config.stats.graphDeleteSeconds * 1000));
                }
             })
       } //End of sendChart()

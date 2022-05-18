@@ -14,9 +14,9 @@ const config = require('../config/config.json');
 const noProtoJson = require('../config/noProto.json');
 
 module.exports = {
-   deviceStatus: async function deviceStatus(receivedMessage) {
+   deviceStatus: async function deviceStatus(channel, user) {
       let dbInfo = require('../MAD_Database_Info.json');
-      console.log(`${receivedMessage.author.username} requested the status of all devices`);
+      console.log(`${user.username} requested the status of all devices`);
       let connectionMAD = mysql.createConnection(config.madDB);
       let statusQuery = `SELECT * FROM trs_status`;
       connectionMAD.query(statusQuery, function (err, results) {
@@ -26,7 +26,6 @@ module.exports = {
             var instanceList = [];
             var sortBy = require('sort-by'),
                buttonArray = [];
-            //var buttonArray = [];
             results.forEach(device => {
                instanceList.push(dbInfo.instances[device.instance_id]);
                let minutesSinceSeen = ((Math.abs(Date.now() - Date.parse(device.lastProtoDateTime)) / (1000 * 3600)) * 60).toFixed(0);
@@ -98,7 +97,7 @@ module.exports = {
                      } //End of r loop
                      messageComponents.push(buttonRow);
                   } //End of n loop
-                  receivedMessage.channel.send({
+                  channel.send({
                         content: content,
                         components: messageComponents
                      }).catch(console.error)
@@ -117,14 +116,14 @@ module.exports = {
       connectionMAD.end();
    }, //End of deviceStatus()
 
-   noProtoDevices: async function noProtoDevices(client, receivedMessage, type) {
+   noProtoDevices: async function noProtoDevices(client, channel, user, type) {
       if (type === 'cron' && !config.devices.noProtoChannelID && config.devices.useNoProtoJson !== true) {
          console.log("Error: 'noProtoChannelID' not set in config.json");
          return;
       }
       let dbInfo = require('../MAD_Database_Info.json');
       if (type === 'search') {
-         console.log(`${receivedMessage.author.username} requested the status of all noProto devices`);
+         console.log(`${user.username} requested the status of all noProto devices`);
       }
       let connectionMAD = mysql.createConnection(config.madDB);
       let statusQuery = `SELECT * FROM trs_status`;
@@ -200,12 +199,12 @@ module.exports = {
                         for (var b = 0; b < buttonArray.length; b++) {
                            for (var n = 0; n < item.deviceNames.length; n++) {
                               for (var r = 0; r < config.devices.buttonLabelRemove.length; r++) {
-                                  if (item.deviceNames[n].replace(config.devices.buttonLabelRemove[r], '') === buttonArray[b]['name']) {
-                                      channelButtons.push(buttonArray[b]['button']);
-                                      completedDevices.push(buttonArray[b]['name']);
-                                  }
+                                 if (item.deviceNames[n].replace(config.devices.buttonLabelRemove[r], '') === buttonArray[b]['name']) {
+                                    channelButtons.push(buttonArray[b]['button']);
+                                    completedDevices.push(buttonArray[b]['name']);
+                                 }
                               } //End of r loop
-                          } //End of n loop
+                           } //End of n loop
                         }
                         if (channelButtons.length > 0) {
                            createComponents(noProtoChannel, channelButtons);
@@ -284,7 +283,7 @@ module.exports = {
                      } //End of n loop
                      let content = `**${instance}: ${noProtoCount} No Proto Devices:**`;
                      if (type === 'search') {
-                        receivedMessage.channel.send({
+                        channel.send({
                               content: content,
                               components: messageComponents
                            }).catch(console.error)
@@ -323,7 +322,7 @@ module.exports = {
             } //End of sendCronMessage()
 
             if (instanceList.length == 0 && type == "search") {
-               receivedMessage.channel.send("No problems detected!")
+               channel.send("No problems detected!")
                   .catch(console.error)
                   .then(msg => {
                      if (config.devices.statusButtonsDeleteMinutes > 0) {
@@ -337,17 +336,7 @@ module.exports = {
       connectionMAD.end();
    }, //End of noProtoDevices()
 
-   getDeviceInfo: async function getDeviceInfo(type, typeData, deviceID) {
-      var channel, user;
-      if (type === "interaction") {
-         channel = typeData.message.channel;
-         user = typeData.user.username;
-      } else if (type === "search") {
-         channel = typeData.channel;
-         user = typeData.author.username;
-      } else {
-         return;
-      }
+   getDeviceInfo: async function getDeviceInfo(channel, user, deviceID) {
       let dbInfo = require('../MAD_Database_Info.json');
       let connectionMAD = mysql.createConnection(config.madDB);
       let deviceQuery = `SELECT * FROM trs_status WHERE device_id = "${deviceID}"`;
@@ -571,10 +560,10 @@ module.exports = {
          if (statsListArray !== '') {
             deviceComponents.push(statsListArray[0], statsListArray[1]);
          }
-         console.log(`${user} looked for ${origin} device info.`);
+         console.log(`${user.username} looked for ${origin} device info.`);
          channel.send({
                embeds: [new MessageEmbed().setTitle(`${origin} Info:`).setDescription(`- ${deviceInfoArray.join('\n- ')}`).setColor(color).setFooter({
-                  text: `${user}`
+                  text: `${user.username}`
                })],
                components: deviceComponents
             }).catch(console.error)

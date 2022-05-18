@@ -13,13 +13,13 @@ const config = require('../config/config.json');
 const queryConfig = require('../config/queries.json');
 
 module.exports = {
-   queries: async function queries(receivedMessage) {
+   queries: async function queries(channel) {
       let countList = queryConfig.count;
       var selectList = [];
       countList.forEach(count => {
          let listOption = {
             label: count.type,
-            value: `${config.serverName}~count~${count.type}`
+            value: `${config.serverName}~count~${count.table}`
          }
          selectList.push(listOption);
       });
@@ -32,7 +32,7 @@ module.exports = {
             .setMaxValues(1)
             .addOptions(selectList))
 
-      receivedMessage.channel.send({
+      channel.send({
          content: 'Select option below to get count',
          components: [fullCountList]
       }).catch(console.error);
@@ -40,27 +40,20 @@ module.exports = {
    }, //End of queries()
 
 
-   queryCount: async function queryCount(interaction, countType) {
-      let countList = queryConfig.count;
-      for (var c in countList) {
-         if (countList[c]['type'] === countType) {
-            interaction.update({});
-            let table = countList[c]['table'];
-            let connection = mysql.createConnection(config.madDB);
-            connection.connect();
-            let countQuery = `SELECT COUNT(*) FROM ${table}`;
-            connection.query(countQuery, function (err, results) {
-               if (err) {
-                  console.log(`(${interaction.user.username}) Count Query Error:`, err);
-               } else {
-                  let count = results[0]['COUNT(*)'].toLocaleString();
-                  console.log(`(${interaction.user.username}) SELECT COUNT(*) FROM ${config.madDB.database}.${table}: ${count}`);
-                  interaction.channel.send(`Current ${config.madDB.database} ${countType}: ${count}`).catch(console.error);
-               }
-            }) //End of query
-            connection.end();
+   queryCount: async function queryCount(channel, user, table) {
+      let connection = mysql.createConnection(config.madDB);
+      connection.connect();
+      let countQuery = `SELECT COUNT(*) FROM ${table}`;
+      connection.query(countQuery, function (err, results) {
+         if (err) {
+            console.log(`(${user.username}) Count Query Error:`, err);
+         } else {
+            let count = results[0]['COUNT(*)'].toLocaleString();
+            console.log(`(${user.username}) SELECT COUNT(*) FROM ${config.madDB.database}.${table}: ${count}`);
+            channel.send(`Current ${config.madDB.database} ${table}: ${count}`).catch(console.error);
          }
-      }
+      }) //End of query
+      connection.end();
    }, //End of queryCount()
 
 }

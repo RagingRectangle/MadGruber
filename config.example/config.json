@@ -6,6 +6,8 @@
         "prefix": "!",
         "adminIDs": ["123", "456"],
         "channelIDs": ["789", "420"],
+        "useSlashCommands": false,
+        "slashGuildIDs": [""],
         "helpCommand": "madgruber",
         "pm2Command": "pm2",
         "truncateCommand": "truncate",
@@ -16,7 +18,8 @@
         "noProtoCommand": "noproto",
         "systemStatsCommand": "stats",
         "sendWorkerCommand": "sendworker",
-        "eventsCommand": "events"
+        "eventsCommand": "events",
+        "grepCommand": "grep"
     },
     "pm2": {
         "mads": [""],

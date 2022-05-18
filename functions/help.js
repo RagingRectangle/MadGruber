@@ -11,7 +11,7 @@ const Roles = require('./roles.js');
 const config = require('../config/config.json');
 
 module.exports = {
-   helpMenu: async function helpMenu(client, receivedMessage) {
+   helpMenu: async function helpMenu(client, channel, guild, user) {
       let commands = config.discord;
       let prefix = config.discord.prefix;
       var pm2 = truncate = scripts = queries = links = devices = systemStats = sendWorker = events = 'N/A';
@@ -45,14 +45,14 @@ module.exports = {
       if (commands.eventsCommand) {
          events = `${prefix}${commands.eventsCommand}`;
       }
-      let userPerms = await Roles.getUserCommandPerms(receivedMessage.channel.type, receivedMessage.guild, receivedMessage.author);
-      let authorName = receivedMessage.author.username;
+      let userPerms = await Roles.getUserCommandPerms(channel.type, guild, user);
+      let authorName = user.username;
       var allowedCommands = `**${authorName} Permissions:**\n- ${userPerms.join('\n- ')}`;
       if (userPerms.length == 0) {
          allowedCommands = `**${authorName} Permissions:**\n- None`;
       }
       var description = `**Command Syntax:**\n- PM2: \`${pm2}\`\n- Truncate: \`${truncate}\`\n- Scripts: \`${scripts}\`\n- Queries: \`${queries}\`\n- Links: \`${links}\`\n- Devices: \`${devices}\`\n- Stats: \`${systemStats}\`\n- Send Worker: \`${sendWorker}\`\n- Events: \`${events}\`\n\n${allowedCommands}`;
-      receivedMessage.channel.send({
+      channel.send({
          embeds: [new MessageEmbed().setTitle("MadGruber Help Menu").setURL("https://github.com/RagingRectangle/MadGruber").setDescription(description)]
       }).catch(console.error);
    } //End of helpMenu()

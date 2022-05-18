@@ -18,11 +18,22 @@ const {
 const config = require('../config/config.json');
 
 module.exports = {
-   listEvents: async function listEvents(client, receivedMessage) {
-      let eventGuild = await client.guilds.fetch(config.truncate.eventGuildID).catch(console.error);
-      let allEvents = JSON.parse(JSON.stringify(await eventGuild.scheduledEvents.fetch()));
+   listEvents: async function listEvents(client, channel) {
+      var eventGuild = '';
+      var allEvents = '';
       var activeEvents = [];
       var scheduledEvents = [];
+      try {
+         if (config.truncate.eventGuildID === "") {
+            sendEventListMessage(new MessageEmbed().setDescription("No event guild set in config."));
+            return;
+         } else {
+            eventGuild = await client.guilds.fetch(config.truncate.eventGuildID).catch(console.error);
+            allEvents = JSON.parse(JSON.stringify(await eventGuild.scheduledEvents.fetch()));
+         }
+      } catch (err) {
+         console.log(err)
+      }
       for (var e = 0; e < allEvents.length; e++) {
          if (allEvents[e]['description'].toLowerCase().includes(config.truncate.eventDescriptionTrigger.toLowerCase())) {
             if (allEvents[e]['status'] === 'ACTIVE') {
@@ -54,7 +65,7 @@ module.exports = {
                let endTime = new Date(activeEvents[a]['scheduledEndTimestamp']);
                activeEmbed.addFields({
                   name: `${activeEvents[a]['name']}`,
-                  value: `- Ends ${time(endTime, 'R')}\n- ${activeEvents[a]['description']}`
+                  value: (`- Ends ${time(endTime, 'R')}\n- ${activeEvents[a]['description']}`).replaceAll('- -', '-')
                });
             } //End of a loop
             sendEventListMessage(activeEmbed);
@@ -75,18 +86,17 @@ module.exports = {
                let startTime = new Date(scheduledEvents[s]['scheduledStartTimestamp']);
                scheduledEmbed.addFields({
                   name: `${scheduledEvents[s]['name']}`,
-                  value: `- Starts ${time(startTime, 'R')}\n- ${scheduledEvents[s]['description']}`
+                  value: (`- Starts ${time(startTime, 'R')}\n- ${scheduledEvents[s]['description']}`).replaceAll('- -', '-')
                });
             } //End of s loop
             sendEventListMessage(scheduledEmbed);
          }
-
-         async function sendEventListMessage(embed) {
-            receivedMessage.channel.send({
-               embeds: [embed]
-            }).catch(console.error);
-         } //End of sendEventListMessage
       } //End of events found
+      async function sendEventListMessage(embed) {
+         channel.send({
+            embeds: [embed]
+         }).catch(console.error);
+      } //End of sendEventListMessage
    }, //End of listEvents()
 
 
@@ -112,9 +122,9 @@ module.exports = {
 
       //Events found
       if (activeEvents.length > 0 || scheduledEvents.length > 0) {
-         console.log("Quest reroll event/s found.");
-         console.log("active:", activeEvents);
-         console.log("scheduled:", scheduledEvents);
+         //console.log("Quest reroll event/s found.");
+         //console.log("active:", activeEvents);
+         //console.log("scheduled:", scheduledEvents);
          let date = new Date();
          let hour = date.getHours();
          //If no MAD restart
@@ -216,12 +226,10 @@ module.exports = {
                         setTimeout(() => msg.delete().catch(err => console.log(`(${interaction.user.username}) Error deleting PM2 start response:`, err)), (config.pm2.pm2ResponseDeleteSeconds * 1000));
                      }
                   });
-            }
-            catch(err){
+            } catch (err) {
                console.log(err);
             }
          }
       } //End of sendEventAlertMessage()
-
    } //End of checkEvents()
 }

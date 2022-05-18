@@ -48,8 +48,9 @@ module.exports = {
       //Queries
       if (userPerms.includes('queries')) {
          if (interactionID === 'countList') {
-            let countType = interaction.values[0].replace(`${config.serverName}~count~`, '');
-            Queries.queryCount(interaction, countType);
+            let table = interaction.values[0].replace(`${config.serverName}~count~`, '');
+            interaction.update({});
+            Queries.queryCount(interaction.message.channel, interaction.user, table);
          }
       } //End of queries
 
@@ -77,7 +78,7 @@ module.exports = {
          if (interactionID.startsWith('systemStats~')) {
             interaction.deferUpdate();
             let statDuration = interactionID.replace('systemStats~', '');
-            Stats.systemStats(interaction, statDuration, interaction.values[0].replace(`${config.serverName}~systemStats~`, ''));
+            Stats.systemStats(interaction.message.channel, interaction.user, statDuration, interaction.values[0].replace(`${config.serverName}~systemStats~`, ''));
          }
       } //End of SystemStats
    }, //End of listInteraction()
@@ -99,7 +100,7 @@ module.exports = {
          //Run PM2 process
          else if (interactionID.startsWith('process~')) {
             interaction.deferUpdate();
-            Pm2Buttons.runPM2(interaction, interactionID.replace('process~', ''));
+            Pm2Buttons.runPM2(interaction.message.channel, interaction.user, interactionID.replace('process~', ''));
          }
       } //End of pm2
 
@@ -200,7 +201,7 @@ module.exports = {
             } //End of no
             else if (verify === 'yes') {
                let tables = interaction.message.embeds[0]['description'].split('\n');
-               Truncate.truncateTables(interaction, interactionID, tables);
+               Truncate.truncateTables(interaction.message, interaction.user, tables);
             } //End of yes
          } //End of verify truncate
 
@@ -213,9 +214,9 @@ module.exports = {
                setTimeout(() => interaction.message.delete().catch(err => console.log("Error deleting truncate message:", err)), 1);
             } else {
                if (config.truncate.truncateVerify === false) {
-                  Truncate.truncateTables(interaction, interactionID, tables);
+                  Truncate.truncateTables(interaction.message, interaction.user, tables);
                } else {
-                  Truncate.verifyTruncate(interaction, interactionID, tables);
+                  Truncate.verifyTruncate(interaction.message.channel, interaction.user, tables);
                }
             }
          } //End of run truncate
@@ -226,7 +227,7 @@ module.exports = {
          if (interactionID.startsWith('deviceInfo~')) {
             interaction.deferUpdate();
             let deviceID = interactionID.replace('deviceInfo~', '');
-            Devices.getDeviceInfo("interaction", interaction, deviceID);
+            Devices.getDeviceInfo(interaction.message.channel, interaction.user, deviceID);
          }
       } //End of devices
    }, //End of buttonInteraction()

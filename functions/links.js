@@ -10,7 +10,7 @@ const {
 const linksList = require('../config/links.json');
 
 module.exports = {
-   links: async function links(receivedMessage) {
+   links: async function links(client, channel) {
       var buttonList = [];
       linksList.forEach(link => {
          if (link.url !== '') {
@@ -23,7 +23,7 @@ module.exports = {
          }
       });
       if (buttonList.length == 0) {
-         receivedMessage.channel.send("No links are set in config.").catch(console.error);
+         channel.send("No links are set in config.").catch(console.error);
          return;
       }
       let rowsNeeded = Math.ceil(buttonList.length / 5);
@@ -40,7 +40,7 @@ module.exports = {
          } //End of r loop
          messageComponents.push(buttonRow);
       } //End of n loop
-      receivedMessage.channel.send({
+      channel.send({
          content: `Click to open:`,
          components: messageComponents
       }).catch(console.error);
