@@ -28,6 +28,7 @@ const DeviceControl = require('./functions/deviceControl.js');
 const Roles = require('./functions/roles.js');
 const Stats = require('./functions/stats.js');
 const Events = require('./functions/events.js');
+const Geofences = require('./functions/geofenceConverter.js');
 const Help = require('./functions/help.js');
 const config = require('./config/config.json');
 const roleConfig = require('./config/roles.json');
@@ -151,17 +152,20 @@ client.on('messageCreate', async (receivedMessage) => {
 			Events.listEvents(client, receivedMessage.channel);
 		}
 	}
+	//Geofence Converter
+	else if (config.madDB.host && config.discord.geofenceCommand && message === `${config.discord.prefix}${config.discord.geofenceCommand}`) {
+		Geofences.converterMain(receivedMessage.channel, receivedMessage.author);
+	}
 	//Help Menu
 	else if (config.discord.helpCommand && receivedMessage.channel.type !== "DM" && message === `${config.discord.prefix}${config.discord.helpCommand}`) {
 		Help.helpMenu(client, receivedMessage.channel, receivedMessage.guild, receivedMessage.author);
-	} //Specific Device Info
-	else {
-		if (userPerms.includes('admin') || userPerms.includes('deviceInfoControl') || userPerms.includes('deviceInfo')) {
-			let dbInfo = require('./MAD_Database_Info.json');
-			for (const [key, value] of Object.entries(dbInfo.devices)) {
-				if (receivedMessage.content.toLowerCase() === `${config.discord.prefix}${value.name.toLowerCase()}`) {
-					Devices.getDeviceInfo(receivedMessage.channel, receivedMessage.author, key);
-				}
+	}
+	//Specific Device Info
+	else if (userPerms.includes('admin') || userPerms.includes('deviceInfoControl') || userPerms.includes('deviceInfo')) {
+		let dbInfo = require('./MAD_Database_Info.json');
+		for (const [key, value] of Object.entries(dbInfo.devices)) {
+			if (receivedMessage.content.toLowerCase() === `${config.discord.prefix}${value.name.toLowerCase()}`) {
+				Devices.getDeviceInfo(receivedMessage.channel, receivedMessage.author, key);
 			}
 		}
 	}

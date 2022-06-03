@@ -19,7 +19,8 @@
         "systemStatsCommand": "stats",
         "sendWorkerCommand": "sendworker",
         "eventsCommand": "events",
-        "grepCommand": "grep"
+        "grepCommand": "grep",
+        "geofenceCommand": "geofences"
     },
     "pm2": {
         "mads": [""],

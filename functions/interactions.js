@@ -19,6 +19,7 @@ const Queries = require('./queries.js');
 const Devices = require('./devices.js');
 const DeviceControl = require('./deviceControl.js');
 const Stats = require('./stats.js');
+const Geofences = require('./geofenceConverter.js');
 const config = require('../config/config.json');
 const scriptConfig = require('../config/scripts.json');
 
@@ -81,6 +82,18 @@ module.exports = {
             Stats.systemStats(interaction.message.channel, interaction.user, statDuration, interaction.values[0].replace(`${config.serverName}~systemStats~`, ''));
          }
       } //End of SystemStats
+
+      //GeofenceConverter
+      if (userPerms.includes('admin')) {
+         if (interactionID.startsWith('geofenceList~')) {
+            interaction.deferUpdate();
+            let intValue = interaction.values[0].split('~~');
+            Geofences.convert(interaction.message.channel, interaction.user, intValue[0]);
+            interaction.message.edit({
+               components: interaction.message.components
+            }).catch(console.error);
+         } //End of GeofenceConverter
+      }
    }, //End of listInteraction()
 
 
