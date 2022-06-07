@@ -26,7 +26,7 @@ module.exports = {
 	async execute(client, interaction) {
 		let channel = await client.channels.fetch(interaction.channelId).catch(console.error);
 		let guild = await client.guilds.fetch(interaction.guildId).catch(console.error);
-		let userPerms = await Roles.getUserCommandPerms('GUILD_TEXT', guild, interaction.user);
+		let userPerms = await Roles.getUserCommandPerms(guild, interaction.user);
 		if (userPerms.includes('admin')) {
 			interaction.deferReply({ephemeral: true});
 			let searchString = interaction.options.getString('search-string').toLowerCase();

@@ -45,7 +45,7 @@ module.exports = {
       if (commands.eventsCommand) {
          events = `${prefix}${commands.eventsCommand}`;
       }
-      let userPerms = await Roles.getUserCommandPerms(channel.type, guild, user);
+      let userPerms = await Roles.getUserCommandPerms(guild, user);
       let authorName = user.username;
       var allowedCommands = `**${authorName} Permissions:**\n- ${userPerms.join('\n- ')}`;
       if (userPerms.length == 0) {

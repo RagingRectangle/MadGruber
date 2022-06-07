@@ -68,8 +68,8 @@ npm install
 Discord:
 - **token:** Discord bot token.
 - **prefix:** Used in front of Discord commands.
-- **adminIDs:** List of Discord user IDs that can execute all commands.  Can also run stuff in DMs.
-- **channelIDs:** List of channel IDs that the bot will respond in. Will also respond to DMs if they are admins.
+- **adminIDs:** List of Discord user IDs that can execute all commands.
+- **channelIDs:** List of channel IDs that the bot will respond in. Does not work with DMs to the bot
 - **useSlashCommands:** Whether or not to register slash commands in guilds (true/false).
     - Currently available: `helpCommand`, `pm2Command`, `truncateCommand`, `madQueryCommand`, `linksCommand`, `devicesCommand`, `noProtoCommand`, `eventsCommand`, `systemStatsCommand`, `sendWorkerCommand`, `grepCommand`, `geofenceCommand`
     - [Bot must have applications.commands scope](https://discordjs.guide/preparations/adding-your-bot-to-servers.html#creating-and-using-your-invite-link)

@@ -74,19 +74,19 @@ client.on('messageCreate', async (receivedMessage) => {
 	if (!message.startsWith(config.discord.prefix)) {
 		return;
 	}
-	//Ignore bot messages
-	if (user.bot === true) {
+	//Ignore DMs
+	if (receivedMessage.channel.type === "DM") {
 		return;
 	}
-	//DM and not admin
-	if (receivedMessage.channel.type === "DM" && !config.discord.adminIDs.includes(user.id)) {
+	//Ignore bot messages
+	if (user.bot === true) {
 		return;
 	}
 	//Not in channel list
 	if (receivedMessage.channel.type === "GUILD_TEXT" && !config.discord.channelIDs.includes(receivedMessage.channel.id)) {
 		return;
 	}
-	let userPerms = await Roles.getUserCommandPerms(receivedMessage.channel.type, receivedMessage.guild, user);
+	let userPerms = await Roles.getUserCommandPerms(user);
 	if (userPerms === []) {
 		return;
 	}
@@ -176,20 +176,16 @@ client.on('interactionCreate', async interaction => {
 	if (interaction.type === 'APPLICATION_COMMAND') {
 		return;
 	}
-	let user = interaction.member;
-	var channelType = "GUILD_TEXT";
 	if (interaction.message.guildId === null) {
-		channelType = "DM";
-	}
-	if (user.bot == true) {
 		return;
 	}
+	let user = interaction.member;
 	//Verify interaction
 	if (!interaction.customId.startsWith(config.serverName)) {
 		return;
 	}
 	var interactionID = interaction.customId.replace(`${config.serverName}~`, '');
-	let userPerms = await Roles.getUserCommandPerms(channelType, interaction.message.guild, user);
+	let userPerms = await Roles.getUserCommandPerms(interaction.message.guild, user);
 	//Button interaction
 	if (interaction.isButton()) {
 		Interactions.buttonInteraction(interaction, interactionID, userPerms);
