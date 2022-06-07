@@ -150,14 +150,13 @@ client.on('messageCreate', async (receivedMessage) => {
 
 
 client.on('interactionCreate', async interaction => {
-	let user = interaction.member;
-	var channelType = "GUILD_TEXT";
-	if (interaction.message.guildId === null) {
-		channelType = "DM";
-	}
-	if (user.bot == true) {
+	if (interaction.type === 'APPLICATION_COMMAND') {
 		return;
 	}
+	if (interaction.message.guildId === null) {
+		return;
+	}
+	let user = interaction.member;
 	//Verify interaction
 	if (!interaction.customId.startsWith(config.serverName)) {
 		return;

@@ -39,7 +39,7 @@ module.exports = {
         if (commands.systemStatsCommand) {
             systemStats = `${prefix}${commands.systemStatsCommand}`;
         }
-        let userPerms = await Roles.getUserCommandPerms(receivedMessage.channel.type, receivedMessage.guild, receivedMessage.author);
+        let userPerms = await Roles.getUserCommandPerms(receivedMessage.guild, receivedMessage.author);
         let authorName = receivedMessage.author.username;
         var allowedCommands = `**${authorName} Permissions:**\n- ${userPerms.join('\n- ')}`;
         if (userPerms.length == 0) {

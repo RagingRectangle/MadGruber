@@ -64,32 +64,30 @@ module.exports = {
     }, //End of roles()
 
 
-    getUserCommandPerms: async function getUserCommandPerms(channelType, guild, user) {
+    getUserCommandPerms: async function getUserCommandPerms(guild, user) {
         var userPerms = [];
         if (config.discord.adminIDs.includes(user.id)) {
             userPerms.push("admin");
         }
-        if (channelType === "GUILD_TEXT") {
-            let member = await guild.members.fetch(user.id).catch(err => {
-                console.log(err);
-            })
-            if (member !== undefined) {
-                let memberRoles = member._roles;
-                let commandTypes = Object.keys(config.roles.commandPermRoles);
-                let commandRoles = Object.values(config.roles.commandPermRoles);
-                for (var t in commandTypes) {
-                    if (userPerms.includes('admin')) {
-                        userPerms.push(commandTypes[t]);
-                    } else {
-                        let roles = commandRoles[t];
-                        for (var r in roles) {
-                            if (memberRoles && memberRoles.includes(roles[r])) {
-                                userPerms.push(commandTypes[t]);
-                            }
-                        } //End of r loop
-                    }
-                } //End of t loop
-            }
+        let member = await guild.members.fetch(user.id).catch(err => {
+            console.log(err);
+        });
+        if (member !== undefined) {
+            let memberRoles = member._roles;
+            let commandTypes = Object.keys(config.roles.commandPermRoles);
+            let commandRoles = Object.values(config.roles.commandPermRoles);
+            for (var t in commandTypes) {
+                if (userPerms.includes('admin')) {
+                    userPerms.push(commandTypes[t]);
+                } else {
+                    let roles = commandRoles[t];
+                    for (var r in roles) {
+                        if (memberRoles && memberRoles.includes(roles[r])) {
+                            userPerms.push(commandTypes[t]);
+                        }
+                    } //End of r loop
+                }
+            } //End of t loop
         }
         return userPerms;
     } //End of getUserCommandPerms()

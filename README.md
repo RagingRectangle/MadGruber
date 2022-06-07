@@ -65,8 +65,8 @@ npm install
 Discord:
 - **token:** Discord bot token.
 - **prefix:** Used in front of Discord commands.
-- **adminIDs:** List of Discord user IDs that can execute all commands.  Can also run stuff in DMs.
-- **channelIDs:** List of channel IDs that the bot will respond in. Will also respond to DMs if they are admins.
+- **adminIDs:** List of Discord user IDs that can execute all commands.
+- **channelIDs:** List of channel IDs that the bot will respond in. Does not work with DMs to the bot
 - **helpCommand:** Command to show correct syntax and what perms the user has.
 - **pm2Command:** Command to show the PM2 controller.
 - **truncateCommand:** Command to truncate quests and restart MAD instances.
