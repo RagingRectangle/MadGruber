@@ -86,7 +86,7 @@ client.on('messageCreate', async (receivedMessage) => {
 	if (receivedMessage.channel.type === "GUILD_TEXT" && !config.discord.channelIDs.includes(receivedMessage.channel.id)) {
 		return;
 	}
-	let userPerms = await Roles.getUserCommandPerms(user);
+	let userPerms = await Roles.getUserCommandPerms(receivedMessage.guild, user);
 	if (userPerms === []) {
 		return;
 	}
