@@ -72,7 +72,7 @@ client.on('messageCreate', async (receivedMessage) => {
 	if (receivedMessage.channel.type === "GUILD_TEXT" && !config.discord.channelIDs.includes(receivedMessage.channel.id)) {
 		return;
 	}
-	let userPerms = await Roles.getUserCommandPerms(receivedMessage.channel.type, receivedMessage.guild, user);
+	let userPerms = await Roles.getUserCommandPerms(receivedMessage.guild, user);
 	if (userPerms === []) {
 		return;
 	}
@@ -162,7 +162,7 @@ client.on('interactionCreate', async interaction => {
 		return;
 	}
 	var interactionID = interaction.customId.replace(`${config.serverName}~`, '');
-	let userPerms = await Roles.getUserCommandPerms(channelType, interaction.message.guild, user);
+	let userPerms = await Roles.getUserCommandPerms(interaction.message.guild, user);
 	//Button interaction
 	if (interaction.isButton()) {
 		Interactions.buttonInteraction(interaction, interactionID, userPerms);
