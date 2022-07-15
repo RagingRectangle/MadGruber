@@ -55,10 +55,14 @@ client.on('ready', async () => {
 	}
 	//Automated Quest Reroll
 	if (config.madDB.host && config.truncate.eventAutomation === true && config.truncate.eventGuildID && config.truncate.eventAutomation === true) {
-		let questJob = new CronJob(`14-59/15 * * * *`, function () {
-			Events.checkEvents(client);
-		}, null, true, null);
-		questJob.start();
+		if (config.truncate.truncateQuestsByArea === true) {
+			console.log("Warning: eventAutomation disabled because truncateQuestsByArea = true.");
+		} else {
+			let questJob = new CronJob(`14-59/15 * * * *`, function () {
+				Events.checkEvents(client);
+			}, null, true, null);
+			questJob.start();
+		}
 	}
 	//Register Slash Commands
 	if (config.discord.useSlashCommands === true && config.discord.slashGuildIDs.length > 0) {

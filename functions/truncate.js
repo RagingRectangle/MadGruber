@@ -7,9 +7,14 @@ const {
    MessageSelectMenu,
    MessageButton
 } = require('discord.js');
-const mysql = require('mysql');
+const {
+   insidePolygon
+} = require('geolocation-utils');
+const mysql = require('mysql2');
 const pm2 = require('pm2');
+const fs = require('fs');
 const config = require('../config/config.json');
+const dbInfo = require('../MAD_Database_Info.json');
 
 module.exports = {
    sendTruncateMessage: async function sendTruncateMessage(channel) {
@@ -63,6 +68,10 @@ module.exports = {
       var bad = [];
       var restartMAD = false;
       for (var t in tables) {
+         if (tables[t] === 'trs_quest' && config.truncate.truncateQuestsByArea === true) {
+            module.exports.areaQuestsMain(msg.channel, user);
+            continue;
+         }
          let truncateQuery = `TRUNCATE ${tables[t]}`;
          connection.query(truncateQuery, function (err, results) {
             if (err) {
@@ -87,6 +96,9 @@ module.exports = {
          await new Promise(done => setTimeout(done, 5000));
       } //End of t loop
       connection.end();
+      if (good.length == 0 && bad.length == 0) {
+         return;
+      }
       var color = '00841E';
       var description = `Successful:\n- ${good.join('\n- ')}`;
       if (good.length == 0) {
@@ -113,12 +125,23 @@ module.exports = {
          new MessageButton().setCustomId(`${config.serverName}~verifyTruncate~yes`).setLabel(`Yes`).setStyle("SUCCESS"),
          new MessageButton().setCustomId(`${config.serverName}~verifyTruncate~no`).setLabel(`No`).setStyle("DANGER")
       );
+      var tableList = [];
+      for (var t in tables) {
+         if (tables[t] === 'trs_quest' && config.truncate.truncateQuestsByArea === true) {
+            module.exports.areaQuestsMain(channel, user);
+         } else {
+            tableList.push(tables[t]);
+         }
+      }
+      if (tableList.length == 0) {
+         return;
+      }
       var title = 'Truncate the following table?';
-      if (tables.length > 1) {
+      if (tableList.length > 1) {
          title = 'Truncate the following tables?';
       }
       channel.send({
-         embeds: [new MessageEmbed().setTitle(title).setDescription(tables.join('\n')).setColor('0D00CA')],
+         embeds: [new MessageEmbed().setTitle(title).setDescription(tableList.join('\n')).setColor('0D00CA')],
          components: [optionRow]
       }).catch(console.error);
    }, //End of verifyTruncate()
@@ -168,6 +191,211 @@ module.exports = {
          })],
          components: []
       }).catch(console.error);
-      //})
-   } //End of restartMADs()
+   }, //End of restartMADs()
+
+
+   areaQuestsMain: async function areaQuestsMain(channel, user) {
+      var madDB = config.madDB;
+      madDB.multipleStatements = true;
+      var connection = mysql.createConnection(madDB);
+      let areaListQuery = `SELECT a.name "area", b.name "instance" FROM settings_area a, madmin_instance b WHERE a.mode = "pokestops" AND a.instance_id = b.instance_id;`;
+
+      connection.query(areaListQuery, function (err, results) {
+         if (err) {
+            console.log(err);
+            channel.send(`Error selecting areas from database, check console for more info.`);
+            connection.end();
+            return;
+         } else {
+            connection.end();
+            if (results.length > 0) {
+               groupAreas(results);
+            }
+         }
+      }); //End of connection
+
+      async function groupAreas(areaResults) {
+         var instanceAreas = {};
+         for (const [key, instance] of Object.entries(dbInfo.instances)) {
+            var areaList = [];
+            for (var a in areaResults) {
+               if (areaResults[a]['instance'] === instance) {
+                  areaList.push(areaResults[a]['area']);
+               }
+            } //End of a loop
+            if (areaList.length > 0) {
+               areaList.sort();
+               instanceAreas[instance] = areaList;
+            }
+         } //End of instances
+
+         //Create message for each instance
+         var selectMenuList = [];
+         for (const [instance, areaList] of Object.entries(instanceAreas)) {
+            var selectMenu = await new MessageSelectMenu()
+               .setCustomId(`${config.serverName}~truncateArea~${instance}`)
+               .setPlaceholder(`${instance} areas`)
+               .setMinValues(1)
+
+            if (config.truncate.truncateVerify === true) {
+               selectMenu.setCustomId(`${config.serverName}~truncateArea~${instance}`)
+            }
+            var listOptions = [];
+            for (var a = 0; a < areaList.length && a < 25; a++) {
+               listOptions.push({
+                  label: areaList[a],
+                  value: `${areaList[a]}`
+               });
+            } //End of a loop
+            selectMenu.options = listOptions;
+            selectMenuList.push(await new MessageActionRow().addComponents(selectMenu));
+         } //End of instanceAreas loop
+         groupInstanceLists(selectMenuList);
+      } //End of groupAreas()
+
+      async function groupInstanceLists(selectMenuList) {
+         var messagesNeeded = Math.ceil(selectMenuList.length / 5);
+         var listNumber = 0;
+         for (var m = 0; m < messagesNeeded; m++) {
+            var currentLists = [];
+            for (var i = 0; i < 5 && listNumber < selectMenuList.length; i++) {
+               currentLists.push(selectMenuList[listNumber]);
+               listNumber++;
+            } //End of i loop
+            if (m == 0) {
+               channel.send({
+                  content: `**Select quest areas to truncate:**`,
+                  components: currentLists
+               }).catch(console.error);
+            } else {
+               channel.send({
+                  components: currentLists
+               }).catch(console.error);
+            }
+         } //End of m loop
+      } //End of groupInstanceLists()
+   }, //End of areaQuestsMain()
+
+
+   verifyAreaQuests: async function verifyAreaQuests(channel, user, instanceName, areaList) {
+      let optionRow = new MessageActionRow().addComponents(
+         new MessageButton().setCustomId(`${config.serverName}~verifyAreaQuests~${instanceName}~yes`).setLabel(`Yes`).setStyle("SUCCESS"),
+         new MessageButton().setCustomId(`${config.serverName}~verifyAreaQuests~${instanceName}~no`).setLabel(`No`).setStyle("DANGER")
+      );
+      var title = 'Truncate Quests From Area?';
+      if (areaList.length > 1) {
+         title = 'Truncate Quests From Areas?';
+      }
+      channel.send({
+         embeds: [new MessageEmbed().setTitle(title).setDescription(areaList.join('\n')).setColor('0D00CA')],
+         components: [optionRow]
+      }).catch(console.error);
+   }, //End of verifyAreaQuests
+
+
+   collectAreaQuests: async function collectAreaQuests(channel, user, instanceName, areaList) {
+      console.log(`Quests truncated by ${user.username} in: ${areaList.join(', ')}`);
+      var queryList = [];
+      for (var a in areaList) {
+         queryList.push(`SELECT c.fence_data "geofence" FROM settings_area a, settings_area_pokestops b, settings_geofence c, madmin_instance d WHERE a.area_id = b.area_id AND b.geofence_included = c.geofence_id AND c.instance_id = d.instance_id AND a.name = "${areaList[a]}" and d.name = "${instanceName}";`);
+      } //End of a loop
+      var madDB = config.madDB;
+      madDB.multipleStatements = true;
+      var connection = mysql.createConnection(madDB);
+      connection.query(queryList.join(' '), async function (err, results) {
+         if (err || results.length == 0) {
+            console.log(err);
+            channel.send(`Error truncating area quests. Check console for more info.`);
+            connection.end();
+            return;
+         } else {
+            connection.end();
+            var geoList = [];
+            if (areaList.length == 1) {
+               geoList.push(results[0]);
+            } else {
+               for (var a = 0; a < areaList.length; a++) {
+                  geoList.push(results[a][0]);
+               }
+            }
+            convertGeofences(geoList);
+         }
+      }); //End of connection
+
+      async function convertGeofences(madGeofenceList) {
+         var geofenceList = [];
+         for (var m in madGeofenceList) {
+            let geofenceData = JSON.parse(madGeofenceList[m]['geofence']);
+            var currentGeofence = [];
+            for (var g in geofenceData) {
+               //Has sub geofences
+               if (geofenceData[g].startsWith('[')) {
+                  if (currentGeofence.length > 0) {
+                     geofenceList.push(currentGeofence);
+                  }
+                  currentGeofence = [];
+               }
+               //Has single geofence
+               else {
+                  let currentPoint = geofenceData[g].split(',');
+                  currentGeofence.push([currentPoint[0] * 1, currentPoint[1] * 1]);
+               }
+            } //End of g loop
+            geofenceList.push(currentGeofence);
+         } //End of m loop
+         getPokestops(geofenceList)
+      } //End of convertGeofences()
+
+      async function getPokestops(geofenceList) {
+         var madDB = config.madDB;
+         madDB.multipleStatements = true;
+         var connection = mysql.createConnection(madDB);
+         let pokestopQuery = `SELECT a.pokestop_id, a.latitude, a.longitude FROM pokestop a, trs_quest b WHERE a.pokestop_id = b.GUID;`;
+         connection.query(pokestopQuery, function (err, results) {
+            if (err) {
+               console.log(err);
+               channel.send(`Error selecting quests from database. Check console for more info.`);
+               connection.end();
+               return;
+            } else {
+               connection.end();
+               createQuestList(geofenceList, results);
+            }
+         }); //End of connection
+      } //End of getPokestops()
+
+      async function createQuestList(geofenceList, pokestopList) {
+         var guidList = [];
+         for (var g in geofenceList) {
+            for (var p in pokestopList) {
+               let isInside = insidePolygon([pokestopList[p]['latitude'], pokestopList[p]['longitude']], geofenceList[g]);
+               if (isInside === true) {
+                  guidList.push(pokestopList[p]['pokestop_id']);
+               }
+            } //End of p loop
+         } //End of g loop
+         guidList = [...new Set(guidList)];
+         module.exports.truncateAreaQuests(channel, guidList);
+      } //End of createQuestList()
+   }, //End of collectAreaQuests()
+
+
+   truncateAreaQuests: async function truncateAreaQuests(channel, guidList) {
+      let deleteList = `"${guidList.join(`","`)}"`;
+      var madDB = config.madDB;
+      madDB.multipleStatements = true;
+      var connection = mysql.createConnection(madDB);
+      let pokestopQuery = `DELETE FROM trs_quest WHERE GUID IN (${deleteList});`;
+      connection.query(pokestopQuery, function (err, results) {
+         if (err) {
+            console.log(err);
+            channel.send(`Error selecting quests from database. Check console for more info.`);
+            connection.end();
+            return;
+         } else {
+            connection.end();
+            channel.send(`${results.affectedRows} quests deleted from database.`);
+         }
+      }); //End of connection
+   } //End of truncateAreaQuests()
 }

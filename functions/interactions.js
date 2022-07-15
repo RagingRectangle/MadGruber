@@ -83,8 +83,26 @@ module.exports = {
          }
       } //End of SystemStats
 
-      //GeofenceConverter
+      //Truncate
+      if (userPerms.includes('truncate')) {
+         //Area quests
+         if (interactionID.startsWith('truncateArea~')) {
+            interaction.deferUpdate();
+            interaction.message.edit({
+               components: interaction.message.components
+            });
+            let areaList = interaction.values;
+            if (config.truncate.truncateVerify === false) {
+               Truncate.collectAreaQuests(interaction.message.channel, interaction.user, interactionID.replace('truncateArea~', ''), areaList);
+            } else {
+               Truncate.verifyAreaQuests(interaction.message.channel, interaction.user, interactionID.replace('truncateArea~', ''), areaList);
+            }
+         } //End of area quests
+      } //End of Truncate
+
+      //Admin only
       if (userPerms.includes('admin')) {
+         //GeofenceConverter
          if (interactionID.startsWith('geofenceList~')) {
             interaction.deferUpdate();
             let intValue = interaction.values[0].split('~~');
@@ -200,9 +218,14 @@ module.exports = {
       //Truncate
       if (userPerms.includes('truncate')) {
          //Verify truncate
-         if (interactionID.startsWith('verifyTruncate~')) {
+         if (interactionID.startsWith('verifyTruncate~') || interactionID.startsWith('verifyAreaQuests~')) {
             interaction.deferUpdate();
-            let verify = interactionID.replace('verifyTruncate~', '');
+            var instanceName = '';
+            var verify = interactionID.replace('verifyTruncate~', '');
+            if (interactionID.startsWith('verifyAreaQuests~')) {
+               instanceName = interactionID.replace('verifyAreaQuests~', '').replace('~yes', '').replace('~no', '');
+               verify = interactionID.replace(`verifyAreaQuests~${instanceName}~`, '');
+            }
             if (verify === 'no') {
                interaction.message.edit({
                   embeds: [new MessageEmbed().setTitle('Did not truncate:').setDescription(interaction.message.embeds[0]['description']).setColor('9E0000').setFooter({
@@ -213,8 +236,17 @@ module.exports = {
                setTimeout(() => interaction.message.delete().catch(err => console.log("Error deleting verify truncate message:", err)), 10000);
             } //End of no
             else if (verify === 'yes') {
-               let tables = interaction.message.embeds[0]['description'].split('\n');
-               Truncate.truncateTables(interaction.message, interaction.user, tables);
+               //Truncate table
+               if (interactionID.startsWith('verifyTruncate~')) {
+                  let tables = interaction.message.embeds[0]['description'].split('\n');
+                  Truncate.truncateTables(interaction.message, interaction.user, tables);
+               }
+               //Truncate Area Quests
+               else if (interactionID.startsWith('verifyAreaQuests~')) {
+                  let areaList = interaction.message.embeds[0]['description'].split('\n');
+                  Truncate.collectAreaQuests(interaction.message.channel, interaction.user, instanceName, areaList);
+                  interaction.message.delete().catch(console.error);
+               }
             } //End of yes
          } //End of verify truncate
 

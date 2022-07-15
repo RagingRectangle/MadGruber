@@ -101,6 +101,7 @@ Roles:
 Truncate:
 - **truncateVerify:** Whether or not to verify table truncate (true/false).
 - **truncateOptions:** List of tables to list as options to truncate.  Can truncate multiple tables at once by combining them with '+'. Example: *["trs_quest", "pokemon", "trs_quest+pokemon"]*
+- **truncateQuestsByArea:** Select instance Pokestop areas to truncate instead of entire trs_quest table (true/false).
 - **onlyRestartBeforeTime:** Set this to limit when the bot will reload MAD instance (0-23).  If set to 0 it will always reload MADs.  If an event ends at 20:00 and you don't need to reload MAD because you won't rescan quests then enter "20".
 - **eventAutomation:** Whether or not to use Discord events to automate quest truncating (true/false).
 - **eventGuildID:** ID of the guild where events are located.
