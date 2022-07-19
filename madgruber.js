@@ -201,7 +201,7 @@ client.on('interactionCreate', async interaction => {
 		Interactions.buttonInteraction(interaction, interactionID, userPerms);
 	}
 	//List interaction
-	else if (interaction.componentType === 'SELECT_MENU') {
+	else if (interaction.isSelectMenu()) {
 		Interactions.listInteraction(interaction, interactionID, userPerms);
 	}
 }); //End of client.on(interactionCreate)
@@ -247,7 +247,7 @@ client.on('messageReactionRemove', async (reaction, user) => {
 
 //Slash commands
 client.on('interactionCreate', async interaction => {
-	if (interaction.type !== InteractionType.ApplicationCommand){
+	if (interaction.type !== InteractionType.ApplicationCommand) {
 		return;
 	}
 	let user = interaction.user;
