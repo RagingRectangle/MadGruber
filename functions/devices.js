@@ -9,6 +9,7 @@ const {
    MessageButton,
    EmbedBuilder,
    ButtonBuilder,
+   ButtonStyle,
    InteractionType,
    ChannelType
 } = require('discord.js');
@@ -43,17 +44,17 @@ module.exports = {
                   }
                } //End of b loop
                var buttonLabel = deviceName;
-               var buttonStyle = 'Success';
+               var buttonStyle = ButtonStyle.Success;
                //If idle
                if (device.idle === 1) {
-                  buttonStyle = 'Primary';
+                  buttonStyle = ButtonStyle.Primary;
                   //If paused
                   if (dbInfo.areas[device.area_id]['mode'] !== 'idle') {
-                     buttonStyle = 'Secondary';
+                     buttonStyle = ButtonStyle.Secondary;
                      buttonLabel = `${deviceName} (${minutesSinceSeen}m)`;
                   }
                } else if (minutesSinceSeen > config.devices.noProtoMinutes) {
-                  buttonStyle = 'Danger';
+                  buttonStyle = ButtonStyle.Danger;
                }
                if (minutesSinceSeen > config.devices.noProtoMinutes) {
                   buttonLabel = `${deviceName} (${minutesSinceSeen}m)`;
@@ -151,13 +152,13 @@ module.exports = {
                } //End of b loop
                if (minutesSinceSeen > config.devices.noProtoMinutes) {
                   instanceList.push(dbInfo.instances[device.instance_id]);
-                  var buttonStyle = 'Danger';
+                  var buttonStyle = ButtonStyle.Danger;
                   //If idle
                   if (device.idle === 1) {
-                     buttonStyle = 'Primary';
+                     buttonStyle = ButtonStyle.Primary;
                      //If paused
                      if (dbInfo.areas[device.area_id]['mode'] !== 'idle') {
-                        buttonStyle = 'Secondary';
+                        buttonStyle = ButtonStyle.Secondary;
                      }
                   }
                   var buttonLabel = `${deviceName} (${minutesSinceSeen}m)`;

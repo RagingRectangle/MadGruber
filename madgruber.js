@@ -9,6 +9,7 @@ const {
 	MessageButton,
 	EmbedBuilder,
 	ButtonBuilder,
+	ButtonStyle,
 	InteractionType,
 	ChannelType,
 } = require('discord.js');

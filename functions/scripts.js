@@ -9,6 +9,7 @@ const {
    MessageButton,
    EmbedBuilder,
    ButtonBuilder,
+   ButtonStyle,
    InteractionType,
    ChannelType
 } = require('discord.js');
@@ -216,8 +217,8 @@ module.exports = {
       for (var s in scriptList) {
          if (scriptList[s]['customName'] === scriptName) {
             let optionRow = new ActionRowBuilder().addComponents(
-               new ButtonBuilder().setCustomId(`${config.serverName}~verifyScript~yes`).setLabel(`Yes`).setStyle("Success"),
-               new ButtonBuilder().setCustomId(`${config.serverName}~verifyScript~no`).setLabel(`No`).setStyle("Danger")
+               new ButtonBuilder().setCustomId(`${config.serverName}~verifyScript~yes`).setLabel(`Yes`).setStyle(ButtonStyle.Success),
+               new ButtonBuilder().setCustomId(`${config.serverName}~verifyScript~no`).setLabel(`No`).setStyle(ButtonStyle.Danger)
             )
             var title = `**Run script: ${scriptName}?**`;
             if (scriptList[s]['adminOnly'] === true) {

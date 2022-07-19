@@ -9,6 +9,7 @@ const {
    MessageButton,
    EmbedBuilder,
    ButtonBuilder,
+   ButtonStyle,
    InteractionType,
    ChannelType
 } = require('discord.js');
@@ -35,7 +36,7 @@ module.exports = {
                if (buttonStyle === undefined) {
                   buttonStyle = process['pm2_env']['status']
                }
-               buttonStyle = buttonStyle.replace('online', 'Success').replace('stopping', 'Danger').replace('stopped', 'Danger').replace('launching', 'Success').replace('errored', 'Danger').replace('one-launch-status', 'Danger').replace('waiting restart', 'Secondary');
+               buttonStyle = buttonStyle.replace('online', ButtonStyle.Success).replace('stopping', ButtonStyle.Danger).replace('stopped', ButtonStyle.Danger).replace('launching', ButtonStyle.Success).replace('errored', ButtonStyle.Danger).replace('one-launch-status', ButtonStyle.Danger).replace('waiting restart', ButtonStyle.Secondary);
                let buttonLabel = process['name'];
                let buttonID = `${config.serverName}~process~restart~${buttonLabel}`;
                let button = new ButtonBuilder().setCustomId(buttonID).setLabel(buttonLabel).setStyle(buttonStyle);
@@ -60,10 +61,10 @@ module.exports = {
             } //End of n loop
             pm2.disconnect();
             let optionRow = new ActionRowBuilder().addComponents(
-               new ButtonBuilder().setCustomId(`${config.serverName}~restart`).setLabel(`Restart`).setStyle("Primary"),
-               new ButtonBuilder().setCustomId(`${config.serverName}~start`).setLabel(`Start`).setStyle("Success"),
-               new ButtonBuilder().setCustomId(`${config.serverName}~stop`).setLabel(`Stop`).setStyle("Danger"),
-               new ButtonBuilder().setCustomId(`${config.serverName}~status`).setLabel(`Status`).setStyle("Secondary")
+               new ButtonBuilder().setCustomId(`${config.serverName}~restart`).setLabel(`Restart`).setStyle(ButtonStyle.Primary),
+               new ButtonBuilder().setCustomId(`${config.serverName}~start`).setLabel(`Start`).setStyle(ButtonStyle.Success),
+               new ButtonBuilder().setCustomId(`${config.serverName}~stop`).setLabel(`Stop`).setStyle(ButtonStyle.Danger),
+               new ButtonBuilder().setCustomId(`${config.serverName}~status`).setLabel(`Status`).setStyle(ButtonStyle.Secondary)
             )
             messageComponents.push(optionRow);
             if (type === 'new') {
@@ -87,10 +88,10 @@ module.exports = {
       if (interactionID === 'restart') {
          var newButtons = interaction.message.components;
          for (var r = 0; r < newButtons.length - 1; r++) {
-            let row = newButtons[r]['components'];
+            var row = newButtons[r]['components'];
             for (var b in row) {
-               row[b].setStyle('Primary');
-               row[b]['customId'] = `${config.serverName}~process~restart~${row[b]['label']}`;
+               row[b]['data']['style'] = ButtonStyle.Primary;
+               row[b]['data']['customId'] = `${config.serverName}~process~restart~${row[b]['label']}`;
             } //End of b loop
          } //End of r loop
          interaction.message.edit({
@@ -102,10 +103,10 @@ module.exports = {
       else if (interactionID === 'start') {
          var newButtons = interaction.message.components;
          for (var r = 0; r < newButtons.length - 1; r++) {
-            let row = newButtons[r]['components'];
+            var row = newButtons[r]['components'];
             for (var b in row) {
-               row[b].setStyle('Success');
-               row[b]['customId'] = `${config.serverName}~process~start~${row[b]['label']}`;
+               row[b]['data']['style'] = ButtonStyle.Success;
+               row[b]['data']['customId'] = `${config.serverName}~process~start~${row[b]['label']}`;
             } //End of b loop
          } //End of r loop
          interaction.message.edit({
@@ -117,10 +118,10 @@ module.exports = {
       else if (interactionID === 'stop') {
          var newButtons = interaction.message.components;
          for (var r = 0; r < newButtons.length - 1; r++) {
-            let row = newButtons[r]['components'];
+            var row = newButtons[r]['components'];
             for (var b in row) {
-               row[b].setStyle('Danger');
-               row[b]['customId'] = `${config.serverName}~process~stop~${row[b]['label']}`;
+               row[b]['data']['style'] = ButtonStyle.Danger;
+               row[b]['data']['customId'] = `${config.serverName}~process~stop~${row[b]['label']}`;
             } //End of b loop
          } //End of r loop
          interaction.message.edit({

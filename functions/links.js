@@ -9,6 +9,7 @@ const {
    MessageButton,
    EmbedBuilder,
    ButtonBuilder,
+   ButtonStyle,
    InteractionType,
    ChannelType
 } = require('discord.js');
@@ -23,7 +24,7 @@ module.exports = {
                .setURL(link.url)
                .setLabel(link.label)
                .setEmoji(link.emoji)
-               .setStyle('Link')
+               .setStyle(ButtonStyle.Link)
             buttonList.push(button);
          }
       });

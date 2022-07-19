@@ -9,6 +9,7 @@ const {
    MessageButton,
    EmbedBuilder,
    ButtonBuilder,
+   ButtonStyle,
    InteractionType,
    ChannelType
 } = require('discord.js');
@@ -37,10 +38,10 @@ module.exports = {
       for (var t in truncateTableList) {
          let tableLabel = truncateTableList[t].replace(/\+/g, " + ");
          let buttonID = `${config.serverName}~truncate~${truncateTableList[t].toLowerCase()}`;
-         let button = new ButtonBuilder().setCustomId(buttonID).setLabel(tableLabel).setStyle('Primary');
+         let button = new ButtonBuilder().setCustomId(buttonID).setLabel(tableLabel).setStyle(ButtonStyle.Primary);
          buttonList.push(button);
       } //End of t loop
-      let cancelButton = new ButtonBuilder().setCustomId(`${config.serverName}~truncate~!CANCEL!`).setLabel('Cancel').setStyle('Danger');
+      let cancelButton = new ButtonBuilder().setCustomId(`${config.serverName}~truncate~!CANCEL!`).setLabel('Cancel').setStyle(ButtonStyle.Danger);
       buttonList.push(cancelButton);
       var buttonsNeeded = buttonList.length;
       let rowsNeeded = Math.ceil(buttonList.length / 5);
@@ -127,8 +128,8 @@ module.exports = {
 
    verifyTruncate: async function verifyTruncate(channel, user, tables) {
       let optionRow = new ActionRowBuilder().addComponents(
-         new ButtonBuilder().setCustomId(`${config.serverName}~verifyTruncate~yes`).setLabel(`Yes`).setStyle("Success"),
-         new ButtonBuilder().setCustomId(`${config.serverName}~verifyTruncate~no`).setLabel(`No`).setStyle("Danger")
+         new ButtonBuilder().setCustomId(`${config.serverName}~verifyTruncate~yes`).setLabel(`Yes`).setStyle(ButtonStyle.Success),
+         new ButtonBuilder().setCustomId(`${config.serverName}~verifyTruncate~no`).setLabel(`No`).setStyle(ButtonStyle.Danger)
       );
       var tableList = [];
       for (var t in tables) {
@@ -284,8 +285,8 @@ module.exports = {
 
    verifyAreaQuests: async function verifyAreaQuests(channel, user, instanceName, areaList) {
       let optionRow = new ActionRowBuilder().addComponents(
-         new ButtonBuilder().setCustomId(`${config.serverName}~verifyAreaQuests~${instanceName}~yes`).setLabel(`Yes`).setStyle("Success"),
-         new ButtonBuilder().setCustomId(`${config.serverName}~verifyAreaQuests~${instanceName}~no`).setLabel(`No`).setStyle("Danger")
+         new ButtonBuilder().setCustomId(`${config.serverName}~verifyAreaQuests~${instanceName}~yes`).setLabel(`Yes`).setStyle(ButtonStyle.Success),
+         new ButtonBuilder().setCustomId(`${config.serverName}~verifyAreaQuests~${instanceName}~no`).setLabel(`No`).setStyle(ButtonStyle.Danger)
       );
       var title = 'Truncate Quests From Area?';
       if (areaList.length > 1) {
