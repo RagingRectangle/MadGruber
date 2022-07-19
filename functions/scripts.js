@@ -216,8 +216,8 @@ module.exports = {
       for (var s in scriptList) {
          if (scriptList[s]['customName'] === scriptName) {
             let optionRow = new ActionRowBuilder().addComponents(
-               new ButtonBuilder().setCustomId(`${config.serverName}~verifyScript~yes`).setLabel(`Yes`).setStyle("SUCCESS"),
-               new ButtonBuilder().setCustomId(`${config.serverName}~verifyScript~no`).setLabel(`No`).setStyle("DANGER")
+               new ButtonBuilder().setCustomId(`${config.serverName}~verifyScript~yes`).setLabel(`Yes`).setStyle("Success"),
+               new ButtonBuilder().setCustomId(`${config.serverName}~verifyScript~no`).setLabel(`No`).setStyle("Danger")
             )
             var title = `**Run script: ${scriptName}?**`;
             if (scriptList[s]['adminOnly'] === true) {

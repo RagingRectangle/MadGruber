@@ -28,13 +28,14 @@ module.exports = {
                pm2.disconnect();
                return;
             }
-            var buttonList = [];
+            var sortButtons = require('sort-by'),
+               buttonList = [];
             response.forEach(process => {
                var buttonStyle = process['status'];
                if (buttonStyle === undefined) {
                   buttonStyle = process['pm2_env']['status']
                }
-               buttonStyle = buttonStyle.replace('online', 'SUCCESS').replace('stopping', 'DANGER').replace('stopped', 'DANGER').replace('launching', 'SUCCESS').replace('errored', 'DANGER').replace('one-launch-status', 'DANGER').replace('waiting restart', 'SECONDARY');
+               buttonStyle = buttonStyle.replace('online', 'Success').replace('stopping', 'Danger').replace('stopped', 'Danger').replace('launching', 'Success').replace('errored', 'Danger').replace('one-launch-status', 'Danger').replace('waiting restart', 'Secondary');
                let buttonLabel = process['name'];
                let buttonID = `${config.serverName}~process~restart~${buttonLabel}`;
                let button = new ButtonBuilder().setCustomId(buttonID).setLabel(buttonLabel).setStyle(buttonStyle);
@@ -42,9 +43,7 @@ module.exports = {
                   buttonList.push(button);
                }
             }) //End of response.forEach
-            buttonList.sort(function (a, b) {
-               return a.label.localeCompare(b.label);
-            });
+            buttonList.sort(sortButtons('data.label'));
             let rowsNeeded = Math.ceil(buttonList.length / 5);
             let buttonsNeeded = buttonList.length;
             var buttonCount = 0;
@@ -61,10 +60,10 @@ module.exports = {
             } //End of n loop
             pm2.disconnect();
             let optionRow = new ActionRowBuilder().addComponents(
-               new ButtonBuilder().setCustomId(`${config.serverName}~restart`).setLabel(`Restart`).setStyle("PRIMARY"),
-               new ButtonBuilder().setCustomId(`${config.serverName}~start`).setLabel(`Start`).setStyle("SUCCESS"),
-               new ButtonBuilder().setCustomId(`${config.serverName}~stop`).setLabel(`Stop`).setStyle("DANGER"),
-               new ButtonBuilder().setCustomId(`${config.serverName}~status`).setLabel(`Status`).setStyle("SECONDARY")
+               new ButtonBuilder().setCustomId(`${config.serverName}~restart`).setLabel(`Restart`).setStyle("Primary"),
+               new ButtonBuilder().setCustomId(`${config.serverName}~start`).setLabel(`Start`).setStyle("Success"),
+               new ButtonBuilder().setCustomId(`${config.serverName}~stop`).setLabel(`Stop`).setStyle("Danger"),
+               new ButtonBuilder().setCustomId(`${config.serverName}~status`).setLabel(`Status`).setStyle("Secondary")
             )
             messageComponents.push(optionRow);
             if (type === 'new') {
@@ -90,7 +89,7 @@ module.exports = {
          for (var r = 0; r < newButtons.length - 1; r++) {
             let row = newButtons[r]['components'];
             for (var b in row) {
-               row[b].setStyle('PRIMARY');
+               row[b].setStyle('Primary');
                row[b]['customId'] = `${config.serverName}~process~restart~${row[b]['label']}`;
             } //End of b loop
          } //End of r loop
@@ -105,7 +104,7 @@ module.exports = {
          for (var r = 0; r < newButtons.length - 1; r++) {
             let row = newButtons[r]['components'];
             for (var b in row) {
-               row[b].setStyle('SUCCESS');
+               row[b].setStyle('Success');
                row[b]['customId'] = `${config.serverName}~process~start~${row[b]['label']}`;
             } //End of b loop
          } //End of r loop
@@ -120,7 +119,7 @@ module.exports = {
          for (var r = 0; r < newButtons.length - 1; r++) {
             let row = newButtons[r]['components'];
             for (var b in row) {
-               row[b].setStyle('DANGER');
+               row[b].setStyle('Danger');
                row[b]['customId'] = `${config.serverName}~process~stop~${row[b]['label']}`;
             } //End of b loop
          } //End of r loop

@@ -23,7 +23,7 @@ module.exports = {
                .setURL(link.url)
                .setLabel(link.label)
                .setEmoji(link.emoji)
-               .setStyle('LINK')
+               .setStyle('Link')
             buttonList.push(button);
          }
       });

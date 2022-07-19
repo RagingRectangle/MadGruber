@@ -43,17 +43,17 @@ module.exports = {
                   }
                } //End of b loop
                var buttonLabel = deviceName;
-               var buttonStyle = 'SUCCESS';
+               var buttonStyle = 'Success';
                //If idle
                if (device.idle === 1) {
-                  buttonStyle = 'PRIMARY';
+                  buttonStyle = 'Primary';
                   //If paused
                   if (dbInfo.areas[device.area_id]['mode'] !== 'idle') {
-                     buttonStyle = 'SECONDARY';
+                     buttonStyle = 'Secondary';
                      buttonLabel = `${deviceName} (${minutesSinceSeen}m)`;
                   }
                } else if (minutesSinceSeen > config.devices.noProtoMinutes) {
-                  buttonStyle = 'DANGER';
+                  buttonStyle = 'Danger';
                }
                if (minutesSinceSeen > config.devices.noProtoMinutes) {
                   buttonLabel = `${deviceName} (${minutesSinceSeen}m)`;
@@ -151,13 +151,13 @@ module.exports = {
                } //End of b loop
                if (minutesSinceSeen > config.devices.noProtoMinutes) {
                   instanceList.push(dbInfo.instances[device.instance_id]);
-                  var buttonStyle = 'DANGER';
+                  var buttonStyle = 'Danger';
                   //If idle
                   if (device.idle === 1) {
-                     buttonStyle = 'PRIMARY';
+                     buttonStyle = 'Primary';
                      //If paused
                      if (dbInfo.areas[device.area_id]['mode'] !== 'idle') {
-                        buttonStyle = 'SECONDARY';
+                        buttonStyle = 'Secondary';
                      }
                   }
                   var buttonLabel = `${deviceName} (${minutesSinceSeen}m)`;
