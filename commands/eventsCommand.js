@@ -1,6 +1,6 @@
 const {
 	SlashCommandBuilder
-} = require('@discordjs/builders');
+} = require('discord.js');
 const fs = require('fs');
 const Events = require('../functions/events.js');
 const config = require('../config/config.json')

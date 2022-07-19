@@ -1,11 +1,16 @@
 const {
    Client,
-   Intents,
-   MessageEmbed,
+   GatewayIntentBits,
+   Partials,
+   Collection,
    Permissions,
-   MessageActionRow,
-   MessageSelectMenu,
-   MessageButton
+   ActionRowBuilder,
+   SelectMenuBuilder,
+   MessageButton,
+   EmbedBuilder,
+   ButtonBuilder,
+   InteractionType,
+   ChannelType
 } = require('discord.js');
 const linksList = require('../config/links.json');
 
@@ -14,7 +19,7 @@ module.exports = {
       var buttonList = [];
       linksList.forEach(link => {
          if (link.url !== '') {
-            let button = new MessageButton()
+            let button = new ButtonBuilder()
                .setURL(link.url)
                .setLabel(link.label)
                .setEmoji(link.emoji)
@@ -31,7 +36,7 @@ module.exports = {
       var buttonCount = 0;
       var messageComponents = [];
       for (var n = 0; n < rowsNeeded && n < 5; n++) {
-         var buttonRow = new MessageActionRow()
+         var buttonRow = new ActionRowBuilder()
          for (var r = 0; r < 5; r++) {
             if (buttonCount < buttonsNeeded) {
                buttonRow.addComponents(buttonList[buttonCount]);

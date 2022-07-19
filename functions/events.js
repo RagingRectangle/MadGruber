@@ -1,20 +1,23 @@
 const {
    Client,
-   Intents,
-   MessageEmbed,
+   GatewayIntentBits,
+   Partials,
+   Collection,
    Permissions,
-   MessageAttachment,
-   MessageActionRow,
-   MessageSelectMenu,
-   MessageButton
+   ActionRowBuilder,
+   SelectMenuBuilder,
+   MessageButton,
+   EmbedBuilder,
+   ButtonBuilder,
+   InteractionType,
+   ChannelType,
+   time
 } = require('discord.js');
 
 const fs = require('fs');
 const mysql = require('mysql');
 const pm2 = require('pm2');
-const {
-   time
-} = require('@discordjs/builders');
+
 const config = require('../config/config.json');
 
 module.exports = {
@@ -25,7 +28,7 @@ module.exports = {
       var scheduledEvents = [];
       try {
          if (config.truncate.eventGuildID === "") {
-            sendEventListMessage(new MessageEmbed().setDescription("No event guild set in config."));
+            sendEventListMessage(new EmbedBuilder().setDescription("No event guild set in config."));
             return;
          } else {
             eventGuild = await client.guilds.fetch(config.truncate.eventGuildID).catch(console.error);
@@ -46,19 +49,19 @@ module.exports = {
 
       //No events found
       if (activeEvents.length == 0 && scheduledEvents.length == 0) {
-         sendEventListMessage(new MessageEmbed().setDescription("No active or scheduled quest reroll events found."));
+         sendEventListMessage(new EmbedBuilder().setDescription("No active or scheduled quest reroll events found."));
       }
 
       //Events found
       else {
          //Active Events
          if (activeEvents.length == 0) {
-            sendEventListMessage(new MessageEmbed().setDescription("No active quest reroll events found."));
+            sendEventListMessage(new EmbedBuilder().setDescription("No active quest reroll events found."));
          } else {
             activeEvents.sort(function (a, b) {
                return a.scheduledEndTimestamp - b.scheduledEndTimestamp;
             });
-            var activeEmbed = new MessageEmbed().setAuthor({
+            var activeEmbed = new EmbedBuilder().setAuthor({
                name: `Active Quest Reroll Events:`
             }).setColor('00841E');
             for (var a = 0; a < activeEvents.length; a++) {
@@ -74,12 +77,12 @@ module.exports = {
          //Scheduled Events
          await new Promise(done => setTimeout(done, 1000));
          if (scheduledEvents.length == 0) {
-            sendEventListMessage(new MessageEmbed().setDescription("No scheduled quest reroll events found."));
+            sendEventListMessage(new EmbedBuilder().setDescription("No scheduled quest reroll events found."));
          } else {
             scheduledEvents.sort(function (a, b) {
                return a.scheduledStartTimestamp - b.scheduledStartTimestamp;
             });
-            var scheduledEmbed = new MessageEmbed().setAuthor({
+            var scheduledEmbed = new EmbedBuilder().setAuthor({
                name: `Scheduled Quest Reroll Events:`
             }).setColor('B4740E');
             for (var s = 0; s < scheduledEvents.length; s++) {
@@ -128,7 +131,7 @@ module.exports = {
          let date = new Date();
          let hour = date.getHours();
          //If no MAD restart
-         var eventEmbed = new MessageEmbed().setAuthor({
+         var eventEmbed = new EmbedBuilder().setAuthor({
             name: `Quests Have Been Rerolled:`
          }).setDescription(`MAD will not restart and quests will not be rescanned.`).setColor('00841E');
          //MAD restart

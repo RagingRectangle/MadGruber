@@ -1,9 +1,7 @@
 const {
-	MessageEmbed,
-} = require('discord.js');
-const {
+	EmbedBuilder,
 	SlashCommandBuilder
-} = require('@discordjs/builders');
+} = require('discord.js');
 const fs = require('fs');
 const Roles = require('../functions/roles.js');
 const Truncate = require('../functions/truncate.js');
@@ -45,7 +43,7 @@ module.exports = {
 					Truncate.verifyTruncate(channel, interaction.user, tables);
 				} else {
 					channel.send({
-							embeds: [new MessageEmbed().setTitle('Truncate Results:').setDescription('**Truncating...**')],
+							embeds: [new EmbedBuilder().setTitle('Truncate Results:').setDescription('**Truncating...**')],
 							components: []
 						})
 						.then(msg => {

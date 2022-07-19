@@ -1,11 +1,16 @@
 const {
    Client,
-   Intents,
-   MessageEmbed,
+   GatewayIntentBits,
+   Partials,
+   Collection,
    Permissions,
-   MessageActionRow,
-   MessageSelectMenu,
-   MessageButton
+   ActionRowBuilder,
+   SelectMenuBuilder,
+   MessageButton,
+   EmbedBuilder,
+   ButtonBuilder,
+   InteractionType,
+   ChannelType
 } = require('discord.js');
 const fs = require('fs');
 const mysql = require('mysql');
@@ -23,9 +28,9 @@ module.exports = {
          }
          selectList.push(listOption);
       });
-      let fullCountList = new MessageActionRow()
+      let fullCountList = new ActionRowBuilder()
          .addComponents(
-            new MessageSelectMenu()
+            new SelectMenuBuilder()
             .setCustomId(`${config.serverName}~countList`)
             .setPlaceholder('MAD DB Counter')
             .setMinValues(1)

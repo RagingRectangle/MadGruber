@@ -1,11 +1,16 @@
 const {
    Client,
-   Intents,
-   MessageEmbed,
+   GatewayIntentBits,
+   Partials,
+   Collection,
    Permissions,
-   MessageActionRow,
-   MessageSelectMenu,
-   MessageButton
+   ActionRowBuilder,
+   SelectMenuBuilder,
+   MessageButton,
+   EmbedBuilder,
+   ButtonBuilder,
+   InteractionType,
+   ChannelType
 } = require('discord.js');
 const Roles = require('./roles.js');
 const config = require('../config/config.json');
@@ -53,7 +58,7 @@ module.exports = {
       }
       var description = `**Command Syntax:**\n- PM2: \`${pm2}\`\n- Truncate: \`${truncate}\`\n- Scripts: \`${scripts}\`\n- Queries: \`${queries}\`\n- Links: \`${links}\`\n- Devices: \`${devices}\`\n- Stats: \`${systemStats}\`\n- Send Worker: \`${sendWorker}\`\n- Events: \`${events}\`\n\n${allowedCommands}`;
       channel.send({
-         embeds: [new MessageEmbed().setTitle("MadGruber Help Menu").setURL("https://github.com/RagingRectangle/MadGruber").setDescription(description)]
+         embeds: [new EmbedBuilder().setTitle("MadGruber Help Menu").setURL("https://github.com/RagingRectangle/MadGruber").setDescription(description)]
       }).catch(console.error);
    } //End of helpMenu()
 }

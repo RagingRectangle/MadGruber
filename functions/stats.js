@@ -1,11 +1,16 @@
 const {
    Client,
-   Intents,
-   MessageEmbed,
+   GatewayIntentBits,
+   Partials,
+   Collection,
    Permissions,
-   MessageActionRow,
-   MessageSelectMenu,
-   MessageButton
+   ActionRowBuilder,
+   SelectMenuBuilder,
+   MessageButton,
+   EmbedBuilder,
+   ButtonBuilder,
+   InteractionType,
+   ChannelType
 } = require('discord.js');
 const mysql = require('mysql');
 const QuickChart = require('quickchart-js');
@@ -40,22 +45,22 @@ module.exports = {
             value: `${config.serverName}~systemStats~uptime`
          }
       ];
-      let componentHourly = new MessageActionRow()
+      let componentHourly = new ActionRowBuilder()
          .addComponents(
-            new MessageSelectMenu()
+            new SelectMenuBuilder()
             .setCustomId(`${config.serverName}~systemStats~hourly`)
             .setPlaceholder(`Hourly ${config.serverName} Stats`)
             .addOptions(systemStatsList)
          );
-      let componentDaily = new MessageActionRow()
+      let componentDaily = new ActionRowBuilder()
          .addComponents(
-            new MessageSelectMenu()
+            new SelectMenuBuilder()
             .setCustomId(`${config.serverName}~systemStats~daily`)
             .setPlaceholder(`Daily ${config.serverName} Stats`)
             .addOptions(systemStatsList)
          );
       channel.send({
-         embeds: [new MessageEmbed().setTitle(`${config.serverName} Stats`).setDescription(`Select option below for more info:`).setFooter({
+         embeds: [new EmbedBuilder().setTitle(`${config.serverName} Stats`).setDescription(`Select option below for more info:`).setFooter({
             text: `${user.username}`
          })],
          components: [componentHourly, componentDaily]
@@ -509,7 +514,7 @@ module.exports = {
       connectionStats.end();
       async function sendChart(title, url) {
          channel.send({
-               embeds: [new MessageEmbed().setTitle(title).setImage(url).setFooter({
+               embeds: [new EmbedBuilder().setTitle(title).setImage(url).setFooter({
                   text: `${user.username}`
                })],
             }).catch(console.error)
@@ -732,7 +737,7 @@ module.exports = {
                });
                const url = await myChart.getShortUrl();
                interaction.message.channel.send({
-                  embeds: [new MessageEmbed().setTitle(`${origin} Proto Success Rate (${rplType})`).setImage(url).setFooter({
+                  embeds: [new EmbedBuilder().setTitle(`${origin} Proto Success Rate (${rplType})`).setImage(url).setFooter({
                      text: `${interaction.user.username}`
                   })],
                }).catch(console.error);
@@ -881,7 +886,7 @@ module.exports = {
 
       async function sendChart(title, url) {
          interaction.message.channel.send({
-               embeds: [new MessageEmbed().setTitle(title).setImage(url).setFooter({
+               embeds: [new EmbedBuilder().setTitle(title).setImage(url).setFooter({
                   text: `${interaction.user.username}`
                })],
             }).catch(console.error)

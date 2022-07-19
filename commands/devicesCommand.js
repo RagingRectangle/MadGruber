@@ -1,6 +1,6 @@
 const {
 	SlashCommandBuilder
-} = require('@discordjs/builders');
+} = require('discord.js');
 const fs = require('fs');
 const Roles = require('../functions/roles.js');
 const Devices = require('../functions/devices.js');
@@ -40,8 +40,7 @@ module.exports = {
 			} else {
 				Devices.deviceStatus(channel, interaction.user);
 			}
-		}
-		else {
+		} else {
 			channel.send(`User *${interaction.user.username}* does not have required device perms`).catch(console.error);
 		}
 		return "delete";

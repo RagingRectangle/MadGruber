@@ -1,5 +1,16 @@
 const {
-   Collection
+   Client,
+   GatewayIntentBits,
+   Partials,
+   Collection,
+   Permissions,
+   ActionRowBuilder,
+   SelectMenuBuilder,
+   MessageButton,
+   EmbedBuilder,
+   ButtonBuilder,
+   InteractionType,
+   ChannelType
 } = require('discord.js');
 
 const fs = require('fs');
@@ -30,7 +41,7 @@ module.exports = {
             version: '10'
          }).setToken(config.discord.token);
          rest.put(Routes.applicationGuildCommands(client.user.id, guildID), {
-            body: commands
+               body: commands
             })
             .then(() => console.log(`Registered slash commands for guild: ${guildID}`))
             .catch(console.error);

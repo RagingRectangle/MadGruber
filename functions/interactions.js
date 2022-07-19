@@ -1,12 +1,16 @@
 const {
    Client,
-   Intents,
-   MessageEmbed,
+   GatewayIntentBits,
+   Partials,
+   Collection,
    Permissions,
-   MessageActionRow,
-   MessageAttachment,
-   MessageSelectMenu,
-   MessageButton
+   ActionRowBuilder,
+   SelectMenuBuilder,
+   MessageButton,
+   EmbedBuilder,
+   ButtonBuilder,
+   InteractionType,
+   ChannelType
 } = require('discord.js');
 const fs = require('fs');
 const pm2 = require('pm2');
@@ -155,7 +159,7 @@ module.exports = {
                Scripts.sendScriptList(interaction, 'restart');
                interaction.message.channel.send({
                      content: '**Did not run script:**',
-                     embeds: [new MessageEmbed().setDescription(interaction.message.embeds[0]['description']).setColor('9E0000').setFooter({
+                     embeds: [new EmbedBuilder().setDescription(interaction.message.embeds[0]['description']).setColor('9E0000').setFooter({
                         text: `${interaction.user.username}`
                      })],
                      components: []
@@ -168,7 +172,7 @@ module.exports = {
                let fullBashCommand = interaction.message.embeds[0]['description'];
                interaction.message.edit({
                   content: '**Running script:**',
-                  embeds: [new MessageEmbed().setDescription(`\`${fullBashCommand}\``).setColor('0D00CA').setFooter({
+                  embeds: [new EmbedBuilder().setDescription(`\`${fullBashCommand}\``).setColor('0D00CA').setFooter({
                      text: `${interaction.user.username}`
                   })],
                   components: []
@@ -185,7 +189,7 @@ module.exports = {
                      console.log(`${interaction.user.username} ran script: \`${fullBashCommand}\``);
                      interaction.message.channel.send({
                            content: '**Ran script:**',
-                           embeds: [new MessageEmbed().setDescription(description).setColor(color).setFooter({
+                           embeds: [new EmbedBuilder().setDescription(description).setColor(color).setFooter({
                               text: `${interaction.user.username}`
                            })],
                            components: []
@@ -200,7 +204,7 @@ module.exports = {
                   console.log(`(${interaction.user.username}) Failed to run script: ${fullBashCommand}:`, err);
                   Scripts.sendScriptList(interaction, "restart");
                   interaction.message.channel.send({
-                        embeds: [new MessageEmbed().setTitle('Failed to run script:').setDescription(interaction.message.embeds[0]['description']).setColor('9E0000').setFooter({
+                        embeds: [new EmbedBuilder().setTitle('Failed to run script:').setDescription(interaction.message.embeds[0]['description']).setColor('9E0000').setFooter({
                            text: `${interaction.user.username}`
                         })],
                         components: []
@@ -228,7 +232,7 @@ module.exports = {
             }
             if (verify === 'no') {
                interaction.message.edit({
-                  embeds: [new MessageEmbed().setTitle('Did not truncate:').setDescription(interaction.message.embeds[0]['description']).setColor('9E0000').setFooter({
+                  embeds: [new EmbedBuilder().setTitle('Did not truncate:').setDescription(interaction.message.embeds[0]['description']).setColor('9E0000').setFooter({
                      text: `${interaction.user.username}`
                   })],
                   components: []

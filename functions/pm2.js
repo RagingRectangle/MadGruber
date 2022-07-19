@@ -1,11 +1,16 @@
 const {
    Client,
-   Intents,
-   MessageEmbed,
+   GatewayIntentBits,
+   Partials,
+   Collection,
    Permissions,
-   MessageActionRow,
-   MessageSelectMenu,
-   MessageButton
+   ActionRowBuilder,
+   SelectMenuBuilder,
+   MessageButton,
+   EmbedBuilder,
+   ButtonBuilder,
+   InteractionType,
+   ChannelType
 } = require('discord.js');
 const pm2 = require('pm2');
 const config = require('../config/config.json');
@@ -32,7 +37,7 @@ module.exports = {
                buttonStyle = buttonStyle.replace('online', 'SUCCESS').replace('stopping', 'DANGER').replace('stopped', 'DANGER').replace('launching', 'SUCCESS').replace('errored', 'DANGER').replace('one-launch-status', 'DANGER').replace('waiting restart', 'SECONDARY');
                let buttonLabel = process['name'];
                let buttonID = `${config.serverName}~process~restart~${buttonLabel}`;
-               let button = new MessageButton().setCustomId(buttonID).setLabel(buttonLabel).setStyle(buttonStyle);
+               let button = new ButtonBuilder().setCustomId(buttonID).setLabel(buttonLabel).setStyle(buttonStyle);
                if (!config.pm2.ignore.includes(buttonLabel)) {
                   buttonList.push(button);
                }
@@ -45,7 +50,7 @@ module.exports = {
             var buttonCount = 0;
             var messageComponents = [];
             for (var n = 0; n < rowsNeeded && n < 4; n++) {
-               var buttonRow = new MessageActionRow()
+               var buttonRow = new ActionRowBuilder()
                for (var r = 0; r < 5; r++) {
                   if (buttonCount < buttonsNeeded) {
                      buttonRow.addComponents(buttonList[buttonCount]);
@@ -55,11 +60,11 @@ module.exports = {
                messageComponents.push(buttonRow);
             } //End of n loop
             pm2.disconnect();
-            let optionRow = new MessageActionRow().addComponents(
-               new MessageButton().setCustomId(`${config.serverName}~restart`).setLabel(`Restart`).setStyle("PRIMARY"),
-               new MessageButton().setCustomId(`${config.serverName}~start`).setLabel(`Start`).setStyle("SUCCESS"),
-               new MessageButton().setCustomId(`${config.serverName}~stop`).setLabel(`Stop`).setStyle("DANGER"),
-               new MessageButton().setCustomId(`${config.serverName}~status`).setLabel(`Status`).setStyle("SECONDARY")
+            let optionRow = new ActionRowBuilder().addComponents(
+               new ButtonBuilder().setCustomId(`${config.serverName}~restart`).setLabel(`Restart`).setStyle("PRIMARY"),
+               new ButtonBuilder().setCustomId(`${config.serverName}~start`).setLabel(`Start`).setStyle("SUCCESS"),
+               new ButtonBuilder().setCustomId(`${config.serverName}~stop`).setLabel(`Stop`).setStyle("DANGER"),
+               new ButtonBuilder().setCustomId(`${config.serverName}~status`).setLabel(`Status`).setStyle("SECONDARY")
             )
             messageComponents.push(optionRow);
             if (type === 'new') {
@@ -138,7 +143,7 @@ module.exports = {
                   if (err) {
                      console.log(`${user.username} failed to restart ${processName} PM2 process.`, err);
                      channel.send({
-                           embeds: [new MessageEmbed().setDescription(`Failed to restart ${processName} process.`).setColor('9E0000').setFooter({
+                           embeds: [new EmbedBuilder().setDescription(`Failed to restart ${processName} process.`).setColor('9E0000').setFooter({
                               text: `${user.username}`
                            })],
                         }).catch(console.error)
@@ -150,7 +155,7 @@ module.exports = {
                   } else {
                      console.log(`${processName} restarted by ${user.username}`);
                      channel.send({
-                           embeds: [new MessageEmbed().setDescription(`PM2 process restarted: ${processName}`).setColor('00841E').setFooter({
+                           embeds: [new EmbedBuilder().setDescription(`PM2 process restarted: ${processName}`).setColor('00841E').setFooter({
                               text: `${user.username}`
                            })],
                         }).catch(console.error)
@@ -167,7 +172,7 @@ module.exports = {
                   if (err) {
                      console.log(`${user.username} failed to start ${processName} PM2 process.`, err);
                      channel.send({
-                           embeds: [new MessageEmbed().setDescription(`Failed to start ${processName} process.`).setColor('9E0000').setFooter({
+                           embeds: [new EmbedBuilder().setDescription(`Failed to start ${processName} process.`).setColor('9E0000').setFooter({
                               text: `${user.username}`
                            })],
                         }).catch(console.error)
@@ -179,7 +184,7 @@ module.exports = {
                   } else {
                      console.log(`${processName} started by ${user.username}`);
                      channel.send({
-                           embeds: [new MessageEmbed().setDescription(`PM2 process started: ${processName}`).setColor('00841E').setFooter({
+                           embeds: [new EmbedBuilder().setDescription(`PM2 process started: ${processName}`).setColor('00841E').setFooter({
                               text: `${user.username}`
                            })],
                         }).catch(console.error)
@@ -196,7 +201,7 @@ module.exports = {
                   if (err) {
                      console.log(`${user.username} failed to stop ${processName} PM2 process.`, err);
                      channel.send({
-                           embeds: [new MessageEmbed().setDescription(`Failed to stop ${processName} PM2 process.`).setColor('9E0000').setFooter({
+                           embeds: [new EmbedBuilder().setDescription(`Failed to stop ${processName} PM2 process.`).setColor('9E0000').setFooter({
                               text: `${user.username}`
                            })],
                         }).catch(console.error)
@@ -208,7 +213,7 @@ module.exports = {
                   } else {
                      console.log(`${processName} stopped by ${user.username}`);
                      channel.send({
-                           embeds: [new MessageEmbed().setDescription(`PM2 process stopped: ${processName}`).setColor('00841E').setFooter({
+                           embeds: [new EmbedBuilder().setDescription(`PM2 process stopped: ${processName}`).setColor('00841E').setFooter({
                               text: `${user.username}`
                            })],
                         }).catch(console.error)

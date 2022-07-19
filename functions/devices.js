@@ -1,11 +1,16 @@
 const {
    Client,
-   Intents,
-   MessageEmbed,
+   GatewayIntentBits,
+   Partials,
+   Collection,
    Permissions,
-   MessageActionRow,
-   MessageSelectMenu,
-   MessageButton
+   ActionRowBuilder,
+   SelectMenuBuilder,
+   MessageButton,
+   EmbedBuilder,
+   ButtonBuilder,
+   InteractionType,
+   ChannelType
 } = require('discord.js');
 const fs = require('fs');
 const mysql = require('mysql');
@@ -62,7 +67,7 @@ module.exports = {
                   }
                }
                let buttonID = `${config.serverName}~deviceInfo~${device.device_id}`;
-               let button = new MessageButton().setCustomId(buttonID).setLabel(buttonLabel).setStyle(buttonStyle);
+               let button = new ButtonBuilder().setCustomId(buttonID).setLabel(buttonLabel).setStyle(buttonStyle);
                let buttonObj = {
                   name: deviceName,
                   instance: dbInfo.instances[device.instance_id],
@@ -88,7 +93,7 @@ module.exports = {
                   var buttonCount = 0;
                   var messageComponents = [];
                   for (var n = 0; n < rowsNeeded && n < 5; n++) {
-                     var buttonRow = new MessageActionRow();
+                     var buttonRow = new ActionRowBuilder();
                      for (var r = 0; r < 5; r++) {
                         if (buttonCount < buttonsNeeded) {
                            buttonRow.addComponents(instanceButtons[buttonCount]);
@@ -165,7 +170,7 @@ module.exports = {
                      }
                   }
                   var buttonID = `${config.serverName}~deviceInfo~${device.device_id}`;
-                  let button = new MessageButton().setCustomId(buttonID).setLabel(buttonLabel).setStyle(buttonStyle);
+                  let button = new ButtonBuilder().setCustomId(buttonID).setLabel(buttonLabel).setStyle(buttonStyle);
                   let buttonObj = {
                      name: deviceName,
                      instance: dbInfo.instances[device.instance_id],
@@ -240,7 +245,7 @@ module.exports = {
                      var buttonCount = 0;
                      var messageComponents = [];
                      for (var n = 0; n < rowsNeeded && n < 5; n++) {
-                        var buttonRow = new MessageActionRow();
+                        var buttonRow = new ActionRowBuilder();
                         for (var r = 0; r < 5; r++) {
                            if (buttonCount < buttonsNeeded) {
                               buttonRow.addComponents(channelButtons[buttonCount]);
@@ -272,7 +277,7 @@ module.exports = {
                      var buttonCount = 0;
                      var messageComponents = [];
                      for (var n = 0; n < rowsNeeded && n < 5; n++) {
-                        var buttonRow = new MessageActionRow();
+                        var buttonRow = new ActionRowBuilder();
                         for (var r = 0; r < 5; r++) {
                            if (buttonCount < buttonsNeeded) {
                               buttonRow.addComponents(instanceButtons[buttonCount]);
@@ -483,16 +488,16 @@ module.exports = {
                value: `${config.serverName}~deviceStats~${origin}~temperature~daily`
             },
          ];
-         let statsComponentHourly = new MessageActionRow()
+         let statsComponentHourly = new ActionRowBuilder()
             .addComponents(
-               new MessageSelectMenu()
+               new SelectMenuBuilder()
                .setCustomId(`${config.serverName}~deviceStats~hourly`)
                .setPlaceholder(`${origin} Hourly Stats`)
                .addOptions(statsSelectListHourly)
             );
-         let statsComponentDaily = new MessageActionRow()
+         let statsComponentDaily = new ActionRowBuilder()
             .addComponents(
-               new MessageSelectMenu()
+               new SelectMenuBuilder()
                .setCustomId(`${config.serverName}~deviceStats~daily`)
                .setPlaceholder(`${origin} Daily Stats`)
                .addOptions(statsSelectListDaily)
@@ -548,9 +553,9 @@ module.exports = {
                   value: `raspberryRelay~${origin}`
                })
             }
-            let controlListComponent = new MessageActionRow()
+            let controlListComponent = new ActionRowBuilder()
                .addComponents(
-                  new MessageSelectMenu()
+                  new SelectMenuBuilder()
                   .setCustomId(`${config.serverName}~deviceControl`)
                   .setPlaceholder(`${origin} DeviceControl`)
                   .addOptions(controlSelectList),
@@ -562,7 +567,7 @@ module.exports = {
          }
          console.log(`${user.username} looked for ${origin} device info.`);
          channel.send({
-               embeds: [new MessageEmbed().setTitle(`${origin} Info:`).setDescription(`- ${deviceInfoArray.join('\n- ')}`).setColor(color).setFooter({
+               embeds: [new EmbedBuilder().setTitle(`${origin} Info:`).setDescription(`- ${deviceInfoArray.join('\n- ')}`).setColor(color).setFooter({
                   text: `${user.username}`
                })],
                components: deviceComponents
