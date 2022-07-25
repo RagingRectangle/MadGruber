@@ -1,9 +1,6 @@
 const {
-	MessageEmbed,
-} = require('discord.js');
-const {
 	SlashCommandBuilder
-} = require('@discordjs/builders');
+} = require('discord.js');
 const fs = require('fs');
 const Roles = require('../functions/roles.js');
 const DeviceControl = require('../functions/deviceControl.js');

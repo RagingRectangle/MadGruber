@@ -1,11 +1,17 @@
 const {
    Client,
-   Intents,
-   MessageEmbed,
+   GatewayIntentBits,
+   Partials,
+   Collection,
    Permissions,
-   MessageActionRow,
-   MessageSelectMenu,
-   MessageButton
+   ActionRowBuilder,
+   SelectMenuBuilder,
+   MessageButton,
+   EmbedBuilder,
+   ButtonBuilder,
+   ButtonStyle,
+   InteractionType,
+   ChannelType
 } = require('discord.js');
 const {
    insidePolygon
@@ -32,17 +38,17 @@ module.exports = {
       for (var t in truncateTableList) {
          let tableLabel = truncateTableList[t].replace(/\+/g, " + ");
          let buttonID = `${config.serverName}~truncate~${truncateTableList[t].toLowerCase()}`;
-         let button = new MessageButton().setCustomId(buttonID).setLabel(tableLabel).setStyle('PRIMARY');
+         let button = new ButtonBuilder().setCustomId(buttonID).setLabel(tableLabel).setStyle(ButtonStyle.Primary);
          buttonList.push(button);
       } //End of t loop
-      let cancelButton = new MessageButton().setCustomId(`${config.serverName}~truncate~!CANCEL!`).setLabel('Cancel').setStyle('DANGER');
+      let cancelButton = new ButtonBuilder().setCustomId(`${config.serverName}~truncate~!CANCEL!`).setLabel('Cancel').setStyle(ButtonStyle.Danger);
       buttonList.push(cancelButton);
       var buttonsNeeded = buttonList.length;
       let rowsNeeded = Math.ceil(buttonList.length / 5);
       var buttonCount = 0;
       var messageComponents = [];
       for (var n = 0; n < rowsNeeded && n < 5; n++) {
-         var buttonRow = new MessageActionRow()
+         var buttonRow = new ActionRowBuilder()
          for (var r = 0; r < 5; r++) {
             if (buttonCount < buttonsNeeded) {
                buttonRow.addComponents(buttonList[buttonCount]);
@@ -61,7 +67,7 @@ module.exports = {
       let connection = mysql.createConnection(config.madDB);
       connection.connect();
       msg.edit({
-         embeds: [new MessageEmbed().setTitle('Truncate Results:').setDescription('**Truncating...**')],
+         embeds: [new EmbedBuilder().setTitle('Truncate Results:').setDescription('**Truncating...**')],
          components: []
       }).catch(console.error);
       var good = [];
@@ -109,7 +115,7 @@ module.exports = {
          description = description.concat(`\n\nFailed:\n- ${bad.join('\n- ')}`);
       }
       msg.edit({
-         embeds: [new MessageEmbed().setTitle('Truncate Results:').setDescription(description).setColor(color).setFooter({
+         embeds: [new EmbedBuilder().setTitle('Truncate Results:').setDescription(description).setColor(color).setFooter({
             text: `${user.username}`
          })],
          components: []
@@ -121,9 +127,9 @@ module.exports = {
 
 
    verifyTruncate: async function verifyTruncate(channel, user, tables) {
-      let optionRow = new MessageActionRow().addComponents(
-         new MessageButton().setCustomId(`${config.serverName}~verifyTruncate~yes`).setLabel(`Yes`).setStyle("SUCCESS"),
-         new MessageButton().setCustomId(`${config.serverName}~verifyTruncate~no`).setLabel(`No`).setStyle("DANGER")
+      let optionRow = new ActionRowBuilder().addComponents(
+         new ButtonBuilder().setCustomId(`${config.serverName}~verifyTruncate~yes`).setLabel(`Yes`).setStyle(ButtonStyle.Success),
+         new ButtonBuilder().setCustomId(`${config.serverName}~verifyTruncate~no`).setLabel(`No`).setStyle(ButtonStyle.Danger)
       );
       var tableList = [];
       for (var t in tables) {
@@ -141,7 +147,7 @@ module.exports = {
          title = 'Truncate the following tables?';
       }
       channel.send({
-         embeds: [new MessageEmbed().setTitle(title).setDescription(tableList.join('\n')).setColor('0D00CA')],
+         embeds: [new EmbedBuilder().setTitle(title).setDescription(tableList.join('\n')).setColor('0D00CA')],
          components: [optionRow]
       }).catch(console.error);
    }, //End of verifyTruncate()
@@ -149,7 +155,7 @@ module.exports = {
 
    restartMADs: async function restartMADs(msg, user, description, color) {
       msg.edit({
-         embeds: [new MessageEmbed().setTitle('Truncate Results:').setDescription(`${description}\n\n**Restarting MADs...**`).setColor(color)],
+         embeds: [new EmbedBuilder().setTitle('Truncate Results:').setDescription(`${description}\n\n**Restarting MADs...**`).setColor(color)],
          components: []
       }).catch(console.error);
       let mads = config.pm2.mads;
@@ -186,7 +192,7 @@ module.exports = {
          newDescription = newDescription.concat(`\n\nFailed:\n- ${bad.join('\n- ')}`);
       }
       msg.edit({
-         embeds: [new MessageEmbed().setTitle('Truncate Results:').setDescription(newDescription).setColor(color).setFooter({
+         embeds: [new EmbedBuilder().setTitle('Truncate Results:').setDescription(newDescription).setColor(color).setFooter({
             text: `${user.username}`
          })],
          components: []
@@ -232,7 +238,7 @@ module.exports = {
          //Create message for each instance
          var selectMenuList = [];
          for (const [instance, areaList] of Object.entries(instanceAreas)) {
-            var selectMenu = await new MessageSelectMenu()
+            var selectMenu = await new SelectMenuBuilder()
                .setCustomId(`${config.serverName}~truncateArea~${instance}`)
                .setPlaceholder(`${instance} areas`)
                .setMinValues(1)
@@ -248,7 +254,7 @@ module.exports = {
                });
             } //End of a loop
             selectMenu.options = listOptions;
-            selectMenuList.push(await new MessageActionRow().addComponents(selectMenu));
+            selectMenuList.push(await new ActionRowBuilder().addComponents(selectMenu));
          } //End of instanceAreas loop
          groupInstanceLists(selectMenuList);
       } //End of groupAreas()
@@ -278,16 +284,16 @@ module.exports = {
 
 
    verifyAreaQuests: async function verifyAreaQuests(channel, user, instanceName, areaList) {
-      let optionRow = new MessageActionRow().addComponents(
-         new MessageButton().setCustomId(`${config.serverName}~verifyAreaQuests~${instanceName}~yes`).setLabel(`Yes`).setStyle("SUCCESS"),
-         new MessageButton().setCustomId(`${config.serverName}~verifyAreaQuests~${instanceName}~no`).setLabel(`No`).setStyle("DANGER")
+      let optionRow = new ActionRowBuilder().addComponents(
+         new ButtonBuilder().setCustomId(`${config.serverName}~verifyAreaQuests~${instanceName}~yes`).setLabel(`Yes`).setStyle(ButtonStyle.Success),
+         new ButtonBuilder().setCustomId(`${config.serverName}~verifyAreaQuests~${instanceName}~no`).setLabel(`No`).setStyle(ButtonStyle.Danger)
       );
       var title = 'Truncate Quests From Area?';
       if (areaList.length > 1) {
          title = 'Truncate Quests From Areas?';
       }
       channel.send({
-         embeds: [new MessageEmbed().setTitle(title).setDescription(areaList.join('\n')).setColor('0D00CA')],
+         embeds: [new EmbedBuilder().setTitle(title).setDescription(areaList.join('\n')).setColor('0D00CA')],
          components: [optionRow]
       }).catch(console.error);
    }, //End of verifyAreaQuests

@@ -1,11 +1,17 @@
 const {
    Client,
-   Intents,
-   MessageEmbed,
+   GatewayIntentBits,
+   Partials,
+   Collection,
    Permissions,
-   MessageActionRow,
-   MessageSelectMenu,
-   MessageButton
+   ActionRowBuilder,
+   SelectMenuBuilder,
+   MessageButton,
+   EmbedBuilder,
+   ButtonBuilder,
+   ButtonStyle,
+   InteractionType,
+   ChannelType
 } = require('discord.js');
 const pm2 = require('pm2');
 const config = require('../config/config.json');
@@ -23,29 +29,28 @@ module.exports = {
                pm2.disconnect();
                return;
             }
-            var buttonList = [];
+            var sortButtons = require('sort-by'),
+               buttonList = [];
             response.forEach(process => {
                var buttonStyle = process['status'];
                if (buttonStyle === undefined) {
                   buttonStyle = process['pm2_env']['status']
                }
-               buttonStyle = buttonStyle.replace('online', 'SUCCESS').replace('stopping', 'DANGER').replace('stopped', 'DANGER').replace('launching', 'SUCCESS').replace('errored', 'DANGER').replace('one-launch-status', 'DANGER').replace('waiting restart', 'SECONDARY');
+               buttonStyle = buttonStyle.replace('online', ButtonStyle.Success).replace('stopping', ButtonStyle.Danger).replace('stopped', ButtonStyle.Danger).replace('launching', ButtonStyle.Success).replace('errored', ButtonStyle.Danger).replace('one-launch-status', ButtonStyle.Danger).replace('waiting restart', ButtonStyle.Secondary);
                let buttonLabel = process['name'];
                let buttonID = `${config.serverName}~process~restart~${buttonLabel}`;
-               let button = new MessageButton().setCustomId(buttonID).setLabel(buttonLabel).setStyle(buttonStyle);
+               let button = new ButtonBuilder().setCustomId(buttonID).setLabel(buttonLabel).setStyle(buttonStyle);
                if (!config.pm2.ignore.includes(buttonLabel)) {
                   buttonList.push(button);
                }
             }) //End of response.forEach
-            buttonList.sort(function (a, b) {
-               return a.label.localeCompare(b.label);
-            });
+            buttonList.sort(sortButtons('data.label'));
             let rowsNeeded = Math.ceil(buttonList.length / 5);
             let buttonsNeeded = buttonList.length;
             var buttonCount = 0;
             var messageComponents = [];
             for (var n = 0; n < rowsNeeded && n < 4; n++) {
-               var buttonRow = new MessageActionRow()
+               var buttonRow = new ActionRowBuilder()
                for (var r = 0; r < 5; r++) {
                   if (buttonCount < buttonsNeeded) {
                      buttonRow.addComponents(buttonList[buttonCount]);
@@ -55,11 +60,11 @@ module.exports = {
                messageComponents.push(buttonRow);
             } //End of n loop
             pm2.disconnect();
-            let optionRow = new MessageActionRow().addComponents(
-               new MessageButton().setCustomId(`${config.serverName}~restart`).setLabel(`Restart`).setStyle("PRIMARY"),
-               new MessageButton().setCustomId(`${config.serverName}~start`).setLabel(`Start`).setStyle("SUCCESS"),
-               new MessageButton().setCustomId(`${config.serverName}~stop`).setLabel(`Stop`).setStyle("DANGER"),
-               new MessageButton().setCustomId(`${config.serverName}~status`).setLabel(`Status`).setStyle("SECONDARY")
+            let optionRow = new ActionRowBuilder().addComponents(
+               new ButtonBuilder().setCustomId(`${config.serverName}~restart`).setLabel(`Restart`).setStyle(ButtonStyle.Primary),
+               new ButtonBuilder().setCustomId(`${config.serverName}~start`).setLabel(`Start`).setStyle(ButtonStyle.Success),
+               new ButtonBuilder().setCustomId(`${config.serverName}~stop`).setLabel(`Stop`).setStyle(ButtonStyle.Danger),
+               new ButtonBuilder().setCustomId(`${config.serverName}~status`).setLabel(`Status`).setStyle(ButtonStyle.Secondary)
             )
             messageComponents.push(optionRow);
             if (type === 'new') {
@@ -83,10 +88,10 @@ module.exports = {
       if (interactionID === 'restart') {
          var newButtons = interaction.message.components;
          for (var r = 0; r < newButtons.length - 1; r++) {
-            let row = newButtons[r]['components'];
+            var row = newButtons[r]['components'];
             for (var b in row) {
-               row[b].setStyle('PRIMARY');
-               row[b]['customId'] = `${config.serverName}~process~restart~${row[b]['label']}`;
+               row[b]['data']['style'] = ButtonStyle.Primary;
+               row[b]['data']['customId'] = `${config.serverName}~process~restart~${row[b]['label']}`;
             } //End of b loop
          } //End of r loop
          interaction.message.edit({
@@ -98,10 +103,10 @@ module.exports = {
       else if (interactionID === 'start') {
          var newButtons = interaction.message.components;
          for (var r = 0; r < newButtons.length - 1; r++) {
-            let row = newButtons[r]['components'];
+            var row = newButtons[r]['components'];
             for (var b in row) {
-               row[b].setStyle('SUCCESS');
-               row[b]['customId'] = `${config.serverName}~process~start~${row[b]['label']}`;
+               row[b]['data']['style'] = ButtonStyle.Success;
+               row[b]['data']['customId'] = `${config.serverName}~process~start~${row[b]['label']}`;
             } //End of b loop
          } //End of r loop
          interaction.message.edit({
@@ -113,10 +118,10 @@ module.exports = {
       else if (interactionID === 'stop') {
          var newButtons = interaction.message.components;
          for (var r = 0; r < newButtons.length - 1; r++) {
-            let row = newButtons[r]['components'];
+            var row = newButtons[r]['components'];
             for (var b in row) {
-               row[b].setStyle('DANGER');
-               row[b]['customId'] = `${config.serverName}~process~stop~${row[b]['label']}`;
+               row[b]['data']['style'] = ButtonStyle.Danger;
+               row[b]['data']['customId'] = `${config.serverName}~process~stop~${row[b]['label']}`;
             } //End of b loop
          } //End of r loop
          interaction.message.edit({
@@ -138,7 +143,7 @@ module.exports = {
                   if (err) {
                      console.log(`${user.username} failed to restart ${processName} PM2 process.`, err);
                      channel.send({
-                           embeds: [new MessageEmbed().setDescription(`Failed to restart ${processName} process.`).setColor('9E0000').setFooter({
+                           embeds: [new EmbedBuilder().setDescription(`Failed to restart ${processName} process.`).setColor('9E0000').setFooter({
                               text: `${user.username}`
                            })],
                         }).catch(console.error)
@@ -150,7 +155,7 @@ module.exports = {
                   } else {
                      console.log(`${processName} restarted by ${user.username}`);
                      channel.send({
-                           embeds: [new MessageEmbed().setDescription(`PM2 process restarted: ${processName}`).setColor('00841E').setFooter({
+                           embeds: [new EmbedBuilder().setDescription(`PM2 process restarted: ${processName}`).setColor('00841E').setFooter({
                               text: `${user.username}`
                            })],
                         }).catch(console.error)
@@ -167,7 +172,7 @@ module.exports = {
                   if (err) {
                      console.log(`${user.username} failed to start ${processName} PM2 process.`, err);
                      channel.send({
-                           embeds: [new MessageEmbed().setDescription(`Failed to start ${processName} process.`).setColor('9E0000').setFooter({
+                           embeds: [new EmbedBuilder().setDescription(`Failed to start ${processName} process.`).setColor('9E0000').setFooter({
                               text: `${user.username}`
                            })],
                         }).catch(console.error)
@@ -179,7 +184,7 @@ module.exports = {
                   } else {
                      console.log(`${processName} started by ${user.username}`);
                      channel.send({
-                           embeds: [new MessageEmbed().setDescription(`PM2 process started: ${processName}`).setColor('00841E').setFooter({
+                           embeds: [new EmbedBuilder().setDescription(`PM2 process started: ${processName}`).setColor('00841E').setFooter({
                               text: `${user.username}`
                            })],
                         }).catch(console.error)
@@ -196,7 +201,7 @@ module.exports = {
                   if (err) {
                      console.log(`${user.username} failed to stop ${processName} PM2 process.`, err);
                      channel.send({
-                           embeds: [new MessageEmbed().setDescription(`Failed to stop ${processName} PM2 process.`).setColor('9E0000').setFooter({
+                           embeds: [new EmbedBuilder().setDescription(`Failed to stop ${processName} PM2 process.`).setColor('9E0000').setFooter({
                               text: `${user.username}`
                            })],
                         }).catch(console.error)
@@ -208,7 +213,7 @@ module.exports = {
                   } else {
                      console.log(`${processName} stopped by ${user.username}`);
                      channel.send({
-                           embeds: [new MessageEmbed().setDescription(`PM2 process stopped: ${processName}`).setColor('00841E').setFooter({
+                           embeds: [new EmbedBuilder().setDescription(`PM2 process stopped: ${processName}`).setColor('00841E').setFooter({
                               text: `${user.username}`
                            })],
                         }).catch(console.error)

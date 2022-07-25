@@ -1,9 +1,7 @@
 const {
-	MessageEmbed,
-} = require('discord.js');
-const {
+	EmbedBuilder,
 	SlashCommandBuilder
-} = require('@discordjs/builders');
+} = require('discord.js');
 const fs = require('fs');
 const Roles = require('../functions/roles.js');
 const Links = require('../functions/links.js');
@@ -53,7 +51,7 @@ module.exports = {
 			} catch (err) {}
 			if (specificCheck === true) {
 				channel.send({
-					embeds: [new MessageEmbed().setDescription(`${specificEmoji} [${specificLabel} Link](${specificURL})`)]
+					embeds: [new EmbedBuilder().setDescription(`${specificEmoji} [${specificLabel} Link](${specificURL})`)]
 				}).catch(console.error);
 			} else {
 				Links.links(client, channel);

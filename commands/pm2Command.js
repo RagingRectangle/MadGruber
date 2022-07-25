@@ -1,6 +1,6 @@
 const {
 	SlashCommandBuilder
-} = require('@discordjs/builders');
+} = require('discord.js');
 const fs = require('fs');
 const pm2 = require('pm2');
 const Roles = require('../functions/roles.js');

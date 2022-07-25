@@ -1,9 +1,7 @@
 const {
-	MessageAttachment
-} = require('discord.js');
-const {
+	MessageAttachment,
 	SlashCommandBuilder
-} = require('@discordjs/builders');
+} = require('discord.js');
 const fs = require('fs');
 const fetch = require('node-fetch');
 const Roles = require('../functions/roles.js');
@@ -28,7 +26,9 @@ module.exports = {
 		let guild = await client.guilds.fetch(interaction.guildId).catch(console.error);
 		let userPerms = await Roles.getUserCommandPerms(guild, interaction.user);
 		if (userPerms.includes('admin')) {
-			interaction.deferReply({ephemeral: true});
+			interaction.deferReply({
+				ephemeral: true
+			});
 			let searchString = interaction.options.getString('search-string').toLowerCase();
 			file = interaction.options.getAttachment('file');
 			console.log(`${interaction.user.username} searched ${file.name} for "${searchString}"`);
@@ -45,7 +45,7 @@ module.exports = {
 					linesFound.push(line);
 				}
 			});
-			
+
 			fs.writeFileSync(`./${file.name}.txt`, linesFound.join('\n'));
 			interaction.editReply({
 				files: [new MessageAttachment(`./${file.name}.txt`)],

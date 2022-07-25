@@ -1,9 +1,6 @@
 const {
-	MessageEmbed,
-} = require('discord.js');
-const {
 	SlashCommandBuilder
-} = require('@discordjs/builders');
+} = require('discord.js');
 const fs = require('fs');
 const Roles = require('../functions/roles.js');
 const Queries = require('../functions/queries.js');
@@ -23,12 +20,12 @@ module.exports = {
 					.setName('table')
 					.setDescription('Select table to count')
 
-				for (var i = 0; i < queryConfig.count.length; i++){
+				for (var i = 0; i < queryConfig.count.length; i++) {
 					option.addChoices({
 						name: queryConfig.count[i]['type'],
 						value: queryConfig.count[i]['table']
 					});
-				}//End of i loop
+				} //End of i loop
 				return option;
 			})),
 

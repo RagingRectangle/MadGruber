@@ -1,11 +1,17 @@
 const {
    Client,
-   Intents,
-   MessageEmbed,
+   GatewayIntentBits,
+   Partials,
+   Collection,
    Permissions,
-   MessageActionRow,
-   MessageSelectMenu,
-   MessageButton
+   ActionRowBuilder,
+   SelectMenuBuilder,
+   MessageButton,
+   EmbedBuilder,
+   ButtonBuilder,
+   ButtonStyle,
+   InteractionType,
+   ChannelType
 } = require('discord.js');
 const fs = require('fs');
 const fileExists = require('file-exists');
@@ -31,16 +37,16 @@ module.exports = {
             selectList.push(listOption);
          }
       });
-      let fullList = new MessageActionRow()
+      let fullList = new ActionRowBuilder()
          .addComponents(
-            new MessageSelectMenu()
+            new SelectMenuBuilder()
             .setCustomId(`${config.serverName}~scriptList`)
             .setPlaceholder('List of Scripts')
             .addOptions(selectList))
       if (type === 'new') {
          if (selectList.length == 0) {
             messageOrInteraction.channel.send({
-               embeds: [new MessageEmbed().setDescription("Error: No scripts found in scripts.json").setColor('9E0000')]
+               embeds: [new EmbedBuilder().setDescription("Error: No scripts found in scripts.json").setColor('9E0000')]
             }).catch(console.error);
             return;
          }
@@ -113,9 +119,9 @@ module.exports = {
                optionCounter++;
                varCounter++;
             } //End of v loop
-            let fullList = new MessageActionRow()
+            let fullList = new ActionRowBuilder()
                .addComponents(
-                  new MessageSelectMenu()
+                  new SelectMenuBuilder()
                   .setCustomId(`${config.serverName}~runScript${n}`)
                   .setPlaceholder(`${varDescription}`)
                   .addOptions(currentList))
@@ -184,9 +190,9 @@ module.exports = {
                      optionCounter++;
                      varCounter++;
                   } //End of v loop
-                  let fullList = new MessageActionRow()
+                  let fullList = new ActionRowBuilder()
                      .addComponents(
-                        new MessageSelectMenu()
+                        new SelectMenuBuilder()
                         .setCustomId(`${config.serverName}~runScript_var${varCounter}`)
                         .setPlaceholder(`${varDescription}`)
                         .addOptions(currentList))
@@ -210,9 +216,9 @@ module.exports = {
       interaction.deferUpdate();
       for (var s in scriptList) {
          if (scriptList[s]['customName'] === scriptName) {
-            let optionRow = new MessageActionRow().addComponents(
-               new MessageButton().setCustomId(`${config.serverName}~verifyScript~yes`).setLabel(`Yes`).setStyle("SUCCESS"),
-               new MessageButton().setCustomId(`${config.serverName}~verifyScript~no`).setLabel(`No`).setStyle("DANGER")
+            let optionRow = new ActionRowBuilder().addComponents(
+               new ButtonBuilder().setCustomId(`${config.serverName}~verifyScript~yes`).setLabel(`Yes`).setStyle(ButtonStyle.Success),
+               new ButtonBuilder().setCustomId(`${config.serverName}~verifyScript~no`).setLabel(`No`).setStyle(ButtonStyle.Danger)
             )
             var title = `**Run script: ${scriptName}?**`;
             if (scriptList[s]['adminOnly'] === true) {
@@ -220,7 +226,7 @@ module.exports = {
             }
             interaction.message.edit({
                content: title,
-               embeds: [new MessageEmbed().setDescription(`bash ${scriptList[s]['fullFilePath']} ${variables}`).setColor('0D00CA').setFooter({
+               embeds: [new EmbedBuilder().setDescription(`bash ${scriptList[s]['fullFilePath']} ${variables}`).setColor('0D00CA').setFooter({
                   text: `${interaction.user.username}`
                })],
                components: [optionRow]
@@ -241,7 +247,7 @@ module.exports = {
       if (fullBashCommand !== '') {
          interaction.message.edit({
             content: '**Running script:**',
-            embeds: [new MessageEmbed().setDescription(`\`${fullBashCommand}\``).setColor('0D00CA').setFooter({
+            embeds: [new EmbedBuilder().setDescription(`\`${fullBashCommand}\``).setColor('0D00CA').setFooter({
                text: `${interaction.user.username}`
             })],
             components: []
@@ -258,7 +264,7 @@ module.exports = {
                console.log(`${interaction.user.username} ran script: \`${fullBashCommand}\``);
 
                interaction.message.channel.send({
-                     embeds: [new MessageEmbed().setTitle('Ran script:').setDescription(description).setColor(color).setFooter({
+                     embeds: [new EmbedBuilder().setTitle('Ran script:').setDescription(description).setColor(color).setFooter({
                         text: `${interaction.user.username}`
                      })],
                   }).catch(console.error)
@@ -272,7 +278,7 @@ module.exports = {
             console.log(`Failed to run script: ${fullBashCommand}:`, err);
             module.exports.sendScriptList(interaction, "restart");
             interaction.message.channel.send({
-                  embeds: [new MessageEmbed().setTitle('Failed to run script:').setDescription(fullBashCommand).setColor('9E0000').setFooter({
+                  embeds: [new EmbedBuilder().setTitle('Failed to run script:').setDescription(fullBashCommand).setColor('9E0000').setFooter({
                      text: `${interaction.user.username}`
                   })],
                }).catch(console.error)

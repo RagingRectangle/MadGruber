@@ -1,12 +1,16 @@
 const {
    Client,
-   Intents,
-   MessageEmbed,
+   GatewayIntentBits,
+   Partials,
+   Collection,
    Permissions,
-   MessageActionRow,
-   MessageAttachment,
-   MessageSelectMenu,
-   MessageButton
+   ActionRowBuilder,
+   SelectMenuBuilder,
+   MessageButton,
+   EmbedBuilder,
+   ButtonBuilder,
+   InteractionType,
+   ChannelType
 } = require('discord.js');
 const fs = require('fs');
 const mysql = require('mysql');
@@ -31,9 +35,9 @@ module.exports = {
             var componentList = [];
             for (var i = 0, j = fenceList.length; i < j; i += 25) {
                if (componentList.length < 5) {
-                  componentList.push(new MessageActionRow()
+                  componentList.push(new ActionRowBuilder()
                      .addComponents(
-                        new MessageSelectMenu()
+                        new SelectMenuBuilder()
                         .setCustomId(`${config.serverName}~geofenceList~${componentList.length}`)
                         .setPlaceholder('Select geofence to convert')
                         .addOptions(fenceList.slice(i, i + 25))

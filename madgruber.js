@@ -1,17 +1,23 @@
 const {
 	Client,
-	Intents,
+	GatewayIntentBits,
+	Partials,
 	Collection,
-	MessageEmbed,
 	Permissions,
-	MessageActionRow,
-	MessageSelectMenu,
-	MessageButton
+	ActionRowBuilder,
+	SelectMenuBuilder,
+	MessageButton,
+	EmbedBuilder,
+	ButtonBuilder,
+	ButtonStyle,
+	InteractionType,
+	ChannelType,
 } = require('discord.js');
 const client = new Client({
-	intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.DIRECT_MESSAGES, Intents.FLAGS.GUILD_SCHEDULED_EVENTS],
-	partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
+	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildEmojisAndStickers, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildScheduledEvents, GatewayIntentBits.DirectMessages],
+	partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 });
+
 const fs = require('fs');
 const pm2 = require('pm2');
 const CronJob = require('cron').CronJob;
@@ -79,7 +85,7 @@ client.on('messageCreate', async (receivedMessage) => {
 		return;
 	}
 	//Ignore DMs
-	if (receivedMessage.channel.type === "DM") {
+	if (receivedMessage.channel.type === ChannelType.DM) {
 		return;
 	}
 	//Ignore bot messages
@@ -87,7 +93,7 @@ client.on('messageCreate', async (receivedMessage) => {
 		return;
 	}
 	//Not in channel list
-	if (receivedMessage.channel.type === "GUILD_TEXT" && !config.discord.channelIDs.includes(receivedMessage.channel.id)) {
+	if (receivedMessage.channel.type === ChannelType.GuildText && !config.discord.channelIDs.includes(receivedMessage.channel.id)) {
 		return;
 	}
 	let userPerms = await Roles.getUserCommandPerms(receivedMessage.guild, user);
@@ -161,7 +167,7 @@ client.on('messageCreate', async (receivedMessage) => {
 		Geofences.converterMain(receivedMessage.channel, receivedMessage.author);
 	}
 	//Help Menu
-	else if (config.discord.helpCommand && receivedMessage.channel.type !== "DM" && message === `${config.discord.prefix}${config.discord.helpCommand}`) {
+	else if (config.discord.helpCommand && receivedMessage.channel.type !== ChannelType.DM && message === `${config.discord.prefix}${config.discord.helpCommand}`) {
 		Help.helpMenu(client, receivedMessage.channel, receivedMessage.guild, receivedMessage.author);
 	}
 	//Specific Device Info
@@ -177,7 +183,7 @@ client.on('messageCreate', async (receivedMessage) => {
 
 
 client.on('interactionCreate', async interaction => {
-	if (interaction.type === 'APPLICATION_COMMAND') {
+	if (interaction.type !== InteractionType.MessageComponent) {
 		return;
 	}
 	if (interaction.message.guildId === null) {
@@ -195,7 +201,7 @@ client.on('interactionCreate', async interaction => {
 		Interactions.buttonInteraction(interaction, interactionID, userPerms);
 	}
 	//List interaction
-	else if (interaction.componentType === 'SELECT_MENU') {
+	else if (interaction.isSelectMenu()) {
 		Interactions.listInteraction(interaction, interactionID, userPerms);
 	}
 }); //End of client.on(interactionCreate)
@@ -241,7 +247,9 @@ client.on('messageReactionRemove', async (reaction, user) => {
 
 //Slash commands
 client.on('interactionCreate', async interaction => {
-	if (!interaction.isCommand()) return;
+	if (interaction.type !== InteractionType.ApplicationCommand) {
+		return;
+	}
 	let user = interaction.user;
 	if (user.bot == true) {
 		return;

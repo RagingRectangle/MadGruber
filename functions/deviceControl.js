@@ -1,12 +1,16 @@
 const {
    Client,
-   Intents,
-   MessageEmbed,
+   GatewayIntentBits,
+   Partials,
+   Collection,
    Permissions,
-   MessageActionRow,
-   MessageAttachment,
-   MessageSelectMenu,
-   MessageButton
+   ActionRowBuilder,
+   SelectMenuBuilder,
+   MessageButton,
+   EmbedBuilder,
+   ButtonBuilder,
+   InteractionType,
+   ChannelType
 } = require('discord.js');
 const fs = require('fs');
 const mysql = require('mysql');
@@ -30,7 +34,7 @@ module.exports = {
       }).catch(console.error);
       interaction.message.channel.send({
             content: '**Running deviceControl script:**',
-            embeds: [new MessageEmbed().setDescription(`\`${bashControlCommand}\``).setColor('0D00CA').setFooter({
+            embeds: [new EmbedBuilder().setDescription(`\`${bashControlCommand}\``).setColor('0D00CA').setFooter({
                text: `${interaction.user.username}`
             })]
          }).catch(console.error)
@@ -102,7 +106,7 @@ module.exports = {
                }
                msg.edit({
                   content: '**Ran deviceControl script:**',
-                  embeds: [new MessageEmbed().setDescription(description).setColor(color).setFooter({
+                  embeds: [new EmbedBuilder().setDescription(description).setColor(color).setFooter({
                      text: `${interaction.user.username}`
                   })],
                }).catch(console.error);
@@ -175,7 +179,7 @@ module.exports = {
       let dcPath = (`${config.deviceControl.path}/devicecontrol.sh`).replace('//', '/');
       let sendWorkerBash = `bash ${dcPath} origin sendWorker ${coords}`;
       channel.send({
-            embeds: [new MessageEmbed().setDescription(`Sending closest worker...`).setColor('0D00CA').setFooter({
+            embeds: [new EmbedBuilder().setDescription(`Sending closest worker...`).setColor('0D00CA').setFooter({
                text: `${user.username}`
             })]
          }).catch(console.error)
@@ -186,14 +190,14 @@ module.exports = {
                if (exitCode !== 0) {
                   console.log(`${user.username} failed to send worker to: ${coords}`);
                   msg.edit({
-                     embeds: [new MessageEmbed().setDescription(`Error sending worker:\n\n${output}`).setColor('9E0000').setFooter({
+                     embeds: [new EmbedBuilder().setDescription(`Error sending worker:\n\n${output}`).setColor('9E0000').setFooter({
                         text: `${user.username}`
                      })],
                   }).catch(console.error);
                } else {
                   console.log(`(${user.username}) ${response}`);
                   msg.edit({
-                     embeds: [new MessageEmbed().setDescription(response.replace(coords, `[${coords}](https://www.google.com/maps/search/?api=1&query=${coords})`)).setColor('00841E').setFooter({
+                     embeds: [new EmbedBuilder().setDescription(response.replace(coords, `[${coords}](https://www.google.com/maps/search/?api=1&query=${coords})`)).setColor('00841E').setFooter({
                         text: `${user.username}`
                      })],
                   }).catch(console.error);
