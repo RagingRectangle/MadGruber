@@ -23,6 +23,10 @@ module.exports = {
                if (emoji.emojiName === reaction._emoji.name) {
                   let guildUser = await reaction.message.guild.members.cache.find(m => m.id === user.id);
                   let newRole = await reaction.message.guild.roles.cache.find(r => r.id === emoji.roleID);
+                  if (!newRole){
+                     console.log(`Error fetching role for ${emoji.emojiName}`);
+                     return;
+                  }
                   var errorCheck = false;
                   if (type === 'add') {
                      guildUser.roles.add(newRole).catch(err => {
@@ -41,7 +45,7 @@ module.exports = {
                                     })
                               }
                            }
-                        })
+                        });
                   } //End of role added
                   else {
                      guildUser.roles.remove(newRole).catch(err => {

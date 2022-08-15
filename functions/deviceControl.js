@@ -7,6 +7,7 @@ const {
    ActionRowBuilder,
    SelectMenuBuilder,
    MessageButton,
+   MessageAttachment,
    EmbedBuilder,
    ButtonBuilder,
    InteractionType,
