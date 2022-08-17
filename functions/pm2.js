@@ -91,7 +91,7 @@ module.exports = {
             var row = newButtons[r]['components'];
             for (var b in row) {
                row[b]['data']['style'] = ButtonStyle.Primary;
-               row[b]['data']['customId'] = `${config.serverName}~process~restart~${row[b]['label']}`;
+               row[b]['data']['custom_id'] = `${config.serverName}~process~restart~${row[b]['label']}`;
             } //End of b loop
          } //End of r loop
          interaction.message.edit({
@@ -106,7 +106,7 @@ module.exports = {
             var row = newButtons[r]['components'];
             for (var b in row) {
                row[b]['data']['style'] = ButtonStyle.Success;
-               row[b]['data']['customId'] = `${config.serverName}~process~start~${row[b]['label']}`;
+               row[b]['data']['custom_id'] = `${config.serverName}~process~start~${row[b]['label']}`;
             } //End of b loop
          } //End of r loop
          interaction.message.edit({
@@ -121,7 +121,7 @@ module.exports = {
             var row = newButtons[r]['components'];
             for (var b in row) {
                row[b]['data']['style'] = ButtonStyle.Danger;
-               row[b]['data']['customId'] = `${config.serverName}~process~stop~${row[b]['label']}`;
+               row[b]['data']['custom_id'] = `${config.serverName}~process~stop~${row[b]['label']}`;
             } //End of b loop
          } //End of r loop
          interaction.message.edit({
