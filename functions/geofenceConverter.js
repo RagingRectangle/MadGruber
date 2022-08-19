@@ -6,6 +6,7 @@ const {
    Permissions,
    ActionRowBuilder,
    SelectMenuBuilder,
+   AttachmentBuilder,
    MessageButton,
    EmbedBuilder,
    ButtonBuilder,
@@ -105,8 +106,12 @@ module.exports = {
             color: `#${Math.floor(Math.random()*16777215).toString(16)}`,
             path: [simpleCoordList]
          }];
-         let geoAttachment = await new MessageAttachment(Buffer.from(JSON.stringify(geoJSON)), `${fenceName}_GeoJSON.json`);
-         let simpleAttachment = await new MessageAttachment(Buffer.from(JSON.stringify(simpleJSON)), `${fenceName}_SimpleJSON.json`);
+         let geoAttachment = await new AttachmentBuilder(Buffer.from(JSON.stringify(geoJSON)), {
+            name: `${fenceName}_GeoJSON.json`
+         });
+         let simpleAttachment = await new AttachmentBuilder(Buffer.from(JSON.stringify(simpleJSON)), {
+            name: `${fenceName}_SimpleJSON.json`
+         });
          channel.send({
             content: `**Converted geofence for ${fenceName}:**`,
             files: [geoAttachment, simpleAttachment]
@@ -174,8 +179,12 @@ module.exports = {
             id: fenceID,
             path: [simpleCoordList]
          });
-         let geoAttachment = await new MessageAttachment(Buffer.from(JSON.stringify(geoJSON)), `${fenceNameMain}_GeoJSON.json`);
-         let simpleAttachment = await new MessageAttachment(Buffer.from(JSON.stringify(simpleJSON)), `${fenceNameMain}_SimpleJSON.json`);
+         let geoAttachment = await new AttachmentBuilder(Buffer.from(JSON.stringify(geoJSON)), {
+            name: `${fenceNameMain}_GeoJSON.json`
+         });
+         let simpleAttachment = await new AttachmentBuilder(Buffer.from(JSON.stringify(simpleJSON)), {
+            name: `${fenceNameMain}_SimpleJSON.json`
+         });
          channel.send({
             content: `**Converted geofence for ${fenceNameMain}:**`,
             files: [geoAttachment, simpleAttachment]
