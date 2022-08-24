@@ -205,7 +205,6 @@ module.exports = {
       madDB.multipleStatements = true;
       var connection = mysql.createConnection(madDB);
       let areaListQuery = `SELECT a.name "area", b.name "instance" FROM settings_area a, madmin_instance b WHERE a.mode = "pokestops" AND a.instance_id = b.instance_id;`;
-
       connection.query(areaListQuery, function (err, results) {
          if (err) {
             console.log(err);
@@ -238,14 +237,6 @@ module.exports = {
          //Create message for each instance
          var selectMenuList = [];
          for (const [instance, areaList] of Object.entries(instanceAreas)) {
-            var selectMenu = await new SelectMenuBuilder()
-               .setCustomId(`${config.serverName}~truncateArea~${instance}`)
-               .setPlaceholder(`${instance} areas`)
-               .setMinValues(1)
-
-            if (config.truncate.truncateVerify === true) {
-               selectMenu.setCustomId(`${config.serverName}~truncateArea~${instance}`)
-            }
             var listOptions = [];
             for (var a = 0; a < areaList.length && a < 25; a++) {
                listOptions.push({
@@ -253,8 +244,13 @@ module.exports = {
                   value: `${areaList[a]}`
                });
             } //End of a loop
-            selectMenu.options = listOptions;
-            selectMenuList.push(await new ActionRowBuilder().addComponents(selectMenu));
+            selectMenuList.push(await new ActionRowBuilder().addComponents(
+               new SelectMenuBuilder()
+               .setCustomId(`${config.serverName}~truncateArea~${instance}`)
+               .setPlaceholder(`${instance} areas`)
+               .setMinValues(1)
+               .addOptions(listOptions)
+            ));
          } //End of instanceAreas loop
          groupInstanceLists(selectMenuList);
       } //End of groupAreas()

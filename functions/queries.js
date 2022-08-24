@@ -41,7 +41,6 @@ module.exports = {
          content: 'Select option below to get count',
          components: [fullCountList]
       }).catch(console.error);
-
    }, //End of queries()
 
 
@@ -60,5 +59,4 @@ module.exports = {
       }) //End of query
       connection.end();
    }, //End of queryCount()
-
 }
