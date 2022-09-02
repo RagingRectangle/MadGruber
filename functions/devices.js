@@ -389,12 +389,12 @@ module.exports = {
             offsetHours = config.madDB.timezoneDifference;
          }
          deviceInfoArray.push(`**area:** ${dbInfo.areas[device.area_id]['name']} (${dbInfo.areas[device.area_id]['mode']})`);
-         deviceInfoArray.push(`**last seen:** ${moment(device.lastProtoDateTime).from(moment().add(offsetHours, 'hours'))}`);
+         deviceInfoArray.push(`**last seen:** ${moment(device.lastProtoDateTime).add(offsetHours, 'hours').from(moment())}`);
          if (config.devices.displayOptions.restartInfo === true) {
-            deviceInfoArray.push(`**last restart:** ${moment(device.lastPogoRestart).from(moment().add(offsetHours, 'hours'))} (#${device.globalrestartcount})`);
+            deviceInfoArray.push(`**last restart:** ${moment(device.lastPogoRestart).add(offsetHours, 'hours').from(moment())} (#${device.globalrestartcount})`);
          }
          if (config.devices.displayOptions.rebootInfo === true) {
-            deviceInfoArray.push(`**last reboot:** ${moment(device.lastPogoReboot).from(moment().add(offsetHours, 'hours'))} (#${device.globalrebootcount})`);
+            deviceInfoArray.push(`**last reboot:** ${moment(device.lastPogoReboot).add(offsetHours, 'hours').from(moment())} (#${device.globalrebootcount})`);
          }
          let cycleStatPosition = deviceInfoArray.length;
          if (config.devices.displayOptions.deviceID === true) {
