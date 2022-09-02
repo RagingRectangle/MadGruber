@@ -61,7 +61,8 @@
         "port": 3306,
         "user": "",
         "password": "",
-        "database": ""
+        "database": "",
+        "timezoneDifference": 0
     },
     "devices": {
         "noProtoMinutes": 20,

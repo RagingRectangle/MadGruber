@@ -115,6 +115,7 @@ Scripts:
 
 madDB:
 - Enter your basic MAD database info. Make sure your user has access if the database is not local.  Leave blank if you don't plan on connecting to MAD.
+- **timezoneDifference:** Timezone offset of MAD in hours. ONLY if MAD and the database are set to different timezones.
 
 Devices:
 - **noProtoMinutes:** Limit for how long it's been since the device has been heard from.

@@ -25,6 +25,10 @@ module.exports = {
       console.log(`${user.username} requested the status of all devices`);
       let connectionMAD = mysql.createConnection(config.madDB);
       let statusQuery = `SELECT * FROM trs_status`;
+      var offsetMinutes = 0;
+      if (config.madDB.timezoneDifference) {
+         offsetMinutes = config.madDB.timezoneDifference * 60;
+      }
       connectionMAD.query(statusQuery, function (err, results) {
          if (err) {
             console.log("Status Query Error:", err);
@@ -34,7 +38,7 @@ module.exports = {
                buttonArray = [];
             results.forEach(device => {
                instanceList.push(dbInfo.instances[device.instance_id]);
-               let minutesSinceSeen = ((Math.abs(Date.now() - Date.parse(device.lastProtoDateTime)) / (1000 * 3600)) * 60).toFixed(0);
+               let minutesSinceSeen = (((Math.abs(Date.now() - Date.parse(device.lastProtoDateTime)) / (1000 * 3600)) * 60) + offsetMinutes).toFixed(0);
                var deviceName = dbInfo.devices[device.device_id]['name'];
                for (var b = 0; b < config.devices.buttonLabelRemove.length; b++) {
                   let remove = config.devices.buttonLabelRemove[b];
@@ -133,6 +137,10 @@ module.exports = {
       }
       let connectionMAD = mysql.createConnection(config.madDB);
       let statusQuery = `SELECT * FROM trs_status`;
+      var offsetMinutes = 0;
+      if (config.madDB.timezoneDifference) {
+         offsetMinutes = config.madDB.timezoneDifference * 60;
+      }
       connectionMAD.query(statusQuery, function (err, results) {
          if (err) {
             console.log("noProto Status Query Error:", err);
@@ -141,7 +149,7 @@ module.exports = {
             var sortBy = require('sort-by'),
                buttonArray = [];
             results.forEach(device => {
-               let minutesSinceSeen = ((Math.abs(Date.now() - Date.parse(device.lastProtoDateTime)) / (1000 * 3600)) * 60).toFixed(0);
+               let minutesSinceSeen = (((Math.abs(Date.now() - Date.parse(device.lastProtoDateTime)) / (1000 * 3600)) * 60) + offsetMinutes).toFixed(0);
                var deviceName = dbInfo.devices[device.device_id]['name'];
                for (var b = 0; b < config.devices.buttonLabelRemove.length; b++) {
                   let remove = config.devices.buttonLabelRemove[b];
@@ -355,9 +363,11 @@ module.exports = {
       }); //End of query
       connectionMAD.end();
       async function parseDeviceInfo(device) {
-         let timeDiffLastSeen = Math.abs(Date.now() - Date.parse(device.lastProtoDateTime));
-         let hoursSinceLastSeen = timeDiffLastSeen / (1000 * 3600);
-         let minutesSinceLastSeen = (hoursSinceLastSeen * 60).toFixed(2);
+         var offsetMinutes = 0;
+         if (config.madDB.timezoneDifference) {
+            offsetMinutes = config.madDB.timezoneDifference * 60;
+         }
+         let minutesSinceSeen = (((Math.abs(Date.now() - Date.parse(device.lastProtoDateTime)) / (1000 * 3600)) * 60) + offsetMinutes).toFixed(0);
          var paused = '';
          let origin = dbInfo.devices[device.device_id]['name'];
          var deviceInfoArray = [];
@@ -371,16 +381,20 @@ module.exports = {
                color = '696969';
                paused = '**- Paused:** true\n';
             }
-         } else if (minutesSinceLastSeen > config.devices.noProtoMinutes) {
+         } else if (minutesSinceSeen > config.devices.noProtoMinutes) {
             color = '9E0000';
          }
+         var offsetHours = 0;
+         if (config.madDB.timezoneDifference){
+            offsetHours = config.madDB.timezoneDifference;
+         }
          deviceInfoArray.push(`**area:** ${dbInfo.areas[device.area_id]['name']} (${dbInfo.areas[device.area_id]['mode']})`);
-         deviceInfoArray.push(`**last seen:** ${moment(device.lastProtoDateTime).from(moment())}`);
+         deviceInfoArray.push(`**last seen:** ${moment(device.lastProtoDateTime).from(moment().add(offsetHours, 'hours'))}`);
          if (config.devices.displayOptions.restartInfo === true) {
-            deviceInfoArray.push(`**last restart:** ${moment(device.lastPogoRestart).from(moment())} (#${device.globalrestartcount})`);
+            deviceInfoArray.push(`**last restart:** ${moment(device.lastPogoRestart).from(moment().add(offsetHours, 'hours'))} (#${device.globalrestartcount})`);
          }
          if (config.devices.displayOptions.rebootInfo === true) {
-            deviceInfoArray.push(`**last reboot:** ${moment(device.lastPogoReboot).from(moment())} (#${device.globalrebootcount})`);
+            deviceInfoArray.push(`**last reboot:** ${moment(device.lastPogoReboot).from(moment().add(offsetHours, 'hours'))} (#${device.globalrebootcount})`);
          }
          let cycleStatPosition = deviceInfoArray.length;
          if (config.devices.displayOptions.deviceID === true) {
