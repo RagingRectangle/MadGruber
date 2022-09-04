@@ -12,7 +12,7 @@
         "pm2Command": "pm2",
         "truncateCommand": "truncate",
         "scriptCommand": "scripts",
-        "madQueryCommand": "mad",
+        "queryCommand": "query",
         "linksCommand": "links",
         "devicesCommand": "devices",
         "noProtoCommand": "noproto",

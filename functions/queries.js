@@ -21,42 +21,57 @@ module.exports = {
    queries: async function queries(channel) {
       let countList = queryConfig.count;
       var selectList = [];
-      countList.forEach(count => {
+      queryConfig.custom.forEach(query => {
          let listOption = {
-            label: count.type,
-            value: `${config.serverName}~count~${count.table}`
+            label: query.name,
+            value: `${config.serverName}~customQuery~${query.name}`
          }
          selectList.push(listOption);
       });
-      let fullCountList = new ActionRowBuilder()
+      let fullQueryList = new ActionRowBuilder()
          .addComponents(
             new SelectMenuBuilder()
-            .setCustomId(`${config.serverName}~countList`)
-            .setPlaceholder('MAD DB Counter')
+            .setCustomId(`${config.serverName}~queryList`)
+            .setPlaceholder('Custom query list')
             .setMinValues(1)
             .setMaxValues(1)
             .addOptions(selectList))
 
       channel.send({
-         content: 'Select option below to get count',
-         components: [fullCountList]
+         content: 'Select query below to run',
+         components: [fullQueryList]
       }).catch(console.error);
    }, //End of queries()
 
 
-   queryCount: async function queryCount(channel, user, table) {
-      let connection = mysql.createConnection(config.madDB);
+   customQuery: async function customQuery(channel, user, queryName, queryFull) {
+      var dbConfig = config.madDB;
+      dbConfig.multipleStatements = true;
+      let connection = mysql.createConnection(dbConfig);
       connection.connect();
-      let countQuery = `SELECT COUNT(*) FROM ${table}`;
-      connection.query(countQuery, function (err, results) {
+      var queryEmbed = new EmbedBuilder().setTitle(`${queryName} Results:`);
+      connection.query(queryFull, function (err, results) {
          if (err) {
-            console.log(`(${user.username}) Count Query Error:`, err);
+            console.log(`(${user.username}) vustom query error:`, err);
          } else {
-            let count = results[0]['COUNT(*)'].toLocaleString();
-            console.log(`(${user.username}) SELECT COUNT(*) FROM ${config.madDB.database}.${table}: ${count}`);
-            channel.send(`Current ${config.madDB.database} ${table}: ${count}`).catch(console.error);
+            console.log(`(${user.username}) ran custom query: ${queryName}`);
+            var queryResults = results;
+            if (!queryFull.replace(';','').includes(';')){
+               queryResults = [results];
+            }
+            for (var r in queryResults) {
+               for (const [key, value] of Object.entries(queryResults[r][0])) {
+                  queryEmbed.addFields({
+                     name: key,
+                     value: value.toLocaleString()
+                  });
+               }
+            } //End of r loop
+            channel.send({
+               embeds: [queryEmbed],
+            }).catch(console.error);
          }
       }) //End of query
       connection.end();
-   }, //End of queryCount()
+   }, //End of customQuery()
 }

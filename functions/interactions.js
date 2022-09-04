@@ -25,6 +25,7 @@ const DeviceControl = require('./deviceControl.js');
 const Stats = require('./stats.js');
 const Geofences = require('./geofenceConverter.js');
 const config = require('../config/config.json');
+const queryConfig = require('../config/queries.json');
 const scriptConfig = require('../config/scripts.json');
 
 module.exports = {
@@ -52,10 +53,14 @@ module.exports = {
 
       //Queries
       if (userPerms.includes('queries')) {
-         if (interactionID === 'countList') {
-            let table = interaction.values[0].replace(`${config.serverName}~count~`, '');
+         if (interactionID === 'queryList') {
+            let queryName = interaction.values[0].replace(`${config.serverName}~customQuery~`, '');
             interaction.update({});
-            Queries.queryCount(interaction.message.channel, interaction.user, table);
+            for (var i in queryConfig.custom){
+               if (queryConfig.custom[i]['name'] === queryName){
+                  Queries.customQuery(interaction.message.channel, interaction.user, queryName, queryConfig.custom[i]['query']);
+               }
+            }//End of i loop
          }
       } //End of queries
 

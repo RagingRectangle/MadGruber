@@ -29,8 +29,8 @@ module.exports = {
       if (commands.scriptCommand) {
          scripts = `${prefix}${commands.scriptCommand}`;
       }
-      if (commands.madQueryCommand) {
-         queries = `${prefix}${commands.madQueryCommand}`;
+      if (commands.queryCommand) {
+         queries = `${prefix}${commands.queryCommand}`;
       }
       if (commands.linksCommand) {
          links = `${prefix}${commands.linksCommand}`;

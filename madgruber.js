@@ -121,7 +121,7 @@ client.on('messageCreate', async (receivedMessage) => {
 		}
 	}
 	//Run Queries
-	else if (config.madDB.host && config.discord.madQueryCommand && message === `${config.discord.prefix}${config.discord.madQueryCommand}`) {
+	else if (config.madDB.host && config.discord.queryCommand && message === `${config.discord.prefix}${config.discord.queryCommand}`) {
 		if (userPerms.includes('admin') || userPerms.includes('queries')) {
 			Queries.queries(receivedMessage.channel);
 		}

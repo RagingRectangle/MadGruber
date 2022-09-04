@@ -9,25 +9,21 @@ const queryConfig = require('../config/queries.json');
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName(config.discord.madQueryCommand)
+		.setName(config.discord.queryCommand)
 		.setDescription("Run database query")
-		.addSubcommand(subcommand =>
-			subcommand
-			.setName('count')
-			.setDescription('Run count query on table')
-			.addStringOption(option => {
-				option
-					.setName('table')
-					.setDescription('Select table to count')
-
-				for (var i = 0; i < queryConfig.count.length; i++) {
-					option.addChoices({
-						name: queryConfig.count[i]['type'],
-						value: queryConfig.count[i]['table']
-					});
-				} //End of i loop
-				return option;
-			})),
+		.addStringOption(option => {
+			option
+				.setName('query-name')
+				.setDescription('Select query')
+				.setRequired(true)
+			for (var i = 0; i < queryConfig.custom.length; i++) {
+				option.addChoices({
+					name: queryConfig.custom[i]['name'],
+					value: queryConfig.custom[i]['name']
+				});
+			} //End of i loop
+			return option;
+		}),
 
 	async execute(client, interaction) {
 		let channel = await client.channels.fetch(interaction.channelId).catch(console.error);
@@ -36,15 +32,21 @@ module.exports = {
 		if (userPerms.includes('admin') || userPerms.includes('queries')) {
 			interaction.deferReply();
 			var specificCheck = false;
-			var table = '';
+			var queryName = '';
+			var queryFull = '';
 			try {
 				if (interaction.options._hoistedOptions[0]['value']) {
-					specificCheck = true;
-					table = interaction.options._hoistedOptions[0]['value'];
+					queryName = interaction.options._hoistedOptions[0]['value'];
+					for (var i in queryConfig.custom){
+						if (queryConfig.custom[i]['name'] === queryName && queryConfig.custom[i]['query']){
+							specificCheck = true;
+							queryFull = queryConfig.custom[i]['query'];
+						}
+					}//End of i loop
 				}
 			} catch (err) {}
 			if (specificCheck === true) {
-				Queries.queryCount(channel, interaction.user, table);
+				Queries.customQuery(channel, interaction.user, queryName, queryFull);
 			} else {
 				Queries.queries(channel);
 			}

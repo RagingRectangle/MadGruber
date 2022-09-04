@@ -13,7 +13,7 @@ Join the Discord server for any help and to keep up with updates: https://discor
 - Truncate MAD quests and auto reload MAD processes
 - Automated quest rescanning
 - Convert MAD geofences to other formats
-- MAD DB counter
+- Custom SQL queries
 - Run custom scripts with optional variables
 - Quickly access URL bookmarks
 - Reaction role manager
@@ -78,7 +78,7 @@ Discord:
 - **pm2Command:** Show the PM2 controller.
 - **truncateCommand:** Truncate quests and restart MAD instances.
 - **scriptCommand:** Show the list of scripts.
-- **madQueryCommand:** Show MAD database queries.
+- **queryCommand:** Show custom query list.
 - **linksCommand:** Show list of bookmarks.
 - **devicesCommand:** Get status of all devices.
 - **noProtoCommand:** Get noProto devices.
@@ -100,9 +100,9 @@ Roles:
 
 Truncate:
 - **truncateVerify:** Whether or not to verify table truncate (true/false).
-- **truncateOptions:** List of tables to list as options to truncate.  Can truncate multiple tables at once by combining them with '+'. Example: *["trs_quest", "pokemon", "trs_quest+pokemon"]*
+- **truncateOptions:** List of tables to list as options to truncate. Can truncate multiple tables at once by combining them with '+'. Example: *["trs_quest", "pokemon", "trs_quest+pokemon"]*
 - **truncateQuestsByArea:** Select instance Pokestop areas to truncate instead of entire trs_quest table (true/false).
-- **onlyRestartBeforeTime:** Set this to limit when the bot will reload MAD instance (0-23).  If set to 0 it will always reload MADs.  If an event ends at 20:00 and you don't need to reload MAD because you won't rescan quests then enter "20".
+- **onlyRestartBeforeTime:** Set this to limit when the bot will reload MAD instance (0-23). If set to 0 it will always reload MADs. If an event ends at 20:00 and you don't need to reload MAD because you won't rescan quests then enter "20".
 - **eventAutomation:** Whether or not to use Discord events to automate quest truncating (true/false).
 - **eventGuildID:** ID of the guild where events are located.
 - **eventDescriptionTrigger:** The trigger word/s that must be in the event description to automate truncating.
@@ -114,7 +114,7 @@ Scripts:
 - **scriptResponseDeleteSeconds:** How long to wait until script response is deleted (Set to 0 to never delete).
 
 madDB:
-- Enter your basic MAD database info. Make sure your user has access if the database is not local.  Leave blank if you don't plan on connecting to MAD.
+- Enter your basic MAD database info. Make sure your user has access if the database is not local. Leave blank if you don't plan on connecting to MAD.
 - **timezoneDifference:** Timezone offset of MAD in hours. ONLY if MAD and the database are set to different timezones.
 
 Devices:
@@ -123,7 +123,7 @@ Devices:
 - **noProtoChannelID:** Channel ID for where automated warning should be posted.
 - **noProtoIncludeIdle:** Include paused and idle devices in automated checks (false to ignore).
 - **noProtoIgnoreDevices:** Array of devices to be ignored during noProto checks.
-- **useNoProtoJson:**  Use noProto.json to split which channels noProto device alerts are sent to (true/false).  If 'noProtoChannelID' is set then that will be the default channel for any devices not listed in noProto.json.
+- **useNoProtoJson:**  Use noProto.json to split which channels noProto device alerts are sent to (true/false). If 'noProtoChannelID' is set then that will be the default channel for any devices not listed in noProto.json.
 - **checkDeleteMinutes:** How long to wait until auto check messages are deleted (Set to 0 to never delete).
 - **infoMessageDeleteSeconds:** How long to wait until device info responses are deleted (Set to 0 to never delete).
 - **statusButtonsDeleteMinutes:** How long to wait until messages with device buttons are deleted (Set to 0 to never delete).
@@ -162,7 +162,7 @@ Stats:
     - Ex: `/home/mad/devicecontrol.sh poe4 cycle 20`
 
 - **variables:** Make sure each variable is in the correct order because that is how it will be sent with the script.
-    - **varDescription:** Summary of this list of variables that will be shown.  ("Pick which device" or "Choose the port").
+    - **varDescription:** Summary of this list of variables that will be shown. ("Pick which device" or "Choose the port").
     - **varOptions:** The list of options that this variable can be ("1", "2", "3", "4", "5").
 
  
@@ -187,9 +187,12 @@ Stats:
  
   
   
-## Queries Setup
-- The bot is currently only able to run a simple count query to a selection of tables in the MAD database.
-- More query options will be added later.
+## Custom Query Setup
+- Config file: */config/queries.json*
+- **name:** Query name to display in lists.
+- **query:** The SQL query to run. Multiple statements allowed separated by `;` (Response will show query results in this order). This will __not__ use the `timezoneDifference` config option so any adjustments will need to made in the query itself.
+
+
 
  
   
