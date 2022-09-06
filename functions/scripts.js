@@ -31,7 +31,7 @@ module.exports = {
             }
             let listOption = {
                label: label,
-               description: script.description,
+               description: script.description ? script.description : '\u00A0',
                value: `${config.serverName}~startScript~${script.customName}~${script.variables.length}`
             }
             selectList.push(listOption);
