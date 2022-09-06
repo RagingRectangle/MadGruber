@@ -1,11 +1,11 @@
 {
     "custom": [{
             "name": "Active Pokemon (All)",
-            "query": "SELECT count(*) FROM pokemon WHERE encounter_id IS NOT NULL AND disappear_time >= now();"
+            "query": "SELECT count(*) FROM pokemon WHERE encounter_id IS NOT NULL AND disappear_time >= utc_timestamp();"
         },
         {
             "name": "Active Pokemon (IV)",
-            "query": "SELECT count(*) FROM pokemon WHERE encounter_id IS NOT NULL AND cp IS NOT NULL AND disappear_time >= now();"
+            "query": "SELECT count(*) FROM pokemon WHERE encounter_id IS NOT NULL AND cp IS NOT NULL AND disappear_time >= utc_timestamp();"
         },
         {
             "name": "Gym Count",
