@@ -9,7 +9,7 @@ const config = require('../config/config.json');
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName(config.discord.truncateCommand)
+		.setName(config.discord.truncateCommand.toLowerCase().replaceAll(/[^a-z0-9]/gi, '_'))
 		.setDescription("Get list of tables to truncate")
 		.addStringOption(option => {
 			option

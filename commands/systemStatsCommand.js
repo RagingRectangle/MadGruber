@@ -8,7 +8,7 @@ const config = require('../config/config.json');
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName(config.discord.systemStatsCommand)
+		.setName(config.discord.systemStatsCommand.toLowerCase().replaceAll(/[^a-z0-9]/gi, '_'))
 		.setDescription("Get system stats")
 		.addStringOption(option =>
 			option

@@ -10,7 +10,7 @@ const dbInfo = require('../MAD_Database_Info.json');
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName(config.discord.pm2Command)
+		.setName(config.discord.pm2Command.toLowerCase().replaceAll(/[^a-z0-9]/gi, '_'))
 		.setDescription("Show PM2 controller")
 		.addStringOption(option => {
 			option

@@ -8,7 +8,7 @@ const config = require('../config/config.json');
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName(config.discord.noProtoCommand)
+		.setName(config.discord.noProtoCommand.toLowerCase().replaceAll(/[^a-z0-9]/gi, '_'))
 		.setDescription("Show noProto devices"),
 
 	async execute(client, interaction) {

@@ -8,7 +8,7 @@ const config = require('../config/config.json');
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName(config.discord.geofenceCommand)
+		.setName(config.discord.geofenceCommand.toLowerCase().replaceAll(/[^a-z0-9]/gi, '_'))
 		.setDescription("Convert MAD geofences"),
 
 	async execute(client, interaction) {

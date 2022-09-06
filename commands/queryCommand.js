@@ -9,7 +9,7 @@ const queryConfig = require('../config/queries.json');
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName(config.discord.queryCommand)
+		.setName(config.discord.queryCommand.toLowerCase().replaceAll(/[^a-z0-9]/gi, '_'))
 		.setDescription("Run database query")
 		.addStringOption(option => {
 			option

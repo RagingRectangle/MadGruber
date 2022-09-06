@@ -7,7 +7,7 @@ const config = require('../config/config.json');
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName(config.discord.helpCommand)
+		.setName(config.discord.helpCommand.toLowerCase().replaceAll(/[^a-z0-9]/gi, '_'))
 		.setDescription("Show help menu and user perms"),
 
 	async execute(client, interaction) {

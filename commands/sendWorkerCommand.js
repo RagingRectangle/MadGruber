@@ -8,7 +8,7 @@ const config = require('../config/config.json');
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName(config.discord.sendWorkerCommand)
+		.setName(config.discord.sendWorkerCommand.toLowerCase().replaceAll(/[^a-z0-9]/gi, '_'))
 		.setDescription(`Send worker to location`)
 		.addStringOption(option =>
 			option.setName('coordinates')

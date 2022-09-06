@@ -10,7 +10,7 @@ const config = require('../config/config.json');
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName(config.discord.linksCommand)
+		.setName(config.discord.linksCommand.toLowerCase().replaceAll(/[^a-z0-9]/gi, '_'))
 		.setDescription(`Get list of bookmarks`)
 		.addStringOption(option => {
 			option

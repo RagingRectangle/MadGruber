@@ -7,7 +7,7 @@ const config = require('../config/config.json')
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName(config.discord.eventsCommand)
+		.setName(config.discord.eventsCommand.toLowerCase().replaceAll(/[^a-z0-9]/gi, '_'))
 		.setDescription("Get list of events that will reroll quests"),
 
 	async execute(client, interaction) {

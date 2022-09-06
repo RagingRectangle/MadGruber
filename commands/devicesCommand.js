@@ -9,7 +9,7 @@ let dbInfo = require('../MAD_Database_Info.json');
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName(config.discord.devicesCommand)
+		.setName(config.discord.devicesCommand.toLowerCase().replaceAll(/[^a-z0-9]/gi, '_'))
 		.setDescription("Show status of devices")
 		.addStringOption(option =>
 			option
