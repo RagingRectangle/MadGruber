@@ -19,12 +19,14 @@ module.exports = {
    links: async function links(client, channel) {
       var buttonList = [];
       linksList.forEach(link => {
-         if (link.url !== '') {
-            let button = new ButtonBuilder()
+         if (link.url && link.label) {
+            var button = new ButtonBuilder()
                .setURL(link.url)
                .setLabel(link.label)
-               .setEmoji(link.emoji)
                .setStyle(ButtonStyle.Link)
+            if (link.emoji){
+               button.setEmoji(link.emoji);
+            }
             buttonList.push(button);
          }
       });
