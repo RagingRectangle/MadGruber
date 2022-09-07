@@ -36,7 +36,7 @@ module.exports = {
             var instanceList = [];
             var sortBy = require('sort-by'),
                buttonArray = [];
-            results.forEach(device => {
+            results.filter(areaTest => areaTest.area_id).forEach(device => {
                instanceList.push(dbInfo.instances[device.instance_id]);
                let minutesSinceSeen = (((Math.abs(Date.now() - Date.parse(device.lastProtoDateTime)) / (1000 * 3600)) * 60) + offsetMinutes).toFixed(0);
                var deviceName = dbInfo.devices[device.device_id]['name'];
@@ -385,7 +385,7 @@ module.exports = {
             color = '9E0000';
          }
          var offsetHours = 0;
-         if (config.madDB.timezoneDifference){
+         if (config.madDB.timezoneDifference) {
             offsetHours = config.madDB.timezoneDifference;
          }
          deviceInfoArray.push(`**area:** ${dbInfo.areas[device.area_id]['name']} (${dbInfo.areas[device.area_id]['mode']})`);
