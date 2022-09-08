@@ -1,6 +1,6 @@
 {
   "name": "madgruber",
-  "version": "3.18.1",
+  "version": "6.3.1",
   "description": "Discord bot for controlling MAD, PM2 processes, and whatever else this idiot comes up with to add.",
   "main": "madgruber.js",
   "scripts": {
@@ -17,14 +17,19 @@
   },
   "homepage": "https://github.com/RagingRectangle/MadGruber#readme",
   "dependencies": {
+    "@discordjs/rest": "0.4.1",
     "ansi-parser": "^3.2.10",
     "color-convert": "^2.0.1",
     "cron": "^1.8.2",
-    "discord.js": "13.6.0",
+    "discord-api-types": "0.36.2",
+    "discord.js": "14.0.1",
     "file-exists": "^5.0.1",
     "fs": "0.0.1-security",
+    "geolocation-utils": "^1.2.5",
     "moment": "^2.29.1",
     "mysql": "^2.18.1",
+    "mysql2": "^2.3.3",
+    "node-fetch": "2.6.1",
     "pm2": "^5.1.2",
     "quickchart-js": "^2.0.3",
     "request": "^2.88.2",
