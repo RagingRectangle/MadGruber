@@ -7,7 +7,7 @@ const {
    ActionRowBuilder,
    SelectMenuBuilder,
    MessageButton,
-   MessageAttachment,
+   AttachmentBuilder,
    EmbedBuilder,
    ButtonBuilder,
    InteractionType,
@@ -66,7 +66,7 @@ module.exports = {
                            }
                         });
                      }
-                     logFile.push(new MessageAttachment(`logcat_${origin}.txt`));
+                     logFile.push(await new AttachmentBuilder(fs.readFileSync(`logcat_${origin}.txt`), {name: `logcat_${origin}.txt`}));
                   } catch (err) {
                      console.log(`Error renaming logcat.txt to "logcat_${origin}.txt":`, err)
                   }
@@ -81,7 +81,7 @@ module.exports = {
                            }
                         });
                      }
-                     logFile.push(new MessageAttachment(`vm_${origin}.log`));
+                     logFile.push(await new AttachmentBuilder(fs.readFileSync(`vm_${origin}.log`), {name: `vm_${origin}.log`}));
                   } catch (err) {}
                   try {
                      fs.renameSync('./vmapper.log', `vmapper_${origin}.log`);
@@ -94,13 +94,13 @@ module.exports = {
                            }
                         });
                      }
-                     logFile.push(new MessageAttachment(`vmapper_${origin}.log`));
+                     logFile.push(await new AttachmentBuilder(fs.readFileSync(`vmapper_${origin}.log`), {name: `vmapper_${origin}.log`}));
                   } catch (err) {}
                }
                if (controlType === 'screenshot') {
                   try {
                      fs.renameSync('./screenshot.jpg', `screenshot_${origin}.jpg`);
-                     logFile.push(new MessageAttachment(`screenshot_${origin}.jpg`));
+                     logFile.push(await new AttachmentBuilder(fs.readFileSync(`screenshot_${origin}.jpg`), {name: `screenshot_${origin}.jpg`}));
                   } catch (err) {
                      console.log(`Error renaming screenshot.jpg to "screenshot_${origin}.jpg":`, err);
                   }
