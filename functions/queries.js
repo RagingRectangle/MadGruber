@@ -52,7 +52,7 @@ module.exports = {
       var queryEmbed = new EmbedBuilder().setTitle(`${queryName} Results:`);
       connection.query(queryFull, function (err, results) {
          if (err) {
-            console.log(`(${user.username}) vustom query error:`, err);
+            console.log(`(${user.username}) custom query error:`, err);
          } else {
             console.log(`(${user.username}) ran custom query: ${queryName}`);
             var queryResults = results;
