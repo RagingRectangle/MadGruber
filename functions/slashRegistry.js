@@ -20,6 +20,7 @@ module.exports = {
    registerCommands: async function registerCommands(client) {
       var commands = [];
       const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+      var finalCommands = [];
       const {
          REST
       } = require('@discordjs/rest');
@@ -27,10 +28,11 @@ module.exports = {
          Routes
       } = require('discord-api-types/v10');
       for (const file of commandFiles) {
-         if (config.discord[file.replace('.js', '')] !== '') {
+         if (config.discord[file.replace('.js', '')]) {
             const command = require(`../commands/${file}`);
             try {
                commands.push(command.data.toJSON());
+               finalCommands.push(file);
             } catch (err) {
                console.log(err);
             }
@@ -47,7 +49,7 @@ module.exports = {
             .catch(console.error);
 
          client.commands = new Collection();
-         for (const file of commandFiles) {
+         for (const file of finalCommands) {
             const command = require(`../commands/${file}`);
             client.commands.set(command.data.name, command);
          }
