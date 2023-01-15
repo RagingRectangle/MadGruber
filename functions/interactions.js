@@ -31,7 +31,7 @@ const scriptConfig = require('../config/scripts.json');
 module.exports = {
    listInteraction: async function listInteraction(interaction, interactionID, userPerms) {
       //Scripts
-      if (userPerms.includes('scripts')) {
+      if (userPerms.includes('scripts') || userPerms.includes('admin')) {
          if (interactionID === 'scriptList') {
             let intValues = interaction.values[0].replace(`${config.serverName}~startScript~`, '').split('~');
             let scriptName = intValues[0];
@@ -52,7 +52,7 @@ module.exports = {
       } //End of Scripts
 
       //Queries
-      if (userPerms.includes('queries')) {
+      if (userPerms.includes('queries') || userPerms.includes('admin')) {
          if (interactionID === 'queryList') {
             let queryName = interaction.values[0].replace(`${config.serverName}~customQuery~`, '');
             interaction.update({});
@@ -65,7 +65,7 @@ module.exports = {
       } //End of queries
 
       //DeviceControl
-      if (userPerms.includes('deviceInfoControl')) {
+      if (userPerms.includes('deviceInfoControl') || userPerms.includes('admin')) {
          if (interactionID === 'deviceControl') {
             interaction.deferUpdate();
             DeviceControl.deviceControl(interaction);
@@ -73,7 +73,7 @@ module.exports = {
       } //End of DeviceControl
 
       //DeviceStats
-      if (userPerms.includes('deviceInfoControl') || userPerms.includes('deviceInfo')) {
+      if (userPerms.includes('deviceInfoControl') || userPerms.includes('deviceInfo') || userPerms.includes('admin')) {
          if (interactionID.startsWith('deviceStats~')) {
             interaction.deferUpdate();
             let statVariables = interaction.values[0].replace(`${config.serverName}~deviceStats~`, '').split('~');
@@ -84,7 +84,7 @@ module.exports = {
       } //End of DeviceStats
 
       //SystemStats
-      if (userPerms.includes('systemStats')) {
+      if (userPerms.includes('systemStats') || userPerms.includes('admin')) {
          if (interactionID.startsWith('systemStats~')) {
             interaction.deferUpdate();
             let statDuration = interactionID.replace('systemStats~', '');
@@ -93,7 +93,7 @@ module.exports = {
       } //End of SystemStats
 
       //Truncate
-      if (userPerms.includes('truncate')) {
+      if (userPerms.includes('truncate') || userPerms.includes('admin')) {
          //Area quests
          if (interactionID.startsWith('truncateArea~')) {
             interaction.deferUpdate();
@@ -126,7 +126,7 @@ module.exports = {
 
    buttonInteraction: async function buttonInteraction(interaction, interactionID, userPerms) {
       //PM2
-      if (userPerms.includes('pm2')) {
+      if (userPerms.includes('pm2') || userPerms.includes('admin')) {
          pm2MenuButtons = ["restart", "start", "stop"];
          if (pm2MenuButtons.includes(interactionID)) {
             interaction.deferUpdate();
@@ -145,7 +145,7 @@ module.exports = {
       } //End of pm2
 
       //Scripts
-      if (userPerms.includes('scripts')) {
+      if (userPerms.includes('scripts') || userPerms.includes('admin')) {
          if (interactionID.startsWith('verifyScript~')) {
             var scriptName = interaction.message.content.replace('Run script: ', '');
             //Check if admin only
@@ -225,7 +225,7 @@ module.exports = {
       } //End of scripts
 
       //Truncate
-      if (userPerms.includes('truncate')) {
+      if (userPerms.includes('truncate') || userPerms.includes('admin')) {
          //Verify truncate
          if (interactionID.startsWith('verifyTruncate~') || interactionID.startsWith('verifyAreaQuests~')) {
             interaction.deferUpdate();
@@ -277,7 +277,7 @@ module.exports = {
       } //End of truncate
 
       //Devices
-      if (userPerms.includes('deviceInfoControl') || userPerms.includes('deviceInfo')) {
+      if (userPerms.includes('deviceInfoControl') || userPerms.includes('deviceInfo') || userPerms.includes('admin')) {
          if (interactionID.startsWith('deviceInfo~')) {
             interaction.deferUpdate();
             let deviceID = interactionID.replace('deviceInfo~', '');

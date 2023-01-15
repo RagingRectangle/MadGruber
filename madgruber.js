@@ -17,7 +17,10 @@ const client = new Client({
 	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildEmojisAndStickers, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildScheduledEvents, GatewayIntentBits.DirectMessages],
 	partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 });
-
+//Generate database info
+if (config.madDB.host) {
+	GenerateMadInfo.generate();
+}
 const fs = require('fs');
 const pm2 = require('pm2');
 const CronJob = require('cron').CronJob;
@@ -48,10 +51,6 @@ roleConfig.forEach(role => {
 
 client.on('ready', async () => {
 	console.log("MadGruber Bot Logged In");
-	//Generate database info
-	if (config.madDB.host) {
-		GenerateMadInfo.generate();
-	}
 	//No Proto Checker
 	if (config.madDB.host && config.devices.noProtoCheckMinutes > 0) {
 		let noProtoJob = new CronJob(`*/${config.devices.noProtoCheckMinutes} * * * *`, function () {
@@ -96,7 +95,7 @@ client.on('messageCreate', async (receivedMessage) => {
 	if (receivedMessage.channel.type === ChannelType.GuildText && !config.discord.channelIDs.includes(receivedMessage.channel.id)) {
 		return;
 	}
-	let userPerms = await Roles.getUserCommandPerms(receivedMessage.guild, user);
+	let userPerms = config.discord.adminIDs.includes(receivedMessage.author.id) ? ['admin'] : await Roles.getUserCommandPerms(receivedMessage.guild, user);
 	if (userPerms === []) {
 		return;
 	}
@@ -195,7 +194,7 @@ client.on('interactionCreate', async interaction => {
 		return;
 	}
 	var interactionID = interaction.customId.replace(`${config.serverName}~`, '');
-	let userPerms = await Roles.getUserCommandPerms(interaction.message.guild, user);
+	let userPerms = config.discord.adminIDs.includes(user.id) ? ['admin'] : await Roles.getUserCommandPerms(interaction.message.guild, user);
 	//Button interaction
 	if (interaction.isButton()) {
 		Interactions.buttonInteraction(interaction, interactionID, userPerms);

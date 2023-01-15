@@ -8,8 +8,12 @@
             "query": "SELECT count(*) FROM pokemon WHERE encounter_id IS NOT NULL AND cp IS NOT NULL AND disappear_time >= utc_timestamp();"
         },
         {
+            "name": "Global Pokemon Stats",
+            "query": "SELECT `Total Pokemon`, `IV`, `Encountered`, `Wild`, `Nearby`, `Lure Encounterd` FROM (SELECT COUNT(CASE WHEN encounter_id THEN 1 END) AS `Total Pokemon`,100* COUNT(CASE WHEN cp is not null THEN 1 END) / (COUNT(CASE WHEN cp is not null THEN 1 END)+COUNT(CASE WHEN cp is null AND seen_type = 'wild' THEN 1 END)) as 'IV', COUNT(CASE WHEN cp is not null THEN 1 END) AS `Encountered`,COUNT(CASE WHEN cp is null AND seen_type = 'wild' THEN 1 END) AS `Wild`,COUNT(CASE WHEN cp is null AND (seen_type = 'nearby_cell' OR seen_type = 'nearby_stop') THEN 1 END) AS `Nearby`,COUNT(CASE WHEN cp is not null AND seen_type = 'lure_encounter' THEN 1 END) AS `Lure Encounterd`FROM pokemon WHERE disappear_time >= UTC_TIMESTAMP())AS latte;"
+        },
+        {
             "name": "Gym Count",
-            "query": "SELECT count(*) FROM gym; SELECT count(*) FROM gym WHERE team_id = 0; SELECT count(*) FROM gym WHERE team_id = 1; SELECT count(*) FROM gym WHERE team_id = 2; SELECT count(*) FROM gym WHERE team_id = 3; "
+            "query": "SELECT `All Gyms`, `Neutral`, `Mystic`, `Valor`, `Instinct` FROM (SELECT count(*) AS `All Gyms`,COUNT(CASE WHEN team_id = 0 THEN 1 END) AS `Neutral`, COUNT(CASE WHEN team_id = 1 THEN 1 END) AS `Mystic`, COUNT(CASE WHEN team_id = 2 THEN 1 END) AS `Valor`, COUNT(CASE WHEN team_id = 3 THEN 1 END) AS `Instinct` FROM gym)AS latte;"
         },
         {
             "name": "Spawn History Count",

@@ -15,6 +15,7 @@ Join the Discord server for any help and to keep up with updates: https://discor
 - Convert MAD geofences to other formats
 - Custom SQL queries
 - Run custom scripts with optional variables
+- Grep files for search strings
 - Quickly access URL bookmarks
 - Reaction role manager
 - Limit commands to only certain roles
@@ -219,7 +220,7 @@ Stats:
   - Press the Status button to see the current status of processes.
 - Bot will truncate and reload MADs when you send `<prefix><truncateCommand>`
 - Bot will reply with runnable scripts when sent `<prefix><scriptCommand>`
-- Get runnable MAD database queries with `<prefix><madQueryCommand>`
+- Get runnable database queries with `<prefix><queryCommand>`
 - Get link buttons with `<prefix><linksCommand>`
 - Get status of devices as buttons with `<prefix><devicesCommand>`
   - Press device button to get more info.

@@ -28,6 +28,10 @@ module.exports = {
                      return;
                   }
                   var errorCheck = false;
+                  if (!guildUser.roles){
+                     console.log(`Error getting roles for user: ${user.username}`);
+                     return;
+                  }
                   if (type === 'add') {
                      guildUser.roles.add(newRole).catch(err => {
                            console.log(`Error giving ${newRole.name} role to user ${user.username}: ${err}`);
