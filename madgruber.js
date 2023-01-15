@@ -19,13 +19,13 @@ const client = new Client({
 });
 const fs = require('fs');
 const config = require('./config/config.json');
+const GenerateMadInfo = require('./functions/generateMadInfo.js');
 //Generate database info
 if (config.madDB.host) {
 	GenerateMadInfo.generate();
 }
 const pm2 = require('pm2');
 const CronJob = require('cron').CronJob;
-const GenerateMadInfo = require('./functions/generateMadInfo.js');
 const SlashRegistry = require('./functions/slashRegistry.js');
 const Scripts = require('./functions/scripts.js');
 const Queries = require('./functions/queries.js');
