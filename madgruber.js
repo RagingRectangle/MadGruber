@@ -17,11 +17,12 @@ const client = new Client({
 	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildEmojisAndStickers, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildScheduledEvents, GatewayIntentBits.DirectMessages],
 	partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 });
+const fs = require('fs');
+const config = require('./config/config.json');
 //Generate database info
 if (config.madDB.host) {
 	GenerateMadInfo.generate();
 }
-const fs = require('fs');
 const pm2 = require('pm2');
 const CronJob = require('cron').CronJob;
 const GenerateMadInfo = require('./functions/generateMadInfo.js');
@@ -39,7 +40,6 @@ const Stats = require('./functions/stats.js');
 const Events = require('./functions/events.js');
 const Geofences = require('./functions/geofenceConverter.js');
 const Help = require('./functions/help.js');
-const config = require('./config/config.json');
 const roleConfig = require('./config/roles.json');
 var roleMessages = [];
 roleConfig.forEach(role => {
