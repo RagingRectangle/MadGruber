@@ -17,7 +17,10 @@ const client = new Client({
 	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildEmojisAndStickers, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildScheduledEvents, GatewayIntentBits.DirectMessages],
 	partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 });
-
+//Generate database info
+if (config.madDB.host) {
+	GenerateMadInfo.generate();
+}
 const fs = require('fs');
 const pm2 = require('pm2');
 const CronJob = require('cron').CronJob;
@@ -48,10 +51,6 @@ roleConfig.forEach(role => {
 
 client.on('ready', async () => {
 	console.log("MadGruber Bot Logged In");
-	//Generate database info
-	if (config.madDB.host) {
-		GenerateMadInfo.generate();
-	}
 	//No Proto Checker
 	if (config.madDB.host && config.devices.noProtoCheckMinutes > 0) {
 		let noProtoJob = new CronJob(`*/${config.devices.noProtoCheckMinutes} * * * *`, function () {
